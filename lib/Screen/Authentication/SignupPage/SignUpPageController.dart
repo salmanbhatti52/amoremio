@@ -1,7 +1,10 @@
+import 'package:amoremio/Models/GetGenderModel.dart';
+import 'package:amoremio/Utills/AppUrls.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 
 class SignupController extends GetxController{
 
@@ -91,9 +94,36 @@ class SignupController extends GetxController{
 
   RxString selectedGender = "Select Gender".obs;
 
+  List<String> genderType = ["Male", "Female", "Other"];
+  String? selectedGenders;
+
   void setSelectedGender(String gender) {
     selectedGender.value = gender;
   }
+
+  GetGenderModel getGenderModel = GetGenderModel();
+  
+  Future<void> fetchGenders() async {
+
+    String apiUrl = getGender;
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      final responseString = response.body;
+      print("responseSignUpApi: $responseString");
+
+      if ( getGenderModel.status == "success") {
+        getGenderModel = getGenderModelFromJson(responseString);
+      } else {
+        print('Failed to fetch genders. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      print('Failed to connect to the server.');
+    }
+  }
+
 
 }
 
