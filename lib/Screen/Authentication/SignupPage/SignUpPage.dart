@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
+import '../../../Utills/AppUrls.dart';
 import '../../../Widgets/DividerandOR.dart';
+import '../../../Widgets/rounded_dropdown_menu.dart';
 import '../SocialLogin/SocialLoginPage.dart';
 import '../../../Widgets/TextFieldLabel.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +18,8 @@ import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
 import '../../BottomNavigationBar/BottomNavigationBar.dart';
 import 'package:amoremio/Screen/Authentication/LoginPage/login_page.dart';
+import 'package:amoremio/Utills/global.dart';
+import 'package:http/http.dart' as http;
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -23,10 +29,9 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-
   final formKey = GlobalKey<FormState>();
 
-  bool isPasswordVisible= true;
+  bool isPasswordVisible = true;
   bool checkBoxValue = false;
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -34,9 +39,11 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController birthController = TextEditingController();
   final TextEditingController genderController = TextEditingController();
-  final TextEditingController currentAddress = TextEditingController();
+  TextEditingController currentAddress = TextEditingController();
 
-  passwordTap(){
+  GlobalService location = GlobalService();
+
+  passwordTap() {
     setState(() {
       isPasswordVisible = !isPasswordVisible;
     });
@@ -44,13 +51,104 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String selectedGender = "Select Gender";
 
-  List<String> genderType = ["Male", "Female", "Other"];
+  List<dynamic> genderType = [];
   String? selectedGenders;
+  var genderval;
 
-  void setSelectedGender(String gender) {
+  void setSelectedGender(dynamic gender) {
     setState(() {
-      selectedGender = gender;
+      selectedGender = gender['name'];
     });
+  }
+
+  ////get gender/////
+  Future<void> fetchGenders() async {
+    String apiUrl = getGender;
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      final responseString = response.body;
+      var data = jsonDecode(responseString);
+      String status = data['status'];
+      if (status == 'success') {
+        setState(() {
+          genderType = data['data'];
+        });
+      }
+      print("genderApi: $genderType");
+    } catch (e) {
+      print('Error: $e');
+      print('Failed to connect to the server.');
+    }
+  }
+
+  ///get date func/////
+  late String formattedDate;
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      formattedDate =
+          "${picked.year.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      print('formatted date: $formattedDate');
+      birthController.text = formattedDate;
+    }
+    // setDate(formattedDate);
+  }
+
+  var selectedDate;
+  void setDate(String date) {
+    selectedDate.value = date;
+  }
+
+  ///Signup///////
+  void sendval() async {
+    String apiUrl = signUp;
+    print(apiUrl);
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "username": userNameController.text.toString(),
+              "email": emailController.text.toString(),
+              "genders_id": genderval,
+              "date_of_birth": birthController.text.toString(),
+              "location": currentAddress.text.toString(),
+              "password": passwordController.text.toString()
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        Get.to(
+          () => MyBottomNavigationBar(),
+          duration: const Duration(milliseconds: 350),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error');
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchGenders();
   }
 
   @override
@@ -173,31 +271,26 @@ class _SignUpPageState extends State<SignUpPage> {
                           delay: const Duration(milliseconds: 800),
                           duration: const Duration(milliseconds: 900),
                           child: CustomTextFormField(
-                              controller: passwordController,
-                              maxLine: isPasswordVisible
-                                  ? 1
-                                  : null,
-                              suffixImageColor:
-                                  isPasswordVisible
-                                      ? null
-                                      : AppColor.primaryColor,
-                              hintText: "********",
-                              focusNode: focus3,
-                              onFieldSubmitted: (v) {
-                                FocusScope.of(context).requestFocus(focus4);
-                              },
-                              prefixImage: ImageAssets.password,
-                              suffixImage:
-                                  isPasswordVisible
-                                      ? ImageAssets.eyeOffImage
-                                      : ImageAssets.eyeOnImage,
-                              suffixTap: () {
-                                passwordTap();
-                              },
-                              obscureText:
-                                  isPasswordVisible,
-                            ),
+                            controller: passwordController,
+                            maxLine: isPasswordVisible ? 1 : null,
+                            suffixImageColor: isPasswordVisible
+                                ? null
+                                : AppColor.primaryColor,
+                            hintText: "********",
+                            focusNode: focus3,
+                            onFieldSubmitted: (v) {
+                              FocusScope.of(context).requestFocus(focus4);
+                            },
+                            prefixImage: ImageAssets.password,
+                            suffixImage: isPasswordVisible
+                                ? ImageAssets.eyeOffImage
+                                : ImageAssets.eyeOnImage,
+                            suffixTap: () {
+                              passwordTap();
+                            },
+                            obscureText: isPasswordVisible,
                           ),
+                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -215,17 +308,24 @@ class _SignUpPageState extends State<SignUpPage> {
                           delay: const Duration(milliseconds: 1000),
                           duration: const Duration(milliseconds: 1100),
                           child: CustomTextFormField(
-                              controller: currentAddress,
-                              hintText: "Your address here",
-                              focusNode: focus4,
-                              onFieldSubmitted: (v) {
-                                FocusScope.of(context).requestFocus(focus5);
-                              },
-                              keyboardType: TextInputType.streetAddress,
-                              prefixImage: ImageAssets.locationBrown,
-                              suffixImage: ImageAssets.locationFill,
-                              suffixTap: () {},
-                            ),
+                            controller: currentAddress,
+                            hintText: "Your address here",
+                            focusNode: focus4,
+                            onFieldSubmitted: (v) {
+                              FocusScope.of(context).requestFocus(focus5);
+                            },
+                            keyboardType: TextInputType.streetAddress,
+                            prefixImage: ImageAssets.locationBrown,
+                            suffixImage: ImageAssets.locationFill,
+                            suffixTap: () async {
+                              await GlobalService.getCurrentPosition(context);
+                              String? address =
+                                  await GlobalService.getAddressFromLatLng(
+                                      GlobalService.currentLocation!);
+                              print('current address: $address');
+                              currentAddress.text = address!;
+                            },
+                          ),
                         ),
                         const SizedBox(
                           height: 10,
@@ -244,16 +344,18 @@ class _SignUpPageState extends State<SignUpPage> {
                           delay: const Duration(milliseconds: 1200),
                           duration: const Duration(milliseconds: 1300),
                           child: CustomTextFormField(
-                              controller: birthController,
-                              hintText: "Date of birth",
-                              focusNode: focus5,
-                              textInputAction: TextInputAction.done,
-                              keyboardType: TextInputType.number,
-                              prefixImage: ImageAssets.birthDate,
-                              suffixImage: ImageAssets.calendar,
-                              suffixTap: () {},
-                            ),
+                            controller: birthController,
+                            hintText: "Date of birth",
+                            focusNode: focus5,
+                            textInputAction: TextInputAction.done,
+                            keyboardType: TextInputType.number,
+                            prefixImage: ImageAssets.birthDate,
+                            suffixImage: ImageAssets.calendar,
+                            suffixTap: () {
+                              _selectDate(context);
+                            },
                           ),
+                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -286,104 +388,124 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ),
                               ],
                             ),
-                            child: ButtonTheme(
-                              alignedDropdown: true,
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButtonFormField(
-                                  // icon: SvgPicture.asset(ImageAssets.dropDown,),
-                                  iconSize: 0,
-                                  decoration: InputDecoration(
-                                    prefixIcon: IconButton(
-                                      onPressed: () {},
-                                      icon: SvgPicture.asset(
-                                        ImageAssets.gender,
-                                      ),
-                                    ),
-                                    suffixIcon: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left:
-                                              10.0), // Adjust the padding as needed
-                                      child: SvgPicture.asset(
-                                        ImageAssets.dropDown,
-                                        // fit: BoxFit.fill,
-                                        width: 20,
-                                        height: 20,
-                                      ),
-                                    ),
-                                    filled: true,
-                                    fillColor: AppColor.whiteColor,
-                                    border: const OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    enabledBorder: const OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    focusedBorder: const OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    errorBorder: const OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      borderSide: BorderSide(
-                                        color: AppColor.redColor,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 10,
-                                    ),
-                                    hintText: 'Select Gender',
-                                    hintStyle: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      color: AppColor.hintTextColor,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    errorStyle: const TextStyle(
-                                      color: AppColor.redColor,
-                                      fontSize: 10,
-                                      fontFamily: 'Inter-Bold',
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.only(right: 5),
-                                  borderRadius: BorderRadius.circular(12),
-                                  items: genderType
-                                      .map(
-                                        (item) => DropdownMenuItem<String>(
-                                          value: item,
-                                          onTap: (){
-                                            selectedGenders = null;
-                                          },
-                                          child: Text(
-                                            item,
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                              color: selectedGenders != null
-                                                  ? AppColor.hintTextColor
-                                                  : AppColor.blackColor,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  value: selectedGenders,
-                                  onChanged: (value) {
-                                    selectedGenders = value;
-                                  },
-                                ),
-                              ),
-                            ),
+                            child: RoundedDropdownMenu(
+                                width: MediaQuery.sizeOf(context).width * 0.85,
+                                hintText: "Select gender",
+                                onSelected: (p0) {
+                                  print(p0);
+                                  genderval = p0['genders_id'];
+                                  print('$genderval');
+                                },
+                                dropdownMenuEntries: genderType
+                                    .map(
+                                      (dynamic value) =>
+                                          DropdownMenuEntry<dynamic>(
+                                              value: value,
+                                              label: value['name'] ?? ''),
+                                    )
+                                    .toList()),
+                            // child: ButtonTheme(
+                            //   alignedDropdown: true,
+                            //   child: DropdownButtonHideUnderline(
+                            //     child: DropdownButtonFormField(
+                            //       // icon: SvgPicture.asset(ImageAssets.dropDown,),
+                            //       iconSize: 0,
+                            //       decoration: InputDecoration(
+                            //         prefixIcon: IconButton(
+                            //           onPressed: () {},
+                            //           icon: SvgPicture.asset(
+                            //             ImageAssets.gender,
+                            //           ),
+                            //         ),
+                            //         suffixIcon: Padding(
+                            //           padding: const EdgeInsets.only(
+                            //               left:
+                            //                   10.0), // Adjust the padding as needed
+                            //           child: GestureDetector(
+                            //             onTap: () {},
+                            //             child: SvgPicture.asset(
+                            //               ImageAssets.dropDown,
+                            //               // fit: BoxFit.fill,
+                            //               width: 20,
+                            //               height: 20,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //         filled: true,
+                            //         fillColor: AppColor.whiteColor,
+                            //         border: const OutlineInputBorder(
+                            //           borderRadius: BorderRadius.all(
+                            //             Radius.circular(12),
+                            //           ),
+                            //           borderSide: BorderSide.none,
+                            //         ),
+                            //         enabledBorder: const OutlineInputBorder(
+                            //           borderRadius: BorderRadius.all(
+                            //             Radius.circular(12),
+                            //           ),
+                            //           borderSide: BorderSide.none,
+                            //         ),
+                            //         focusedBorder: const OutlineInputBorder(
+                            //           borderRadius: BorderRadius.all(
+                            //             Radius.circular(12),
+                            //           ),
+                            //           borderSide: BorderSide.none,
+                            //         ),
+                            //         errorBorder: const OutlineInputBorder(
+                            //           borderRadius: BorderRadius.all(
+                            //             Radius.circular(12),
+                            //           ),
+                            //           borderSide: BorderSide(
+                            //             color: AppColor.redColor,
+                            //             width: 1,
+                            //           ),
+                            //         ),
+                            //         contentPadding: const EdgeInsets.symmetric(
+                            //           horizontal: 20,
+                            //           vertical: 10,
+                            //         ),
+                            //         hintText: 'Select Gender',
+                            //         hintStyle: GoogleFonts.poppins(
+                            //           fontSize: 14,
+                            //           color: AppColor.hintTextColor,
+                            //           fontWeight: FontWeight.w400,
+                            //         ),
+                            //         errorStyle: const TextStyle(
+                            //           color: AppColor.redColor,
+                            //           fontSize: 10,
+                            //           fontFamily: 'Inter-Bold',
+                            //         ),
+                            //       ),
+                            //       padding: const EdgeInsets.only(right: 5),
+                            //       borderRadius: BorderRadius.circular(12),
+                            //       items: genderType
+                            //           .map(
+                            //             (dynamic item) =>
+                            //                 DropdownMenuItem<dynamic>(
+                            //               value: item['name'],
+                            //               onTap: () {
+                            //                 selectedGenders = null;
+                            //               },
+                            //               child: Text(
+                            //                 item['name'],
+                            //                 style: GoogleFonts.poppins(
+                            //                   fontSize: 14,
+                            //                   color: selectedGenders != null
+                            //                       ? AppColor.hintTextColor
+                            //                       : AppColor.blackColor,
+                            //                   fontWeight: FontWeight.w400,
+                            //                 ),
+                            //               ),
+                            //             ),
+                            //           )
+                            //           .toList(),
+                            //       value: selectedGenders,
+                            //       onChanged: (value) {
+                            //         selectedGenders = value;
+                            //       },
+                            //     ),
+                            //   ),
+                            // ),
                           ),
                         ),
                       ],
@@ -403,22 +525,22 @@ class _SignUpPageState extends State<SignUpPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
-                            padding: const EdgeInsets.only(bottom: 15.0),
-                            child: Theme(
-                              data: ThemeData(
-                                  unselectedWidgetColor: AppColor.primaryColor),
-                              child: Checkbox(
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                activeColor: AppColor.primaryColor,
-                                checkColor: AppColor.whiteColor,
-                                value: checkBoxValue,
-                                onChanged: (bool? value) {
-                                  checkBoxValue = value!;
-                                },
-                              ),
+                          padding: const EdgeInsets.only(bottom: 15.0),
+                          child: Theme(
+                            data: ThemeData(
+                                unselectedWidgetColor: AppColor.primaryColor),
+                            child: Checkbox(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              activeColor: AppColor.primaryColor,
+                              checkColor: AppColor.whiteColor,
+                              value: checkBoxValue,
+                              onChanged: (bool? value) {
+                                checkBoxValue = value!;
+                              },
                             ),
                           ),
+                        ),
                         SizedBox(
                           width: Get.width * 0.65,
                           child: const LabelField(
@@ -442,11 +564,12 @@ class _SignUpPageState extends State<SignUpPage> {
                     height: Get.height * 0.065,
                     text: "Signup",
                     onTap: () {
-                      Get.to(
-                        () => MyBottomNavigationBar(),
-                        duration: const Duration(milliseconds: 350),
-                        transition: Transition.rightToLeft,
-                      );
+                      sendval();
+                      // Get.to(
+                      //   () => MyBottomNavigationBar(),
+                      //   duration: const Duration(milliseconds: 350),
+                      //   transition: Transition.rightToLeft,
+                      // );
                     },
                   ),
                 ),

@@ -23,26 +23,26 @@ class CustomTextFormField extends StatelessWidget {
   final dynamic Function()? suffixTap;
   final bool obscureText;
   final String? Function(String?)? validator;
-  const CustomTextFormField({
-    Key? key,
-    required this.controller,
-    this.suffixImageColor,
-    this.maxLine,
-    this.textInputAction = TextInputAction.next,
-    // this.onEditingComplete = _onEditingComplete,
-    required this.hintText,
-    this.obscureText = false,
-    this.height,
-    this.width,
-    this.keyboardType = TextInputType.text,
-    this.prefixImage = ImageAssets.email,
-    this.suffixImage = ImageAssets.whiteImage,
-    this.onChanged,
-    this.focusNode,
-    this.onFieldSubmitted,
-    this.suffixTap,
-    this.validator
-  }) : super(key: key);
+  const CustomTextFormField(
+      {Key? key,
+      required this.controller,
+      this.suffixImageColor,
+      this.maxLine,
+      this.textInputAction = TextInputAction.next,
+      // this.onEditingComplete = _onEditingComplete,
+      required this.hintText,
+      this.obscureText = false,
+      this.height,
+      this.width,
+      this.keyboardType = TextInputType.text,
+      this.prefixImage = ImageAssets.email,
+      this.suffixImage = ImageAssets.whiteImage,
+      this.onChanged,
+      this.focusNode,
+      this.onFieldSubmitted,
+      this.suffixTap,
+      this.validator})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +64,10 @@ class CustomTextFormField extends StatelessWidget {
       ),
       child: TextFormField(
         style: GoogleFonts.poppins(
-        fontSize: 14,
-        color: AppColor.hintTextColor,
-        fontWeight: FontWeight.w400,
-      ),
+          fontSize: 14,
+          color: AppColor.hintTextColor,
+          fontWeight: FontWeight.w400,
+        ),
         obscureText: obscureText,
         maxLines: maxLine,
         textAlign: TextAlign.left,
@@ -82,33 +82,45 @@ class CustomTextFormField extends StatelessWidget {
         decoration: InputDecoration(
           fillColor: AppColor.whiteColor,
           filled: true,
-          contentPadding:  EdgeInsets.symmetric(horizontal: Get.width * 0.03, vertical: 10),
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: Get.width * 0.03, vertical: 10),
           hintText: hintText,
-          prefixIcon:  IconButton( icon: SvgPicture.asset(prefixImage), onPressed: (){},),
-          suffixIcon: IconButton(onPressed: suffixTap, icon: SvgPicture.asset(suffixImage, color: suffixImageColor, width: 25,)),
+          prefixIcon: IconButton(
+            icon: SvgPicture.asset(prefixImage),
+            onPressed: () {},
+          ),
+          suffixIcon: IconButton(
+              onPressed: suffixTap,
+              icon: SvgPicture.asset(
+                suffixImage,
+                color: suffixImageColor,
+                width: 25,
+              )),
           hintStyle: GoogleFonts.poppins(
             fontSize: 14,
             color: AppColor.hintTextColor,
             fontWeight: FontWeight.w400,
           ),
-          enabledBorder:  OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: AppColor.hintContainerColor),
             borderRadius: BorderRadius.circular(12),
           ),
-          focusedBorder:  OutlineInputBorder(
+          focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: AppColor.hintContainerColor),
             borderRadius: BorderRadius.circular(12),
           ),
           errorStyle: GoogleFonts.poppins(
-          fontSize: 11,
-          color: AppColor.redColor,
-          fontWeight: FontWeight.bold,
-        ),
-          errorBorder:  OutlineInputBorder(
-            borderSide: const BorderSide(color: AppColor.redColor,),
+            fontSize: 11,
+            color: AppColor.redColor,
+            fontWeight: FontWeight.bold,
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: const BorderSide(
+              color: AppColor.redColor,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
-          focusedErrorBorder:  OutlineInputBorder(
+          focusedErrorBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: AppColor.redColor),
             borderRadius: BorderRadius.circular(12),
           ),
