@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'ExploreVideoView.dart';
-import 'ExploreController.dart';
 import '../../Widgets/AppBar.dart';
 import 'ExploreSearch&Filter.dart';
 import 'ExploreVideoViewButton.dart';
@@ -11,10 +10,26 @@ import 'package:amoremio/Widgets/Small_Button.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 
 // ignore: must_be_immutable
-class ExplorePage extends StatelessWidget {
+class ExplorePage extends StatefulWidget {
   ExplorePage({Key? key}) : super(key: key);
 
-  ExploreController exploreController = Get.put(ExploreController());
+  @override
+  State<ExplorePage> createState() => _ExplorePageState();
+}
+
+class _ExplorePageState extends State<ExplorePage> {
+
+  bool status = false;
+  bool selectedIndex1 = true;
+  bool selectedIndex2 = false;
+  bool selectedIndex3 = false;
+  bool selectedIndex4 = false;
+
+  void toggleSwitch(bool newValue) {
+    setState(() {
+      status = newValue;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,18 +105,18 @@ class ExplorePage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Obx(() => SmallButton(
+                    SmallButton(
                       width: Get.width * 0.22,
                       height: Get.height * 0.033,
-                      textColor: exploreController.selectedIndex1.value == true
+                      textColor: selectedIndex1 == true
                           ? const Color(0xFFEE4433)
                           : AppColor.hintTextColor,
                       text: "Discover ",
                       onTap: () {
-                        exploreController.selectedIndex1.value = true;
-                        exploreController.selectedIndex2.value = false;
-                        exploreController.selectedIndex3.value = false;
-                        exploreController.selectedIndex4.value = false;
+                        selectedIndex1 = true;
+                        selectedIndex2 = false;
+                        selectedIndex3 = false;
+                        selectedIndex4 = false;
                         // showDialog(
                         //     context: context,
                         //     barrierColor: Colors.white60,
@@ -117,10 +132,10 @@ class ExplorePage extends StatelessWidget {
                         //          ),
                         // );
                       },
-                    ),),
-                    Obx(() => SmallButton(
+                    ),
+                    SmallButton(
                       text: "Matches ",
-                      textColor: exploreController.selectedIndex2.value == true
+                      textColor: selectedIndex2 == true
                           ? const Color(0xFFEE4433)
                           : AppColor.hintTextColor,
                       width: Get.width * 0.22,
@@ -128,10 +143,10 @@ class ExplorePage extends StatelessWidget {
 
                       onTap: () {
 
-                        exploreController.selectedIndex1.value = false;
-                        exploreController.selectedIndex2.value = true;
-                        exploreController.selectedIndex3.value = false;
-                        exploreController.selectedIndex4.value = false;
+                        selectedIndex1 = false;
+                        selectedIndex2 = true;
+                        selectedIndex3 = false;
+                        selectedIndex4 = false;
                         // Get.to(
                         //   () => const UserMatchesPage(),
                         //   duration: const Duration(milliseconds: 350),
@@ -139,49 +154,46 @@ class ExplorePage extends StatelessWidget {
                         // );
                       },
                     ),
-                    ),
-                    Obx(() => SmallButton(
+                    SmallButton(
                       text: "Liked ",
-                      textColor: exploreController.selectedIndex3.value == true
+                      textColor: selectedIndex3 == true
                           ? const Color(0xFFEE4433)
                           : AppColor.hintTextColor,
                       width: Get.width * 0.22,
                       height: Get.height * 0.033,
                       onTap: () {
-                        exploreController.selectedIndex1.value = false;
-                        exploreController.selectedIndex2.value = false;
-                        exploreController.selectedIndex3.value = true;
-                        exploreController.selectedIndex4.value = false;
+                        selectedIndex1 = false;
+                        selectedIndex2 = false;
+                        selectedIndex3 = true;
+                        selectedIndex4 = false;
                         },
-                    ),),
-                    Obx(() => SmallButton(
+                    ),
+                    SmallButton(
                       text: "Liked You ",
-                      textColor: exploreController.selectedIndex4.value == true
+                      textColor: selectedIndex4 == true
                           ? const Color(0xFFEE4433)
                           : AppColor.hintTextColor,
                       width: Get.width * 0.22,
                       height: Get.height * 0.033,
                       onTap: () {
-                        exploreController.selectedIndex1.value = false;
-                        exploreController.selectedIndex2.value = false;
-                        exploreController.selectedIndex3.value = false;
-                        exploreController.selectedIndex4.value = true;
+                        selectedIndex1 = false;
+                        selectedIndex2 = false;
+                        selectedIndex3 = false;
+                        selectedIndex4 = true;
                       },
-                    ),),
+                    ),
                   ],
                 ),
               ),
-              Obx(
-                () => ExploreVideoContainer(
+              ExploreVideoContainer(
                   height: MediaQuery.of(context).size.height * 0.61,
                   onTap: (){
                     Get.to( () => const ExploreVideoView(),
                       duration: const Duration(seconds: 1),
                       transition: Transition.native,);
                   },
-                  value: exploreController.status.value,
+                  value: status,
                 ),
-              ),
             ],
           ),
         ),

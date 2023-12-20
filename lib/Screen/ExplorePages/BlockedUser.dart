@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'BlockUserDetails.dart';
-import 'ExploreController.dart';
 import '../../Widgets/AppBar.dart';
 import 'ExploreVideoViewButton.dart';
 import 'package:flutter/material.dart';
@@ -127,11 +126,23 @@ import '../BottomNavigationBar/BottomNavigationBar.dart';
 //   );
 // }
 
-class BlockedUser extends StatelessWidget {
-   BlockedUser({Key? key}) : super(key: key);
+class BlockedUser extends StatefulWidget {
+   const BlockedUser({Key? key}) : super(key: key);
+
+  @override
+  State<BlockedUser> createState() => _BlockedUserState();
+}
+
+class _BlockedUserState extends State<BlockedUser> {
 
   final TextEditingController searchController = TextEditingController();
-   ExploreController exploreController = Get.put(ExploreController());
+  bool status = false;
+
+  void toggleSwitch(bool newValue) {
+   setState(() {
+     status = newValue;
+   });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,17 +208,15 @@ class BlockedUser extends StatelessWidget {
                   ),
                 ),
               ),
-              Obx(
-                    () => ExploreVideoContainer(
+              ExploreVideoContainer(
                       height: MediaQuery.of(context).size.height * 0.8,
                   onTap: (){
                         Get.to(()=> const BlockUserDetails(),
                           duration: const Duration(seconds: 1),
                           transition: Transition.native,);
                   },
-                  value: exploreController.status.value,
+                  value: status,
                 ),
-              ),
             ],
           ),
         ),

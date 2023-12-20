@@ -1,3 +1,6 @@
+import 'package:amoremio/Screen/CreateStory/SelectVideoTypes/SelectVideoType.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'PaidStory.dart';
 import 'package:get/get.dart';
 import 'PaidStoryDetails.dart';
@@ -12,7 +15,22 @@ import '../../ExplorePages/ExploreBackgroundContainer.dart';
 class PaidStories extends StatelessWidget {
   PaidStories({super.key});
 
-  final PaidStoryController controller = Get.put(PaidStoryController());
+  // final PaidStoryController controller = Get.put(PaidStoryController());
+
+  Future<void> videoPick() async {
+    final picker = ImagePicker();
+    final videoFile = await picker.pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(seconds: 30),
+    );
+    if (videoFile != null) {
+      Get.to( ()=>
+          SelectVideoType(
+            videoFile : File(videoFile.path),
+          ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +90,7 @@ class PaidStories extends StatelessWidget {
               ),
                GestureDetector(
                  onTap: (){
-                   controller.imagePick();
+                   // controller.imagePick();
                  },
                  child: const Padding(
                    padding: EdgeInsets.only(left: 15.0,bottom: 25, top: 10),
@@ -96,7 +114,7 @@ class PaidStories extends StatelessWidget {
               GestureDetector(
                 onTap: (){
                   // Get.to( ()=>
-                      controller.videoPick();
+                      videoPick();
                   // );
                 },
                 child: const Padding(

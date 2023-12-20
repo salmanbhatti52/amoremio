@@ -4,18 +4,22 @@ import 'TextFieldSendMessage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'ChatDetailsPageController.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 
-// ignore: must_be_immutable
-class ChatDetailsPage extends StatelessWidget {
-  ChatDetailsPage({Key? key}) : super(key: key);
+class ChatDetailsPage extends StatefulWidget {
+  const ChatDetailsPage({Key? key}) : super(key: key);
 
-  ChatDetailsPageController chatDetailsPageController =
-      Get.put(ChatDetailsPageController());
+  @override
+  State<ChatDetailsPage> createState() => _ChatDetailsPageState();
+}
+
+class _ChatDetailsPageState extends State<ChatDetailsPage> {
+
+  final GlobalKey<FormState> sendMessageFormKey = GlobalKey<FormState>();
+  final TextEditingController sendMessageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -713,8 +717,7 @@ class ChatDetailsPage extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     sendMessageTextFields(
-                        chatDetailsPageController.sendMessageFormKey,
-                        chatDetailsPageController.sendMessageController),
+                        sendMessageFormKey, sendMessageController),
                     const SizedBox(width: 05),
                     // Obx(() {return
                     Container(

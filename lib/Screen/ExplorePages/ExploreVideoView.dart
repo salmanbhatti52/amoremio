@@ -1,7 +1,6 @@
 import 'BlockedUser.dart';
 import 'package:get/get.dart';
 import 'ExploreUserAbout.dart';
-import 'ExploreController.dart';
 import 'package:flutter/material.dart';
 import '../../Widgets/RoundedButton.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -22,7 +21,18 @@ class _ExploreVideoViewState extends State<ExploreVideoView> with SingleTickerPr
 
   late final AnimationController _animateController =
   AnimationController(duration: const Duration(milliseconds: 200), vsync: this, value: 1.0);
-  ExploreController exploreController = Get.put(ExploreController());
+  bool isButtonClicked = false;
+
+  void handleButtonTap() {
+    setState(() {
+      isButtonClicked = !isButtonClicked;
+    });
+  }
+  void handleRoundedButtonTap() {
+    setState(() {
+      isButtonClicked = !isButtonClicked;
+    });
+  }
 
   @override
   void dispose() {
@@ -312,30 +322,28 @@ class _ExploreVideoViewState extends State<ExploreVideoView> with SingleTickerPr
                         },
                         icon: ImageAssets.block,
                       ),
-                      Obx(
-                        () => ScaleTransition(
+                      ScaleTransition(
                           scale: Tween(begin: 0.5, end: 1.0).animate(
                               CurvedAnimation(parent: _animateController, curve: Curves.easeOut)),
                           child: RoundedButton(
                             onTap: () {
-                              exploreController.handleButtonTap();
+                              handleButtonTap();
                               _animateController
                                   .reverse()
                                   .then((value) => _animateController.forward());
                             },
-                            icon: exploreController.isButtonClicked.value
+                            icon: isButtonClicked
                                 ? ImageAssets.favorite
                                 : ImageAssets.favorite,
-                            imageColor: exploreController.isButtonClicked.value
+                            imageColor: isButtonClicked
                                 ? AppColor.whiteColor
                                 : AppColor.hintTextColor,
                             containerColor:
-                                exploreController.isButtonClicked.value
+                                isButtonClicked
                                     ? Colors.red
                                     : AppColor.whiteColor,
                           ),
                         ),
-                      ),
                       SvgPicture.asset(ImageAssets.share),
                     ],
                   ),

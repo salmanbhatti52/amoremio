@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'SignUpPageController.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
@@ -16,13 +15,43 @@ import 'package:amoremio/Resources/assets/assets.dart';
 import '../../BottomNavigationBar/BottomNavigationBar.dart';
 import 'package:amoremio/Screen/Authentication/LoginPage/login_page.dart';
 
-// ignore: must_be_immutable
-class SignUpPage extends StatelessWidget {
-  SignUpPage({Key? key}) : super(key: key);
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({Key? key}) : super(key: key);
 
-  SignupController signupController = Get.put(SignupController());
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+
   final formKey = GlobalKey<FormState>();
 
+  bool isPasswordVisible= true;
+  bool checkBoxValue = false;
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController birthController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
+  final TextEditingController currentAddress = TextEditingController();
+
+  passwordTap(){
+    setState(() {
+      isPasswordVisible = !isPasswordVisible;
+    });
+  }
+
+  String selectedGender = "Select Gender";
+
+  List<String> genderType = ["Male", "Female", "Other"];
+  String? selectedGenders;
+
+  void setSelectedGender(String gender) {
+    setState(() {
+      selectedGender = gender;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +120,7 @@ class SignUpPage extends StatelessWidget {
                           delay: const Duration(milliseconds: 400),
                           duration: const Duration(milliseconds: 500),
                           child: CustomTextFormField(
-                            controller: signupController.userNameController,
+                            controller: userNameController,
                             hintText: "username@gmail.com",
                             keyboardType: TextInputType.name,
                             prefixImage: ImageAssets.user,
@@ -118,7 +147,7 @@ class SignUpPage extends StatelessWidget {
                           delay: const Duration(milliseconds: 600),
                           duration: const Duration(milliseconds: 700),
                           child: CustomTextFormField(
-                            controller: signupController.emailController,
+                            controller: emailController,
                             hintText: "username@gmail.com",
                             keyboardType: TextInputType.emailAddress,
                             focusNode: focus2,
@@ -143,14 +172,13 @@ class SignUpPage extends StatelessWidget {
                         FadeInLeft(
                           delay: const Duration(milliseconds: 800),
                           duration: const Duration(milliseconds: 900),
-                          child: Obx(
-                            () => CustomTextFormField(
-                              controller: signupController.passwordController,
-                              maxLine: signupController.isPasswordVisible.value
+                          child: CustomTextFormField(
+                              controller: passwordController,
+                              maxLine: isPasswordVisible
                                   ? 1
                                   : null,
                               suffixImageColor:
-                                  signupController.isPasswordVisible.value
+                                  isPasswordVisible
                                       ? null
                                       : AppColor.primaryColor,
                               hintText: "********",
@@ -160,17 +188,16 @@ class SignUpPage extends StatelessWidget {
                               },
                               prefixImage: ImageAssets.password,
                               suffixImage:
-                                  signupController.isPasswordVisible.value
+                                  isPasswordVisible
                                       ? ImageAssets.eyeOffImage
                                       : ImageAssets.eyeOnImage,
                               suffixTap: () {
-                                signupController.passwordTap();
+                                passwordTap();
                               },
                               obscureText:
-                                  signupController.isPasswordVisible.value,
+                                  isPasswordVisible,
                             ),
                           ),
-                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -187,12 +214,8 @@ class SignUpPage extends StatelessWidget {
                         FadeInLeft(
                           delay: const Duration(milliseconds: 1000),
                           duration: const Duration(milliseconds: 1100),
-                          child: Obx(
-                            () => CustomTextFormField(
-                              controller: signupController.currentAddress == ""
-                                  ? signupController.locationController
-                                  : TextEditingController(
-                                      text: signupController.currentAddress),
+                          child: CustomTextFormField(
+                              controller: currentAddress,
                               hintText: "Your address here",
                               focusNode: focus4,
                               onFieldSubmitted: (v) {
@@ -201,11 +224,8 @@ class SignUpPage extends StatelessWidget {
                               keyboardType: TextInputType.streetAddress,
                               prefixImage: ImageAssets.locationBrown,
                               suffixImage: ImageAssets.locationFill,
-                              suffixTap: () {
-                                signupController.getCurrentPosition(context);
-                              },
+                              suffixTap: () {},
                             ),
-                          ),
                         ),
                         const SizedBox(
                           height: 10,
@@ -223,22 +243,17 @@ class SignUpPage extends StatelessWidget {
                         FadeInLeft(
                           delay: const Duration(milliseconds: 1200),
                           duration: const Duration(milliseconds: 1300),
-                          child: Obx(
-                            () => CustomTextFormField(
-                              controller: TextEditingController(
-                                  text: signupController.selectedDate.value),
+                          child: CustomTextFormField(
+                              controller: birthController,
                               hintText: "Date of birth",
                               focusNode: focus5,
                               textInputAction: TextInputAction.done,
                               keyboardType: TextInputType.number,
                               prefixImage: ImageAssets.birthDate,
                               suffixImage: ImageAssets.calendar,
-                              suffixTap: () {
-                                _selectDate(context);
-                              },
+                              suffixTap: () {},
                             ),
                           ),
-                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -285,7 +300,7 @@ class SignUpPage extends StatelessWidget {
                                       ),
                                     ),
                                     suffixIcon: Padding(
-                                      padding: EdgeInsets.only(
+                                      padding: const EdgeInsets.only(
                                           left:
                                               10.0), // Adjust the padding as needed
                                       child: SvgPicture.asset(
@@ -342,19 +357,18 @@ class SignUpPage extends StatelessWidget {
                                   ),
                                   padding: const EdgeInsets.only(right: 5),
                                   borderRadius: BorderRadius.circular(12),
-                                  items: signupController.genderType
+                                  items: genderType
                                       .map(
                                         (item) => DropdownMenuItem<String>(
                                           value: item,
                                           onTap: (){
-                                            signupController.selectedGenders = null;
-                                            signupController.fetchGenders();
+                                            selectedGenders = null;
                                           },
                                           child: Text(
                                             item,
                                             style: GoogleFonts.poppins(
                                               fontSize: 14,
-                                              color: signupController.selectedGenders != null
+                                              color: selectedGenders != null
                                                   ? AppColor.hintTextColor
                                                   : AppColor.blackColor,
                                               fontWeight: FontWeight.w400,
@@ -363,9 +377,9 @@ class SignUpPage extends StatelessWidget {
                                         ),
                                       )
                                       .toList(),
-                                  value: signupController.selectedGenders,
+                                  value: selectedGenders,
                                   onChanged: (value) {
-                                    signupController.selectedGenders = value;
+                                    selectedGenders = value;
                                   },
                                 ),
                               ),
@@ -388,8 +402,7 @@ class SignUpPage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Obx(
-                          () => Padding(
+                        Padding(
                             padding: const EdgeInsets.only(bottom: 15.0),
                             child: Theme(
                               data: ThemeData(
@@ -399,14 +412,13 @@ class SignUpPage extends StatelessWidget {
                                     MaterialTapTargetSize.shrinkWrap,
                                 activeColor: AppColor.primaryColor,
                                 checkColor: AppColor.whiteColor,
-                                value: signupController.checkBoxValue.value,
+                                value: checkBoxValue,
                                 onChanged: (bool? value) {
-                                  signupController.checkBoxValue.value = value!;
+                                  checkBoxValue = value!;
                                 },
                               ),
                             ),
                           ),
-                        ),
                         SizedBox(
                           width: Get.width * 0.65,
                           child: const LabelField(
@@ -493,7 +505,7 @@ class SignUpPage extends StatelessWidget {
                     GestureDetector(
                       onTap: () {
                         Get.to(
-                          () => LoginPage(),
+                          () => const LoginPage(),
                           duration: const Duration(milliseconds: 350),
                           transition: Transition.upToDown,
                         );
@@ -515,21 +527,5 @@ class SignUpPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  late String formattedDate;
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      formattedDate =
-          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString()}";
-      print(formattedDate);
-    }
-    signupController.setDate(formattedDate);
   }
 }

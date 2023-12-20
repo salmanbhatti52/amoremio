@@ -1,9 +1,8 @@
-import '../SocialLogin/SocialLoginPage.dart';
-import 'login_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:animate_do/animate_do.dart';
+import '../SocialLogin/SocialLoginPage.dart';
 import '../../../Widgets/TextFieldLabel.dart';
 import '../ForgotPassword/forgot_password.dart';
 import 'package:amoremio/Widgets/TextFields.dart';
@@ -14,11 +13,25 @@ import 'package:amoremio/Resources/assets/assets.dart';
 import '../../BottomNavigationBar/BottomNavigationBar.dart';
 import 'package:amoremio/Screen/Authentication/SignupPage/SignUpPage.dart';
 
-class LoginPage extends StatelessWidget {
-   LoginPage({Key? key}) : super(key: key);
+class LoginPage extends StatefulWidget {
+   const LoginPage({Key? key}) : super(key: key);
 
-  final LoginController loginController = Get.put(LoginController());
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+
    final formKey = GlobalKey<FormState>();
+   bool isPasswordVisible= true;
+   final  emailController = TextEditingController();
+   final  passwordController = TextEditingController();
+
+   passwordTap() {
+    setState(() {
+      isPasswordVisible = !isPasswordVisible;
+    });
+   }
 
    @override
   Widget build(BuildContext context) {
@@ -84,7 +97,7 @@ class LoginPage extends StatelessWidget {
                           delay: const Duration(milliseconds: 700),
                           duration: const Duration(milliseconds: 800),
                           child: CustomTextFormField(
-                            controller: loginController.emailController,
+                            controller: emailController,
                             hintText: "username@gmail.com",
                             keyboardType: TextInputType.emailAddress,
                             focusNode: focus1,
@@ -111,27 +124,25 @@ class LoginPage extends StatelessWidget {
                         FadeInDown(
                           delay: const Duration(milliseconds: 900),
                           duration: const Duration(milliseconds: 1000),
-                          child: Obx(
-                            () => CustomTextFormField(
-                              controller: loginController.passwordController,
+                          child: CustomTextFormField(
+                              controller: passwordController,
                               hintText: "********",
-                              maxLine: loginController.isPasswordVisible.value ? 1 : null,
+                              maxLine: isPasswordVisible ? 1 : null,
                               focusNode: focus2,
                               prefixImage: ImageAssets.password,
                               textInputAction: TextInputAction.done,
-                              suffixImage: loginController.isPasswordVisible.value
+                              suffixImage: isPasswordVisible
                                   ? ImageAssets.eyeOffImage
                                   : ImageAssets.eyeOnImage,
-                              suffixImageColor: loginController.isPasswordVisible.value ? null : AppColor.primaryColor,
+                              suffixImageColor: isPasswordVisible ? null : AppColor.primaryColor,
                               suffixTap: () {
-                                loginController.passwordTap();
+                                passwordTap();
                               },
-                              obscureText: loginController.isPasswordVisible.value,
+                              obscureText: isPasswordVisible,
                               validator: null,
                               // validator: validatePassword,
                             ),
                           ),
-                        ),
                         FadeInDown(
                           delay: const Duration(milliseconds: 1000),
                           duration: const Duration(milliseconds: 1100),

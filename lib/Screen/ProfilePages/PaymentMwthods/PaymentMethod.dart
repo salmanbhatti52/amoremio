@@ -9,7 +9,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
-import 'PaymentMethodController.dart';
 
 final List<String> imgList = [
   'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=6ff92caffcdd63681a35134a6770ed3b&auto=format&fit=crop&w=1951&q=80',
@@ -28,7 +27,20 @@ class _PaymentMethodState extends State<PaymentMethod> {
 
   int _current = 0;
   final CarouselController _controller = CarouselController();
-  PaymentMethodController paymentMethodController = Get.put(PaymentMethodController());
+  bool status = true;
+  bool status2 = true;
+
+  void toggleSwitch(bool newValue) {
+    setState(() {
+      status = newValue;
+    });
+  }
+
+  void toggleSwitch2(bool newValue) {
+    setState(() {
+      status2 = newValue;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,12 +275,11 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         fontWeight: FontWeight.w500,
                         color: AppColor.blackColor,
                       ),
-                  Obx(
-                        () => FlutterSwitch(
+                  FlutterSwitch(
                       width: 36,
                       height: 19,
                       toggleSize: 12.0,
-                      value: paymentMethodController.status.value,
+                      value: status,
                       borderRadius: 11,
                       inactiveColor: Color(0xFFC6C6C6),
                       activeColor: AppColor.secondaryColor,
@@ -276,7 +287,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                       inactiveToggleColor: Color(0xFFD9D9D9),
                       showOnOff: false,
                       onToggle: (val) {
-                        paymentMethodController.toggleSwitch(val);
+                        toggleSwitch(val);
                         print("val $val");
                         if (val == true) {
                           // e.g., notificationPermissionApiYes();
@@ -287,7 +298,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         }
                       },
                     ),
-                  ),
                     ],
                   ),
                 ),
@@ -318,12 +328,11 @@ class _PaymentMethodState extends State<PaymentMethod> {
                         fontWeight: FontWeight.w500,
                         color: AppColor.blackColor,
                       ),
-                      Obx(
-                            () => FlutterSwitch(
+                      FlutterSwitch(
                           width: 36,
                           height: 19,
                           toggleSize: 12.0,
-                          value: paymentMethodController.status2.value,
+                          value: status2,
                           borderRadius: 11,
                           inactiveColor: Color(0xFFC6C6C6),
                           activeColor: AppColor.secondaryColor,
@@ -331,7 +340,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           inactiveToggleColor: Color(0xFFD9D9D9),
                           showOnOff: false,
                           onToggle: (val) {
-                            paymentMethodController.toggleSwitch2(val);
+                            toggleSwitch2(val);
                             print("val $val");
                             if (val == true) {
                               // e.g., notificationPermissionApiYes();
@@ -342,7 +351,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
                             }
                           },
                         ),
-                      ),
                     ],
                   ),
                 ),

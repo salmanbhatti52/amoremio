@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../../../Widgets/AppBar.dart';
 import 'package:flutter/material.dart';
-import 'AccountsSettingController.dart';
 import '../../../Widgets/TextFields.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -12,10 +11,40 @@ import '../../../Resources/colors/colors.dart';
 import '../../../Widgets/ProfileContainer.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
 
-class AccountSettings extends StatelessWidget {
+class AccountSettings extends StatefulWidget {
    AccountSettings({super.key});
 
-   final AccountsSettingController settingController = Get.put(AccountsSettingController());
+  @override
+  State<AccountSettings> createState() => _AccountSettingsState();
+}
+
+class _AccountSettingsState extends State<AccountSettings> {
+
+  bool isCurrentPasswordVisible= true;
+  bool isNewPasswordVisible= true;
+  bool isConfirmPasswordVisible= true;
+
+  final  currentPasswordController = TextEditingController();
+  final  newPasswordController     = TextEditingController();
+  final  confirmPasswordController = TextEditingController();
+
+  currentPasswordTap(){
+    setState(() {
+      isCurrentPasswordVisible = !isCurrentPasswordVisible;
+    });
+  }
+
+  newPasswordTap(){
+    setState(() {
+      isNewPasswordVisible = !isNewPasswordVisible;
+    });
+  }
+
+  confirmPasswordTap(){
+    setState(() {
+      isConfirmPasswordVisible = !isConfirmPasswordVisible;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,26 +168,24 @@ class AccountSettings extends StatelessWidget {
                         const SizedBox(
                           height: 5,
                         ),
-                        Obx(
-                              () => CustomTextFormField(
-                            controller: settingController.currentPasswordController,
+                        CustomTextFormField(
+                            controller: currentPasswordController,
                             hintText: "********",
-                            maxLine: settingController.isCurrentPasswordVisible.value ? 1 : null,
+                            maxLine: isCurrentPasswordVisible ? 1 : null,
                             // focusNode: focus2,
                             prefixImage: ImageAssets.password,
                             textInputAction: TextInputAction.done,
-                            suffixImage: settingController.isCurrentPasswordVisible.value
+                            suffixImage: isCurrentPasswordVisible
                                 ? ImageAssets.eyeOffImage
                                 : ImageAssets.eyeOnImage,
-                            suffixImageColor: settingController.isCurrentPasswordVisible.value ? null : AppColor.primaryColor,
+                            suffixImageColor: isCurrentPasswordVisible ? null : AppColor.primaryColor,
                             suffixTap: () {
-                              settingController.currentPasswordTap();
+                              currentPasswordTap();
                             },
-                            obscureText: settingController.isCurrentPasswordVisible.value,
+                            obscureText: isCurrentPasswordVisible,
                             validator: null,
                             // validator: validatePassword,
                           ),
-                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -168,26 +195,24 @@ class AccountSettings extends StatelessWidget {
                         const SizedBox(
                           height: 5,
                         ),
-                        Obx(
-                              () => CustomTextFormField(
-                            controller: settingController.newPasswordController,
+                        CustomTextFormField(
+                            controller: newPasswordController,
                             hintText: "********",
-                            maxLine: settingController.isNewPasswordVisible.value ? 1 : null,
+                            maxLine: isNewPasswordVisible ? 1 : null,
                             // focusNode: focus2,
                             prefixImage: ImageAssets.password,
                             textInputAction: TextInputAction.done,
-                            suffixImage: settingController.isNewPasswordVisible.value
+                            suffixImage: isNewPasswordVisible
                                 ? ImageAssets.eyeOffImage
                                 : ImageAssets.eyeOnImage,
-                            suffixImageColor: settingController.isNewPasswordVisible.value ? null : AppColor.primaryColor,
+                            suffixImageColor: isNewPasswordVisible ? null : AppColor.primaryColor,
                             suffixTap: () {
-                              settingController.newPasswordTap();
+                              newPasswordTap();
                             },
-                            obscureText: settingController.isNewPasswordVisible.value,
+                            obscureText: isNewPasswordVisible,
                             validator: null,
                             // validator: validatePassword,
                           ),
-                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -197,26 +222,24 @@ class AccountSettings extends StatelessWidget {
                         const SizedBox(
                           height: 5,
                         ),
-                        Obx(
-                              () => CustomTextFormField(
-                            controller: settingController.confirmPasswordController,
+                        CustomTextFormField(
+                            controller: confirmPasswordController,
                             hintText: "********",
-                            maxLine: settingController.isConfirmPasswordVisible.value ? 1 : null,
+                            maxLine: isConfirmPasswordVisible ? 1 : null,
                             // focusNode: focus2,
                             prefixImage: ImageAssets.password,
                             textInputAction: TextInputAction.done,
-                            suffixImage: settingController.isConfirmPasswordVisible.value
+                            suffixImage: isConfirmPasswordVisible
                                 ? ImageAssets.eyeOffImage
                                 : ImageAssets.eyeOnImage,
-                            suffixImageColor: settingController.isConfirmPasswordVisible.value ? null : AppColor.primaryColor,
+                            suffixImageColor: isConfirmPasswordVisible ? null : AppColor.primaryColor,
                             suffixTap: () {
-                              settingController.confirmPasswordTap();
+                             confirmPasswordTap();
                             },
-                            obscureText: settingController.isConfirmPasswordVisible.value,
+                            obscureText: isConfirmPasswordVisible,
                             validator: null,
                             // validator: validatePassword,
                           ),
-                        ),
                       ],
                     ),
                   ),

@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'SocialLoginController.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -14,14 +13,31 @@ import '../../BottomNavigationBar/BottomNavigationBar.dart';
 
 
 // ignore: must_be_immutable
-class SocialLoginPage extends StatelessWidget {
-  SocialLoginPage({Key? key}) : super(key: key);
+class SocialLoginPage extends StatefulWidget {
+  const SocialLoginPage({Key? key}) : super(key: key);
 
-  SocialLoginController socialLoginController = Get.put(SocialLoginController());
+  @override
+  State<SocialLoginPage> createState() => _SocialLoginPageState();
+}
+
+class _SocialLoginPageState extends State<SocialLoginPage> {
+
   final formKey = GlobalKey<FormState>();
   List<String> genderType = ["Male", "Female", "Other"];
   String? selectedGender;
+  bool isPasswordVisible= false;
+  bool checkBoxValue = false;
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController birthController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
+  final TextEditingController currentAddress = TextEditingController();
 
+  passwordTap(){
+    setState(() {
+      isPasswordVisible = !isPasswordVisible;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +104,7 @@ class SocialLoginPage extends StatelessWidget {
                           delay: const Duration(milliseconds: 400),
                           duration: const Duration(milliseconds: 500),
                           child: CustomTextFormField(
-                            controller: socialLoginController.userNameController,
+                            controller: userNameController,
                             hintText: "username@gmail.com",
                             focusNode: focus1,
                             onFieldSubmitted: (v){
@@ -114,10 +130,8 @@ class SocialLoginPage extends StatelessWidget {
                         FadeInLeft(
                           delay: const Duration(milliseconds: 600),
                           duration: const Duration(milliseconds: 700),
-                          child: Obx(() => CustomTextFormField(
-                            controller: socialLoginController.currentAddress == ""
-                                ? socialLoginController.locationController
-                                : TextEditingController(text: socialLoginController.currentAddress),
+                          child: CustomTextFormField(
+                            controller: currentAddress,
                             hintText: "Your address here",
                             focusNode: focus2,
                             onFieldSubmitted: (v){
@@ -126,10 +140,7 @@ class SocialLoginPage extends StatelessWidget {
                             keyboardType: TextInputType.streetAddress,
                             prefixImage: ImageAssets.locationBrown,
                             suffixImage: ImageAssets.locationFill,
-                            suffixTap: (){
-                              socialLoginController.getCurrentPosition(context);
-                            },
-                          ),
+                            suffixTap: (){},
                           ),
                         ),
                         const SizedBox(
@@ -149,16 +160,14 @@ class SocialLoginPage extends StatelessWidget {
                           delay: const Duration(milliseconds: 800),
                           duration: const Duration(milliseconds: 900),
                           child: CustomTextFormField(
-                            controller: TextEditingController(text: socialLoginController.selectedDate.value),
+                            controller: birthController,
                             hintText: "Date of birth",
                             focusNode: focus3,
                             textInputAction: TextInputAction.done,
                             keyboardType: TextInputType.number,
                             prefixImage: ImageAssets.birthDate,
                             suffixImage: ImageAssets.calendar,
-                            suffixTap: (){
-                              _selectDate(context);
-                            },
+                            suffixTap: (){},
                           ),
                         ),
                         const SizedBox(
@@ -201,7 +210,7 @@ class SocialLoginPage extends StatelessWidget {
                                   iconSize: 0,
                                   decoration:  InputDecoration(
                                     suffixIcon: Padding(
-                                      padding: EdgeInsets.only(left: 10.0), // Adjust the padding as needed
+                                      padding: const EdgeInsets.only(left: 10.0), // Adjust the padding as needed
                                       child: SvgPicture.asset(
                                         ImageAssets.dropDown,
                                         // fit: BoxFit.fill,
@@ -306,7 +315,7 @@ class SocialLoginPage extends StatelessWidget {
                     child:  Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Obx(() =>  Padding(
+                        Padding(
                           padding: const EdgeInsets.only(bottom: 15.0),
                           child: Theme(
                             data: ThemeData(unselectedWidgetColor: AppColor.primaryColor),
@@ -314,13 +323,12 @@ class SocialLoginPage extends StatelessWidget {
                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               activeColor: AppColor.primaryColor,
                               checkColor: AppColor.whiteColor,
-                              value: socialLoginController.checkBoxValue.value,
+                              value: checkBoxValue,
                               onChanged: (bool? value) {
-                                socialLoginController.checkBoxValue.value = value!;
+                                checkBoxValue = value!;
                               },
                             ),
                           ),
-                        ),
                         ),
                         SizedBox(
                           width: Get.width * 0.65,
@@ -359,19 +367,5 @@ class SocialLoginPage extends StatelessWidget {
         ),
       ),
     );
-  }
-  // ignore: prefer_typing_uninitialized_variables
-  late final formattedDate;
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      formattedDate = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year.toString()}";
-    }
-    socialLoginController.setDate(formattedDate);
   }
 }

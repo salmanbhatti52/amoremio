@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'forgot_password_controller.dart';
 import '../../../Widgets/TextFields.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../../Widgets/large_Button.dart';
@@ -9,11 +8,17 @@ import '../../../Widgets/TextFieldLabel.dart';
 import '../../../Resources/colors/colors.dart';
 import '../EmailVerification/email_verification.dart';
 
-class ForgotPassword extends StatelessWidget {
-  ForgotPassword({Key? key}) : super(key: key);
+class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({Key? key}) : super(key: key);
 
-  final ForgotPasswordController forgotController = Get.put(ForgotPasswordController());
+  @override
+  State<ForgotPassword> createState() => _ForgotPasswordState();
+}
+
+class _ForgotPasswordState extends State<ForgotPassword> {
+
   final formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +101,7 @@ class ForgotPassword extends StatelessWidget {
                           delay: const Duration(milliseconds: 600),
                           duration: const Duration(milliseconds: 700),
                           child: CustomTextFormField(
-                            controller: forgotController.emailController,
+                            controller: emailController,
                             hintText: "username@gmail.com",
                             keyboardType: TextInputType.emailAddress,
                            ),

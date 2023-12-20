@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
-import 'ChatDetailsPageController.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../../Resources/assets/assets.dart';
@@ -9,12 +8,24 @@ import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ignore: must_be_immutable
-class MonitizeDialog extends StatelessWidget {
-  MonitizeDialog({Key? key}) : super(key: key);
+class MonitizeDialog extends StatefulWidget {
+  const MonitizeDialog({Key? key}) : super(key: key);
 
-  ChatDetailsPageController chatDetailsPageController = Get.put(ChatDetailsPageController());
+  @override
+  State<MonitizeDialog> createState() => _MonitizeDialogState();
+}
+
+class _MonitizeDialogState extends State<MonitizeDialog> {
+
   List<String> genderType = ["2 coin per message", "4 coin per message", "6 coin per message"];
   String? selectedGender;
+  int selectedIndex = -1;
+
+  void selectContainer(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +112,9 @@ class MonitizeDialog extends StatelessWidget {
                             SizedBox(
                               width: Get.width * 0.015,
                             ),
-                            Obx(
-                              () => GestureDetector(
+                            GestureDetector(
                                 onTap: () {
-                                  chatDetailsPageController.selectContainer(0);
+                                  selectContainer(0);
                                 },
                                 child: Container(
                                   width: Get.width * 0.13,
@@ -112,7 +122,7 @@ class MonitizeDialog extends StatelessWidget {
                                   // width: 51,
                                   // height: 38,
                                   decoration: ShapeDecoration(
-                                    color: chatDetailsPageController.selectedIndex.value == 0
+                                    color: selectedIndex == 0
                                         ? AppColor.secondaryColor
                                         : AppColor.whiteColor,
                                     shape: RoundedRectangleBorder(
@@ -130,7 +140,7 @@ class MonitizeDialog extends StatelessWidget {
                                   child: Center(
                                     child: MyText(
                                       text: "24d",
-                                      color: chatDetailsPageController.selectedIndex.value == 0
+                                      color: selectedIndex == 0
                                           ? AppColor.whiteColor
                                           : const Color(0xFF727171),
                                       fontWeight: FontWeight.w500,
@@ -139,20 +149,18 @@ class MonitizeDialog extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ),
                             SizedBox(
                               width: Get.width * 0.02,
                             ),
-                            Obx(
-                              () => GestureDetector(
+                            GestureDetector(
                                 onTap: () {
-                                  chatDetailsPageController.selectContainer(1);
+                                  selectContainer(1);
                                 },
                                 child: Container(
                                   width: Get.width * 0.13,
                                   height: Get.height * 0.045,
                                   decoration: ShapeDecoration(
-                                    color: chatDetailsPageController.selectedIndex.value == 1
+                                    color: selectedIndex == 1
                                         ? AppColor.secondaryColor
                                         : AppColor.whiteColor,
                                     shape: RoundedRectangleBorder(
@@ -170,7 +178,7 @@ class MonitizeDialog extends StatelessWidget {
                                   child: Center(
                                     child: MyText(
                                       text: "48d",
-                                      color: chatDetailsPageController.selectedIndex.value == 1
+                                      color: selectedIndex == 1
                                           ? AppColor.whiteColor
                                           : const Color(0xFF727171),
                                       fontWeight: FontWeight.w500,
@@ -179,20 +187,18 @@ class MonitizeDialog extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ),
                             SizedBox(
                               width: Get.width * 0.02,
                             ),
-                            Obx(
-                              () => GestureDetector(
+                            GestureDetector(
                                 onTap: () {
-                                  chatDetailsPageController.selectContainer(2);
+                                  selectContainer(2);
                                 },
                                 child: Container(
                                   width: Get.width * 0.13,
                                   height: Get.height * 0.045,
                                   decoration: ShapeDecoration(
-                                    color: chatDetailsPageController.selectedIndex.value == 2
+                                    color: selectedIndex == 2
                                         ? AppColor.secondaryColor
                                         : AppColor.whiteColor,
                                     shape: RoundedRectangleBorder(
@@ -210,7 +216,7 @@ class MonitizeDialog extends StatelessWidget {
                                   child: Center(
                                     child: MyText(
                                       text: "7d",
-                                      color: chatDetailsPageController.selectedIndex.value == 2
+                                      color: selectedIndex == 2
                                           ? AppColor.whiteColor
                                           : const Color(0xFF727171),
                                       fontWeight: FontWeight.w500,
@@ -219,20 +225,18 @@ class MonitizeDialog extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ),
                             SizedBox(
                               width: Get.width * 0.02,
                             ),
-                            Obx(
-                              () => GestureDetector(
+                            GestureDetector(
                                 onTap: () {
-                                  chatDetailsPageController.selectContainer(3);
+                                  selectContainer(3);
                                 },
                                 child: Container(
                                   width: Get.width * 0.25,
                                   height: Get.height * 0.045,
                                   decoration: ShapeDecoration(
-                                    color: chatDetailsPageController.selectedIndex.value == 3
+                                    color: selectedIndex == 3
                                         ? AppColor.secondaryColor
                                         : AppColor.whiteColor,
                                     shape: RoundedRectangleBorder(
@@ -249,7 +253,7 @@ class MonitizeDialog extends StatelessWidget {
                                   child: Center(
                                     child: MyText(
                                       text: "Permanent",
-                                      color: chatDetailsPageController.selectedIndex.value == 3
+                                      color: selectedIndex == 3
                                           ? AppColor.whiteColor
                                           : const Color(0xFF727171),
                                       fontWeight: FontWeight.w500,
@@ -258,7 +262,6 @@ class MonitizeDialog extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                       ],

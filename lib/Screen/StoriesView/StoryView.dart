@@ -1,4 +1,3 @@
-import 'StoryController.dart';
 import 'package:get/get.dart';
 import 'StoryBuyDialouge.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +18,18 @@ class StoryView extends StatefulWidget {
 }
 
 class _StoryViewState extends State<StoryView> {
-  StoryController storyController = Get.put(StoryController());
 
   bool image1 = false;
+  bool isButtonClicked = false;
+  bool selectedIndex1 = true;
+  bool selectedIndex2 = false;
+  bool selectedIndex3 = false;
+
+  void handleButtonTap() {
+    setState(() {
+      isButtonClicked = !isButtonClicked;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +103,9 @@ class _StoryViewState extends State<StoryView> {
                   //   text: storyController.isButtonClicked.value ? "Liked" : "Like",
                   // ),
                   // ),
-                  Obx(
-                    () => GestureDetector(
+                  GestureDetector(
                       onTap: () {
-                        storyController.handleButtonTap();
+                        handleButtonTap();
                       },
                       child: Column(
                         children: [
@@ -109,24 +116,23 @@ class _StoryViewState extends State<StoryView> {
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25),
-                              color: storyController.isButtonClicked.value
+                              color: isButtonClicked
                                   ? Colors.red
                                   : AppColor.whiteColor,
                             ),
                             child: Center(
                               child: SvgPicture.asset(
                                 ImageAssets.favorite,
-                                color: storyController.isButtonClicked.value
+                                color: isButtonClicked
                                     ? AppColor.whiteColor
                                     : AppColor.hintTextColor,
                               ),
                             ),
                           ),
-                          MyText(text: storyController.isButtonClicked.value ? "Liked" : "Like", fontSize: 12, fontWeight: FontWeight.w500, )
+                          MyText(text: isButtonClicked ? "Liked" : "Like", fontSize: 12, fontWeight: FontWeight.w500, )
                         ],
                       )
                     ),
-                  ),
                   // Obx(
                   //       () => RoundedButton(
                   //         width: 35,

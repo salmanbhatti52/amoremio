@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'ExploreController.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
@@ -11,13 +10,25 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:amoremio/Screen/ExplorePages/BlockedUser.dart';
 
 // ignore: must_be_immutable
-class ExploreSearch extends StatelessWidget {
+class ExploreSearch extends StatefulWidget {
   ExploreSearch({Key? key}) : super(key: key);
+
+  @override
+  State<ExploreSearch> createState() => _ExploreSearchState();
+}
+
+class _ExploreSearchState extends State<ExploreSearch> {
 
   final TextEditingController searchController = TextEditingController();
   List<String> genderType = ["Male", "Female", "Other"];
   String? selectedGender;
-  ExploreController exploreController = Get.put(ExploreController());
+  double value = 50.0;
+
+  void slider(double newValue) {
+    setState(() {
+      value = newValue;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -268,12 +279,10 @@ class ExploreSearch extends StatelessWidget {
                                 color: AppColor.blackColor,
                               ),
                             ),
-                            Obx(
-                              () => SfSlider(
+                            SfSlider(
                                 min: 0.0,
                                 max: 1000.0,
-                                value: exploreController
-                                    .value.value, // Access the value with .value
+                                value: value, // Access the value with .value
                                 interval: 50,
                                 enableTooltip: true,
                                 // shouldAlwaysShowTooltip: true,
@@ -281,10 +290,9 @@ class ExploreSearch extends StatelessWidget {
                                 activeColor: AppColor.primaryColor,
                                 minorTicksPerInterval: 1,
                                 onChanged: (dynamic value) {
-                                  exploreController.slider(value);
+                                  slider(value);
                                 },
                               ),
-                            ),
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20.0),
                               child: Row(

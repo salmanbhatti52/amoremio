@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'ResetPasswordController.dart';
 import 'package:flutter/material.dart';
 import '../../../Widgets/TextFields.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -11,11 +10,32 @@ import '../../../Resources/colors/colors.dart';
 import 'package:amoremio/Screen/Authentication/LoginPage/login_page.dart';
 
 // ignore: must_be_immutable
-class ResetPassword extends StatelessWidget {
-  ResetPassword({Key? key}) : super(key: key);
+class ResetPassword extends StatefulWidget {
+  const ResetPassword({Key? key}) : super(key: key);
 
-  ResetPasswordController resetPasswordController = Get.put(ResetPasswordController());
+  @override
+  State<ResetPassword> createState() => _ResetPasswordState();
+}
+
+class _ResetPasswordState extends State<ResetPassword> {
+
   final formKey = GlobalKey<FormState>();
+  bool isPasswordVisible= true;
+  bool isConfirmPasswordVisible= true;
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  passwordTap(){
+    setState(() {
+      isPasswordVisible = !isPasswordVisible;
+    });
+  }
+
+  confirmPasswordTap(){
+    setState(() {
+      isConfirmPasswordVisible = !isConfirmPasswordVisible;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,27 +118,25 @@ class ResetPassword extends StatelessWidget {
                         FadeInLeft(
                           delay: const Duration(milliseconds: 600),
                           duration: const Duration(milliseconds: 700),
-                          child: Obx(
-                                () => CustomTextFormField(
-                              controller: resetPasswordController.passwordController,
-                                  maxLine: resetPasswordController.isPasswordVisible.value ? 1 : null,
-                                  suffixImageColor: resetPasswordController.isPasswordVisible.value ? null : AppColor.primaryColor,
+                          child: CustomTextFormField(
+                              controller: passwordController,
+                                  maxLine: isPasswordVisible ? 1 : null,
+                                  suffixImageColor: isPasswordVisible ? null : AppColor.primaryColor,
                                   hintText: "********",
                               prefixImage: ImageAssets.password,
                               focusNode: focus1,
                                   onFieldSubmitted: (v){
                                     FocusScope.of(context).requestFocus(focus2);
                                   },
-                                  suffixImage: resetPasswordController.isPasswordVisible.value
+                                  suffixImage: isPasswordVisible
                                       ? ImageAssets.eyeOffImage
                                       : ImageAssets.eyeOnImage,
                                   suffixTap: () {
-                                resetPasswordController.passwordTap();
+                                passwordTap();
                               },
-                              obscureText: resetPasswordController.isPasswordVisible.value,
+                              obscureText: isPasswordVisible,
                             ),
                           ),
-                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -135,25 +153,23 @@ class ResetPassword extends StatelessWidget {
                         FadeInLeft(
                           delay: const Duration(milliseconds: 800),
                           duration: const Duration(milliseconds: 900),
-                          child: Obx(
-                                () => CustomTextFormField(
-                              controller: resetPasswordController.confirmPasswordController,
-                                  maxLine: resetPasswordController.isConfirmPasswordVisible.value ? 1 : null,
+                          child: CustomTextFormField(
+                              controller: confirmPasswordController,
+                                  maxLine: isConfirmPasswordVisible ? 1 : null,
                                   hintText: "********",
                               prefixImage: ImageAssets.password,
                               focusNode: focus2,
                               textInputAction: TextInputAction.done,
-                              suffixImage: resetPasswordController.isConfirmPasswordVisible.value
+                              suffixImage: isConfirmPasswordVisible
                                   ? ImageAssets.eyeOffImage
                                   : ImageAssets.eyeOnImage,
-                                  suffixImageColor: resetPasswordController.isConfirmPasswordVisible.value ? null : AppColor.primaryColor,
+                                  suffixImageColor: isConfirmPasswordVisible ? null : AppColor.primaryColor,
                                   suffixTap: () {
-                                resetPasswordController.confirmPasswordTap();
+                                confirmPasswordTap();
                               },
-                              obscureText: resetPasswordController.isConfirmPasswordVisible.value,
+                              obscureText: isConfirmPasswordVisible,
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -170,7 +186,7 @@ class ResetPassword extends StatelessWidget {
                     text: "Reset",
                     onTap: () {
                       Get.to(
-                            () => LoginPage(),
+                            () => const LoginPage(),
                         duration: const Duration(milliseconds: 350),
                         transition: Transition.upToDown,
                       );

@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'ChatPageController.dart';
 import '../../../Widgets/AppBar.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
@@ -14,7 +13,7 @@ import '../../ExplorePages/ExploreBackgroundContainer.dart';
 class ChatPage extends StatelessWidget {
   ChatPage({Key? key}) : super(key: key);
 
-  ChatPageController chatPageController = Get.put(ChatPageController());
+  final TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +42,7 @@ class ChatPage extends StatelessWidget {
                         color: AppColor.hintTextColor,
                         fontWeight: FontWeight.w400,
                       ),
-                      controller: chatPageController.searchController,
+                      controller: searchController,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: Get.width * 0.03, vertical: 10),

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../Widgets/AppBar.dart';
@@ -9,13 +7,24 @@ import '../../../Resources/assets/assets.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
-import 'Referral Controller.dart';
 
-class ReferralsPage extends StatelessWidget {
-   ReferralsPage({super.key});
+class ReferralsPage extends StatefulWidget {
+   const ReferralsPage({super.key});
 
-  final ReferralsController referralsController = Get.put(ReferralsController());
+  @override
+  State<ReferralsPage> createState() => _ReferralsPageState();
+}
+
+class _ReferralsPageState extends State<ReferralsPage> {
+
   String referralLink = "https://appname.com/@referral_9099";
+  bool isTrue = false;
+
+  listShow(){
+    setState(() {
+      isTrue = !isTrue;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +241,7 @@ class ReferralsPage extends StatelessWidget {
                   SizedBox(
                     height: Get.height * 0.01,
                   ),
-                  Obx(() => Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Image.asset(ImageAssets.smallPic),
@@ -262,17 +271,17 @@ class ReferralsPage extends StatelessWidget {
                       ),
                       GestureDetector(
                           onTap: (){
-                            referralsController.listShow();
+                            listShow();
                           },
                           child: Icon(
-                            referralsController.isTrue.value ? Icons.arrow_drop_up_rounded:   Icons.arrow_drop_down_rounded,
+                            isTrue ? Icons.arrow_drop_up_rounded:   Icons.arrow_drop_down_rounded,
                             color: AppColor.brownColor,
                             size: 30,
-                          )),
+                          ),
+                      ),
                     ],
-                  ),),
-                  Obx(() {
-                   return referralsController.isTrue.value
+                  ),
+                   isTrue
                         ?  Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5),
                       child: Row(
@@ -306,8 +315,7 @@ class ReferralsPage extends StatelessWidget {
                         ],
                       ),
                     )
-                        : const SizedBox();
-                  }),
+                        : const SizedBox(),
                   SizedBox(
                     height: Get.height * 0.01,
                   ),

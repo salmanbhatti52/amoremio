@@ -1,7 +1,6 @@
 import '../UserCoins.dart';
 import 'package:get/get.dart';
 import '../ProfileScreen.dart';
-import 'ProfilePageController.dart';
 import '../../../Widgets/AppBar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -18,11 +17,21 @@ import '../AccountVerification/AccountVerification1.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
 
 // ignore: must_be_immutable
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   ProfilePage({Key? key}) : super(key: key);
 
-  ProfilePageController profilePageController =
-      Get.put(ProfilePageController());
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+
+  bool status = false;
+  void toggleSwitch(bool newValue) {
+    setState(() {
+      status = newValue;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -284,12 +293,11 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ],
                           ),
-                          Obx(
-                            () => FlutterSwitch(
+                          FlutterSwitch(
                               width: 36,
                               height: 19,
                               toggleSize: 12.0,
-                              value: profilePageController.status.value,
+                              value: status,
                               borderRadius: 11,
                               inactiveColor: Color(0xFFC6C6C6),
                               activeColor: AppColor.secondaryColor,
@@ -297,7 +305,7 @@ class ProfilePage extends StatelessWidget {
                               inactiveToggleColor: Color(0xFFD9D9D9),
                               showOnOff: false,
                               onToggle: (val) {
-                                profilePageController.toggleSwitch(val);
+                                toggleSwitch(val);
                                 print("val $val");
                                 if (val == true) {
                                   // e.g., notificationPermissionApiYes();
@@ -308,7 +316,6 @@ class ProfilePage extends StatelessWidget {
                                 }
                               },
                             ),
-                          ),
                         ],
                       ),
                     ),

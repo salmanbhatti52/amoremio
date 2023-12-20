@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
-import 'email_verification_controller.dart';
 import '../../../Widgets/large_Button.dart';
 import 'package:animate_do/animate_do.dart';
 import '../ResetPassword/ResetPassword.dart';
@@ -12,8 +11,8 @@ import 'package:google_fonts/google_fonts.dart';
 class EmailVerify extends StatelessWidget {
    EmailVerify({Key? key}) : super(key: key);
 
-   final EmailVerifyController verifyController = Get.put(EmailVerifyController());
    final formKey = GlobalKey<FormState>();
+   final TextEditingController pinController = TextEditingController();
 
   final defaultPinTheme = PinTheme(
     width: 52,
@@ -109,7 +108,7 @@ class EmailVerify extends StatelessWidget {
                             length: 4,
                             keyboardType: TextInputType.number,
                             closeKeyboardWhenCompleted: true,
-                            controller: verifyController.pinController.value,
+                            controller: pinController,
                             defaultPinTheme: defaultPinTheme,
                             focusedPinTheme: defaultPinTheme,
                             submittedPinTheme: defaultPinTheme,
