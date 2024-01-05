@@ -54,13 +54,17 @@ final kDropDownMenuInputDecoration = InputDecorationTheme(
   hintStyle: kTextFieldHintStyle,
 );
 final kDropDownMenuStyle = MenuStyle(
-    shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+  backgroundColor: MaterialStateProperty.all(Colors.white),
+  shape: MaterialStatePropertyAll(
+    RoundedRectangleBorder(
         side: BorderSide(
           color: Colors.white,
           width: 1,
           style: BorderStyle.solid,
         ),
-        borderRadius: BorderRadius.circular(15))));
+        borderRadius: BorderRadius.circular(15)),
+  ),
+);
 
 class RoundedDropdownMenu extends StatelessWidget {
   const RoundedDropdownMenu(

@@ -1,4 +1,11 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../Resources/assets/assets.dart';
+import '../../Utills/AppUrls.dart';
 import 'ExploreVideoView.dart';
 import '../../Widgets/AppBar.dart';
 import 'ExploreSearch&Filter.dart';
@@ -8,6 +15,8 @@ import 'ExploreBackgroundContainer.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:amoremio/Widgets/Small_Button.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
+import 'package:http/http.dart' as http;
+import 'package:auto_animated/auto_animated.dart';
 
 // ignore: must_be_immutable
 class ExplorePage extends StatefulWidget {
@@ -18,19 +27,192 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
-
   bool status = false;
   bool selectedIndex1 = true;
   bool selectedIndex2 = false;
   bool selectedIndex3 = false;
   bool selectedIndex4 = false;
 
+  bool isloading = false;
+  final options = const LiveOptions(
+    // Start animation after (default zero)
+    delay: Duration(seconds: 0),
+
+    // Show each item through (default 250)
+    showItemInterval: Duration(milliseconds: 200),
+
+    // Animation duration (default 250)
+    showItemDuration: Duration(milliseconds: 500),
+    visibleFraction: 0.05,
+    reAnimateOnVisibility: false,
+  );
+
+  List<dynamic> mainImages = [
+    ImageAssets.exploreImage,
+    ImageAssets.image1,
+    ImageAssets.image2,
+    ImageAssets.image3,
+    ImageAssets.introImage,
+    // Add more image assets as needed
+  ];
+  List<dynamic> userDataList = [];
+  List<dynamic> imgListavators = [];
   void toggleSwitch(bool newValue) {
     setState(() {
       status = newValue;
     });
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchuserDiscover();
+  }
+
+  void fetchuserDiscover() async {
+    isloading = true;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print(userId);
+    String apiUrl = userDiscover;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+            },
+          ));
+      // print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {});
+        userDataList = data['data'];
+        isloading = false;
+        print(userDataList);
+        // images = baseUrlImage + data['data']['image'];
+      } else {
+        isloading = false;
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      isloading = false;
+      print('error');
+    }
+  }
+
+  /// liked users/////
+  void fetchuserliked() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print(userId);
+    String apiUrl = getuserliked;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {});
+        userDataList = data['data'];
+        print(userDataList);
+        // images = baseUrlImage + data['data']['image'];
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error :$e');
+    }
+  }
+
+  /// //////////////
+
+  /// Matches/////
+  fetchusermatches() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = getusermatch;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {});
+        userDataList = data['data'];
+        print(userDataList);
+        // images = baseUrlImage + data['data']['image'];
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error :$e');
+    }
+  }
+
+  /// //////////////
+
+  /// liked users/////
+  void fetchuserlikedme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print(userId);
+    String apiUrl = getuserlikedme;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {});
+        userDataList = data['data']['data'];
+        print(userDataList);
+        // images = baseUrlImage + data['data']['image'];
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error :$e');
+    }
+  }
+
+  /// //////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,7 +283,7 @@ class _ExplorePageState extends State<ExplorePage> {
               //   ),
               // ),
               Padding(
-                padding:  EdgeInsets.symmetric(horizontal: Get.width * 0.01),
+                padding: EdgeInsets.symmetric(horizontal: Get.width * 0.01),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -117,6 +299,9 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex2 = false;
                         selectedIndex3 = false;
                         selectedIndex4 = false;
+                        userDataList = [];
+                        fetchuserDiscover();
+                        setState(() {});
                         // showDialog(
                         //     context: context,
                         //     barrierColor: Colors.white60,
@@ -140,13 +325,14 @@ class _ExplorePageState extends State<ExplorePage> {
                           : AppColor.hintTextColor,
                       width: Get.width * 0.22,
                       height: Get.height * 0.033,
-
                       onTap: () {
-
                         selectedIndex1 = false;
                         selectedIndex2 = true;
                         selectedIndex3 = false;
                         selectedIndex4 = false;
+                        userDataList = [];
+                        fetchusermatches();
+                        setState(() {});
                         // Get.to(
                         //   () => const UserMatchesPage(),
                         //   duration: const Duration(milliseconds: 350),
@@ -166,7 +352,10 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex2 = false;
                         selectedIndex3 = true;
                         selectedIndex4 = false;
-                        },
+                        userDataList = [];
+                        fetchuserliked();
+                        setState(() {});
+                      },
                     ),
                     SmallButton(
                       text: "Liked You ",
@@ -180,24 +369,617 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex2 = false;
                         selectedIndex3 = false;
                         selectedIndex4 = true;
+                        userDataList = [];
+                        fetchuserlikedme();
+                        setState(() {});
                       },
                     ),
                   ],
                 ),
               ),
-              ExploreVideoContainer(
-                  height: MediaQuery.of(context).size.height * 0.61,
-                  onTap: (){
-                    Get.to( () => const ExploreVideoView(),
-                      duration: const Duration(seconds: 1),
-                      transition: Transition.native,);
-                  },
-                  value: status,
-                ),
+              // ExploreVideoContainer(
+              //   height: MediaQuery.of(context).size.height * 0.61,
+              //   onTap: () {
+              //     Get.to(
+              //       () => const ExploreVideoView(),
+              //       duration: const Duration(seconds: 1),
+              //       transition: Transition.native,
+              //     );
+              //   },
+              //   value: status,
+              // ),
+              /////userdiscover////
+              selectedIndex1 == true
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.61,
+                      child: isloading == true
+                          ? Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : LiveGrid.options(
+                              options: options,
+                              itemCount: userDataList.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 1 / 1.1,
+                                mainAxisSpacing: 0,
+                                crossAxisSpacing: 0,
+                              ),
+                              itemBuilder: (
+                                BuildContext context,
+                                int index,
+                                Animation<double> animation,
+                              ) {
+                                // String randomMainImage =
+                                //     mainImages[Random().nextInt(mainImages.length)];
+                                Map<String, dynamic> currentUserData =
+                                    userDataList[index];
+                                return FadeTransition(
+                                  opacity: Tween<double>(
+                                    begin: 0,
+                                    end: 1,
+                                  ).animate(animation),
+                                  // And slide transition
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, -0.1),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    // Paste you Widget
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => ExploreVideoView(
+                                              userid: currentUserData[
+                                                  'users_customers_id']),
+                                          duration: const Duration(seconds: 1),
+                                          transition: Transition.native,
+                                        );
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Stack(
+                                            children: [
+                                              Container(
+                                                width: 160,
+                                                height: 160,
+                                                decoration: ShapeDecoration(
+                                                  image: DecorationImage(
+                                                    image: currentUserData[
+                                                                'image'] ==
+                                                            null
+                                                        ? AssetImage(ImageAssets
+                                                                .image1)
+                                                            as ImageProvider<
+                                                                Object>
+                                                        : NetworkImage(
+                                                            'https://mio.eigix.net/${currentUserData['image']}',
+                                                          ),
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                  ),
+                                                ),
+                                              ),
+                                              Positioned(
+                                                right: 5,
+                                                top: 5,
+                                                child: Row(
+                                                  children: [
+                                                    SvgPicture.asset(ImageAssets
+                                                        .locationWhite),
+                                                    const MyText(
+                                                      text: "1.4 Km",
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 20.0),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  width: 25,
+                                                  height: 25,
+                                                  decoration: ShapeDecoration(
+                                                    image: DecorationImage(
+                                                      image: currentUserData[
+                                                                  'image'] ==
+                                                              null
+                                                          ? AssetImage(
+                                                                  ImageAssets
+                                                                      .image1)
+                                                              as ImageProvider<
+                                                                  Object>
+                                                          : NetworkImage(
+                                                              'https://mio.eigix.net/${currentUserData['image']}',
+                                                            ),
+                                                      fit: BoxFit.fill,
+                                                    ),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  width: 5,
+                                                ),
+                                                MyText(
+                                                  text:
+                                                      "${currentUserData['username']}, ${calculateAge(currentUserData['date_of_birth'])}",
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    )
+                  : SizedBox(),
+              /////usermatch//////
+              selectedIndex2 == true
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.61,
+                      child: LiveGrid.options(
+                        options: options,
+                        itemCount: userDataList.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1 / 1.1,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                        ),
+                        itemBuilder: (
+                          BuildContext context,
+                          int index,
+                          Animation<double> animation,
+                        ) {
+                          // String randomMainImage =
+                          //     mainImages[Random().nextInt(mainImages.length)];
+                          Map<String, dynamic> currentUserData =
+                              userDataList[index];
+                          return FadeTransition(
+                            opacity: Tween<double>(
+                              begin: 0,
+                              end: 1,
+                            ).animate(animation),
+                            // And slide transition
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, -0.1),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              // Paste you Widget
+                              child: GestureDetector(
+                                onTap: () {
+                                  // Get.to(
+                                  //   () => ExploreVideoView(
+                                  //       userid: currentUserData['liked_user']
+                                  //           ['users_customers_id']),
+                                  //   duration: const Duration(seconds: 1),
+                                  //   transition: Transition.native,
+                                  // );
+                                },
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          width: 160,
+                                          height: 160,
+                                          decoration: ShapeDecoration(
+                                            image: DecorationImage(
+                                              image: currentUserData[
+                                                              'user_data']
+                                                          ['image'] ==
+                                                      null
+                                                  ? AssetImage(
+                                                          ImageAssets.image1)
+                                                      as ImageProvider<Object>
+                                                  : NetworkImage(
+                                                      'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                    ),
+                                              fit: BoxFit.fill,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 5,
+                                          top: 5,
+                                          child: Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                  ImageAssets.locationWhite),
+                                              const MyText(
+                                                text: "1.4 Km",
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 25,
+                                            height: 25,
+                                            decoration: ShapeDecoration(
+                                              image: DecorationImage(
+                                                image: currentUserData[
+                                                                'user_data']
+                                                            ['image'] ==
+                                                        null
+                                                    ? AssetImage(
+                                                            ImageAssets.image1)
+                                                        as ImageProvider<Object>
+                                                    : NetworkImage(
+                                                        'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                      ),
+                                                fit: BoxFit.fill,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          MyText(
+                                            text:
+                                                "${currentUserData['user_data']['username']}, ${calculateAge(currentUserData['user_data']['date_of_birth'])}",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : SizedBox(),
+              // userliked/////
+              selectedIndex3 == true
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.61,
+                      child: LiveGrid.options(
+                        options: options,
+                        itemCount: userDataList.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1 / 1.1,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                        ),
+                        itemBuilder: (
+                          BuildContext context,
+                          int index,
+                          Animation<double> animation,
+                        ) {
+                          // String randomMainImage =
+                          //     mainImages[Random().nextInt(mainImages.length)];
+                          Map<String, dynamic> currentUserData =
+                              userDataList[index];
+                          return FadeTransition(
+                            opacity: Tween<double>(
+                              begin: 0,
+                              end: 1,
+                            ).animate(animation),
+                            // And slide transition
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, -0.1),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              // Paste you Widget
+                              child: GestureDetector(
+                                onTap: () {
+                                  // Get.to(
+                                  //   () => ExploreVideoView(
+                                  //       userid: currentUserData['liked_user']
+                                  //           ['users_customers_id']),
+                                  //   duration: const Duration(seconds: 1),
+                                  //   transition: Transition.native,
+                                  // );
+                                },
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          width: 160,
+                                          height: 160,
+                                          decoration: ShapeDecoration(
+                                            image: DecorationImage(
+                                              image: currentUserData[
+                                                              'liked_user']
+                                                          ['image'] ==
+                                                      null
+                                                  ? AssetImage(
+                                                          ImageAssets.image1)
+                                                      as ImageProvider<Object>
+                                                  : NetworkImage(
+                                                      'https://mio.eigix.net/${currentUserData['liked_user']['image']}',
+                                                    ),
+                                              fit: BoxFit.fill,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 5,
+                                          top: 5,
+                                          child: Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                  ImageAssets.locationWhite),
+                                              const MyText(
+                                                text: "1.4 Km",
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 25,
+                                            height: 25,
+                                            decoration: ShapeDecoration(
+                                              image: DecorationImage(
+                                                image: currentUserData[
+                                                                'liked_user']
+                                                            ['image'] ==
+                                                        null
+                                                    ? AssetImage(
+                                                            ImageAssets.image1)
+                                                        as ImageProvider<Object>
+                                                    : NetworkImage(
+                                                        'https://mio.eigix.net/${currentUserData['liked_user']['image']}',
+                                                      ),
+                                                fit: BoxFit.fill,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          MyText(
+                                            text:
+                                                "${currentUserData['liked_user']['username']}, ${calculateAge(currentUserData['liked_user']['date_of_birth'])}",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : SizedBox(),
+
+              //userlikedby/////
+              selectedIndex4 == true
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.61,
+                      child: LiveGrid.options(
+                        options: options,
+                        itemCount: userDataList.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1 / 1.1,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                        ),
+                        itemBuilder: (
+                          BuildContext context,
+                          int index,
+                          Animation<double> animation,
+                        ) {
+                          // String randomMainImage =
+                          //     mainImages[Random().nextInt(mainImages.length)];
+                          Map<String, dynamic> currentUserData =
+                              userDataList[index];
+                          return FadeTransition(
+                            opacity: Tween<double>(
+                              begin: 0,
+                              end: 1,
+                            ).animate(animation),
+                            // And slide transition
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, -0.1),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              // Paste you Widget
+                              child: GestureDetector(
+                                onTap: () {
+                                  // Get.to(
+                                  //   () => ExploreVideoView(
+                                  //       userid: currentUserData['liked_user']
+                                  //           ['users_customers_id']),
+                                  //   duration: const Duration(seconds: 1),
+                                  //   transition: Transition.native,
+                                  // );
+                                },
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          width: 160,
+                                          height: 160,
+                                          decoration: ShapeDecoration(
+                                            image: DecorationImage(
+                                              image: currentUserData[
+                                                              'user_data']
+                                                          ['image'] ==
+                                                      null
+                                                  ? AssetImage(
+                                                          ImageAssets.image1)
+                                                      as ImageProvider<Object>
+                                                  : NetworkImage(
+                                                      'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                    ),
+                                              fit: BoxFit.fill,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 5,
+                                          top: 5,
+                                          child: Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                  ImageAssets.locationWhite),
+                                              const MyText(
+                                                text: "1.4 Km",
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 25,
+                                            height: 25,
+                                            decoration: ShapeDecoration(
+                                              image: DecorationImage(
+                                                image: currentUserData[
+                                                                'user_data']
+                                                            ['image'] ==
+                                                        null
+                                                    ? AssetImage(
+                                                            ImageAssets.image1)
+                                                        as ImageProvider<Object>
+                                                    : NetworkImage(
+                                                        'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                      ),
+                                                fit: BoxFit.fill,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          MyText(
+                                            text:
+                                                "${currentUserData['user_data']['username']}, ${calculateAge(currentUserData['user_data']['date_of_birth'])}",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : SizedBox()
             ],
           ),
         ),
       ),
     );
+  }
+
+  int calculateAge(String dateOfBirth) {
+    DateTime today = DateTime.now();
+    DateTime birthDate = DateTime.parse(dateOfBirth);
+    int age = today.year - birthDate.year;
+
+    // Adjust age if the birthday hasn't occurred yet this year
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+
+    return age;
   }
 }

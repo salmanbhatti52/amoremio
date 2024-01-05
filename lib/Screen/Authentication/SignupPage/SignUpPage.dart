@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Utills/AppUrls.dart';
 import '../../../Widgets/DividerandOR.dart';
 import '../../../Widgets/rounded_dropdown_menu.dart';
@@ -108,8 +109,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   ///Signup///////
   void sendval() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
     String apiUrl = signUp;
-    print(apiUrl);
     try {
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
@@ -128,6 +133,10 @@ class _SignUpPageState extends State<SignUpPage> {
       print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
+        Navigator.of(context).pop();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString(
+            'users_customers_id', data['data']['users_customers_id']);
         Get.to(
           () => MyBottomNavigationBar(),
           duration: const Duration(milliseconds: 350),
@@ -140,7 +149,7 @@ class _SignUpPageState extends State<SignUpPage> {
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      print('error');
+      print('error123456');
     }
   }
 
@@ -219,7 +228,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           duration: const Duration(milliseconds: 500),
                           child: CustomTextFormField(
                             controller: userNameController,
-                            hintText: "username@gmail.com",
+                            hintText: "username",
                             keyboardType: TextInputType.name,
                             prefixImage: ImageAssets.user,
                             focusNode: focus1,

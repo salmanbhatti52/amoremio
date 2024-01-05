@@ -5,12 +5,12 @@ class ExploreContainer extends StatelessWidget {
   final Widget child;
   final Color gradientColor1;
   final Color gradientColor2;
-  const ExploreContainer({Key? key,
+  const ExploreContainer({
+    Key? key,
     required this.child,
     this.gradientColor1 = AppColor.primaryColor,
     this.gradientColor2 = AppColor.secondaryColor,
-  }
-  ) : super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

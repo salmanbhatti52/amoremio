@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import '../../Utills/AppUrls.dart';
+import '../../Widgets/rounded_dropdown_menu.dart';
 import 'InterestTags.dart';
 import 'package:get/get.dart';
 import 'EditAvatorProfile.dart';
@@ -13,12 +18,262 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:amoremio/Widgets/large_Button.dart';
 import '../ExplorePages/ExploreBackgroundContainer.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-class UserProfile extends StatelessWidget {
+class UserProfile extends StatefulWidget {
   UserProfile({super.key});
 
-  List<String> genderType = ["Male", "Female", "Other"];
-  String? selectedGender;
+  @override
+  State<UserProfile> createState() => _UserProfileState();
+}
+
+class _UserProfileState extends State<UserProfile> {
+  Uint8List? _image;
+  File? selectedIMage;
+  String base64string = '';
+  String userGenderName = '';
+  String address = '';
+  var username = '';
+  dynamic imgurl = '';
+  List<dynamic> interests = [];
+  late List<dynamic> interestIds;
+  dynamic interestIdsJson;
+  List<dynamic> interestList = [];
+
+  int currentIndex = -1;
+  List<dynamic> imagePaths = List.generate(9, (index) => '');
+  List<String> imagesavators = [];
+
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController birthController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
+  final TextEditingController bioController = TextEditingController();
+  final TextEditingController educationController = TextEditingController();
+  TextEditingController currentAddress = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    fetchGenders();
+  }
+
+  Future pickimage() async {
+    final pickedImage =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedImage == null) return;
+    setState(() {
+      selectedIMage = File(pickedImage.path);
+      print(selectedIMage);
+      _image = selectedIMage?.readAsBytesSync();
+      base64string =
+          base64.encode(_image as List<int>); //convert bytes to base64 string
+      uploadprofile(base64string);
+    });
+    // await ImagePicker()
+    //     .pickImage(source: ImageSource.gallery, imageQuality: 50)
+    //     .then((value) {
+    //   if (value != null) {
+    //     print(File(value.path));
+    //     // _cropImage(File(value.path));
+    //   }
+    // });
+  }
+
+  //upload avators///
+  Future<void> _pickImages() async {
+    final pickedImage =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      setState(() {
+        var path = pickedImage.path;
+        imagePaths[currentIndex] = pickedImage.path;
+      });
+      List<int> imageBytes = await pickedImage.readAsBytes();
+
+      // Encode the image bytes to base64
+      String base64Image = base64Encode(imageBytes);
+      print('base64Image $base64Image');
+      uploadavators(base64Image);
+    }
+  }
+
+  String selectedGender = "Select Gender";
+
+  List<dynamic> genderType = [];
+  String? selectedGenders;
+  var genderval;
+
+  void setSelectedGender(dynamic gender) {
+    setState(() {
+      selectedGender = gender['name'];
+    });
+  }
+
+  ////get gender/////
+  Future<void> fetchGenders() async {
+    String apiUrl = getGender;
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      final responseString = response.body;
+      var data = jsonDecode(responseString);
+      String status = data['status'];
+      if (status == 'success') {
+        setState(() {
+          genderType = data['data'];
+          loaddata();
+          // getuseravatars(index);
+        });
+      }
+      print("genderApi: $genderType");
+    } catch (e) {
+      print('Error: $e');
+      print('Failed to connect to the server.');
+    }
+  }
+
+  void loaddata() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = getusersProfile;
+    // try {
+    final response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {"users_customers_id": userId},
+        ));
+    var userdetail = jsonDecode(response.body);
+    if (userdetail['status'] == 'success') {
+      print(userdetail);
+      setState(() {});
+      Navigator.of(context).pop();
+      userNameController.text = userdetail['data']['username'];
+      username = userdetail['data']['username'];
+      emailController.text = userdetail['data']['email'];
+      birthController.text = userdetail['data']['date_of_birth'];
+      bioController.text = userdetail['data']['summary'] ?? '';
+      educationController.text = userdetail['data']['education'] ?? '';
+      address = userdetail['data']['location'];
+      interestList = userdetail['data']['interests'] ?? '';
+      imgurl = baseUrlImage + userdetail['data']['image'];
+
+      // List<int> decodedBytes = base64.decode(data);
+      // setState(() {
+      //   _image = Uint8List.fromList(decodedBytes);
+      //   print('image url: $_image');
+      // });
+
+      dynamic gendersId = userdetail['data']['genders_id'];
+
+      String getGenderName(gendersId) {
+        Map<String, dynamic>? gender = genderType.firstWhere(
+          (g) => g['genders_id'] == gendersId,
+          orElse: () => {'name': 'Unknown'},
+        );
+        return gender?['name'];
+      }
+
+      setState(() {
+        userGenderName = getGenderName(gendersId);
+      });
+      // Get gender name for the user
+
+      // Output the result
+      print('User Gender: $userGenderName');
+    } else {
+      print(userdetail['status']);
+      var errormsg = userdetail['message'];
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errormsg)));
+    }
+    // } catch (e) {
+    //   print('error123456');
+    // }
+  }
+
+  ///get date func/////
+  late String formattedDate;
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      formattedDate =
+          "${picked.year.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      print('formatted date: $formattedDate');
+      birthController.text = formattedDate;
+    }
+    // setDate(formattedDate);
+  }
+
+  var selectedDate;
+  void setDate(String date) {
+    selectedDate.value = date;
+  }
+
+  void editprofile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = editProfile;
+    print(interestIdsJson);
+    try {
+      var showdata = {
+        "users_customers_id": userId,
+        "summary": bioController.text.toString(),
+        "username": userNameController.text.toString(),
+        "email": emailController.text.toString(),
+        "genders_id": genderval,
+        "date_of_birth": birthController.text.toString(),
+        "education": educationController.text.toString(),
+        "verified": "No",
+        "interests": interestIdsJson
+      };
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(showdata));
+      print(showdata);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        // Get.to(
+        //   () => MyBottomNavigationBar(),
+        //   duration: const Duration(milliseconds: 350),
+        //   transition: Transition.rightToLeft,
+        // );
+        var msg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
+      } else {
+        print('error');
+        print(data['message']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error123456: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +295,26 @@ class UserProfile extends StatelessWidget {
               ),
               Stack(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    radius: Get.height * 0.09,
-                    backgroundImage: Image.asset(ImageAssets.mediumImage).image,
+                  // CircleAvatar(
+                  //   backgroundColor: Colors.transparent,
+                  //   radius: Get.height * 0.09,
+                  //   backgroundImage: _image == null
+                  //       ? Image.asset(ImageAssets.mediumImage).image
+                  //       : MemoryImage(_image!),
+                  // ),
+                  Container(
+                    width: Get.height * 0.18,
+                    height: Get.height * 0.18,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: imgurl.isEmpty
+                            ? AssetImage(ImageAssets.mediumImage)
+                                as ImageProvider<Object>
+                            : NetworkImage(imgurl),
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: Get.height * 0.01,
@@ -57,14 +328,16 @@ class UserProfile extends StatelessWidget {
                       ),
                       child: Center(
                         child: GestureDetector(
-                            onTap: () {
-                              Get.to(
-                                () => const EditAvatorProfile(),
-                                transition: Transition.rightToLeft,
-                                duration: const Duration(milliseconds: 300),
-                              );
-                            },
-                            child: SvgPicture.asset(ImageAssets.iconEdit)),
+                          onTap: () {
+                            pickimage();
+                            // Get.to(
+                            //   () => const EditAvatorProfile(),
+                            //   transition: Transition.rightToLeft,
+                            //   duration: const Duration(milliseconds: 300),
+                            // );
+                          },
+                          child: SvgPicture.asset(ImageAssets.iconEdit),
+                        ),
                       ),
                     ),
                   ),
@@ -73,8 +346,8 @@ class UserProfile extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              const MyText(
-                text: "Lubana Antique",
+              MyText(
+                text: username,
                 fontSize: 22,
               ),
               const SizedBox(
@@ -92,267 +365,353 @@ class UserProfile extends StatelessWidget {
                   const SizedBox(
                     width: 5,
                   ),
-                  const MyText(
+                  MyText(
                     textDecoration: TextDecoration.underline,
-                    text: "Sector 8, Los Angeles",
+                    text: address,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                   ),
                 ],
               ),
+              // Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     const Padding(
+              //       padding: EdgeInsets.only(left: 25.0, top: 20, bottom: 10),
+              //       child: MyText(
+              //         text: "Album Photos (9)",
+              //         fontSize: 18,
+              //       ),
+              //     ),
+              //
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: 22.0),
+              //       child: Row(
+              //         children: [
+              //           Stack(
+              //             children: [
+              //               Container(
+              //                 width: 103,
+              //                 height: 110,
+              //                 decoration: ShapeDecoration(
+              //                   image: const DecorationImage(
+              //                     image: AssetImage(ImageAssets.image2),
+              //                     fit: BoxFit.fill,
+              //                   ),
+              //                   shape: RoundedRectangleBorder(
+              //                       borderRadius: BorderRadius.circular(8)),
+              //                 ),
+              //               ),
+              //               Positioned(
+              //                 top: 5,
+              //                 right: 5,
+              //                 child: Container(
+              //                   width: 16,
+              //                   height: 16,
+              //                   padding: const EdgeInsets.all(2),
+              //                   decoration: const ShapeDecoration(
+              //                     color: AppColor.blackColor,
+              //                     shape: OvalBorder(),
+              //                   ),
+              //                   child: Center(
+              //                     child: SvgPicture.asset(ImageAssets.deleteAc),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //           const SizedBox(
+              //             width: 3,
+              //           ),
+              //           Stack(
+              //             children: [
+              //               Container(
+              //                 width: 103,
+              //                 height: 110,
+              //                 decoration: ShapeDecoration(
+              //                   image: const DecorationImage(
+              //                     image: AssetImage(ImageAssets.image3),
+              //                     fit: BoxFit.fill,
+              //                   ),
+              //                   shape: RoundedRectangleBorder(
+              //                       borderRadius: BorderRadius.circular(8)),
+              //                 ),
+              //               ),
+              //               Positioned(
+              //                 top: 5,
+              //                 right: 5,
+              //                 child: Container(
+              //                   width: 16,
+              //                   height: 16,
+              //                   padding: const EdgeInsets.all(2),
+              //                   decoration: const ShapeDecoration(
+              //                     color: AppColor.blackColor,
+              //                     shape: OvalBorder(),
+              //                   ),
+              //                   child: Center(
+              //                     child: SvgPicture.asset(ImageAssets.deleteAc),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //           const SizedBox(
+              //             width: 3,
+              //           ),
+              //           Stack(
+              //             children: [
+              //               Container(
+              //                 width: 103,
+              //                 height: 110,
+              //                 decoration: ShapeDecoration(
+              //                   image: const DecorationImage(
+              //                     image: AssetImage(ImageAssets.image1),
+              //                     fit: BoxFit.fill,
+              //                   ),
+              //                   shape: RoundedRectangleBorder(
+              //                       borderRadius: BorderRadius.circular(8)),
+              //                 ),
+              //               ),
+              //               Positioned(
+              //                 top: 5,
+              //                 right: 5,
+              //                 child: Container(
+              //                   width: 16,
+              //                   height: 16,
+              //                   padding: const EdgeInsets.all(2),
+              //                   decoration: const ShapeDecoration(
+              //                     color: AppColor.blackColor,
+              //                     shape: OvalBorder(),
+              //                   ),
+              //                   child: Center(
+              //                     child: SvgPicture.asset(ImageAssets.deleteAc),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //     const SizedBox(
+              //       height: 15,
+              //     ),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: 22.0),
+              //       child: Row(
+              //         children: [
+              //           Stack(
+              //             children: [
+              //               Container(
+              //                 width: 103,
+              //                 height: 110,
+              //                 decoration: ShapeDecoration(
+              //                   image: const DecorationImage(
+              //                     image: AssetImage(ImageAssets.image2),
+              //                     fit: BoxFit.fill,
+              //                   ),
+              //                   shape: RoundedRectangleBorder(
+              //                       borderRadius: BorderRadius.circular(8)),
+              //                 ),
+              //               ),
+              //               Positioned(
+              //                 top: 5,
+              //                 right: 5,
+              //                 child: Container(
+              //                   width: 16,
+              //                   height: 16,
+              //                   padding: const EdgeInsets.all(2),
+              //                   decoration: const ShapeDecoration(
+              //                     color: AppColor.blackColor,
+              //                     shape: OvalBorder(),
+              //                   ),
+              //                   child: Center(
+              //                     child: SvgPicture.asset(ImageAssets.deleteAc),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //           const SizedBox(
+              //             width: 3,
+              //           ),
+              //           Stack(
+              //             children: [
+              //               Container(
+              //                 width: 103,
+              //                 height: 110,
+              //                 decoration: ShapeDecoration(
+              //                   image: const DecorationImage(
+              //                     image: AssetImage(ImageAssets.image3),
+              //                     fit: BoxFit.fill,
+              //                   ),
+              //                   shape: RoundedRectangleBorder(
+              //                       borderRadius: BorderRadius.circular(8)),
+              //                 ),
+              //               ),
+              //               Positioned(
+              //                 top: 5,
+              //                 right: 5,
+              //                 child: Container(
+              //                   width: 16,
+              //                   height: 16,
+              //                   padding: const EdgeInsets.all(2),
+              //                   decoration: const ShapeDecoration(
+              //                     color: AppColor.blackColor,
+              //                     shape: OvalBorder(),
+              //                   ),
+              //                   child: Center(
+              //                     child: SvgPicture.asset(ImageAssets.deleteAc),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //           const SizedBox(
+              //             width: 3,
+              //           ),
+              //           Stack(
+              //             children: [
+              //               Container(
+              //                 width: 103,
+              //                 height: 110,
+              //                 decoration: ShapeDecoration(
+              //                   image: const DecorationImage(
+              //                     image: AssetImage(ImageAssets.image1),
+              //                     fit: BoxFit.fill,
+              //                   ),
+              //                   shape: RoundedRectangleBorder(
+              //                       borderRadius: BorderRadius.circular(8)),
+              //                 ),
+              //               ),
+              //               Positioned(
+              //                 top: 5,
+              //                 right: 5,
+              //                 child: Container(
+              //                   width: 16,
+              //                   height: 16,
+              //                   padding: const EdgeInsets.all(2),
+              //                   decoration: const ShapeDecoration(
+              //                     color: AppColor.blackColor,
+              //                     shape: OvalBorder(),
+              //                   ),
+              //                   child: Center(
+              //                     child: SvgPicture.asset(ImageAssets.deleteAc),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //     const SizedBox(
+              //       height: 15,
+              //     ),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: 22.0),
+              //       child: Row(
+              //         children: [
+              //           Container(
+              //             width: 103,
+              //             height: 110,
+              //             decoration: BoxDecoration(
+              //               color: AppColor.hintTextColor,
+              //               borderRadius: BorderRadius.circular(8),
+              //             ),
+              //             child: const Icon(
+              //               Icons.camera_alt_rounded,
+              //               color: AppColor.primaryColor,
+              //             ),
+              //           ),
+              //           const SizedBox(
+              //             width: 3,
+              //           ),
+              //           Container(
+              //             width: 103,
+              //             height: 110,
+              //             decoration: BoxDecoration(
+              //               color: AppColor.hintTextColor,
+              //               borderRadius: BorderRadius.circular(8),
+              //             ),
+              //             child: const Icon(
+              //               Icons.camera_alt_rounded,
+              //               color: AppColor.primaryColor,
+              //             ),
+              //           ),
+              //           const SizedBox(
+              //             width: 3,
+              //           ),
+              //           Container(
+              //             width: 103,
+              //             height: 110,
+              //             decoration: BoxDecoration(
+              //               color: AppColor.hintTextColor,
+              //               borderRadius: BorderRadius.circular(8),
+              //             ),
+              //             child: const Icon(
+              //               Icons.camera_alt_rounded,
+              //               color: AppColor.primaryColor,
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ],
+              // ),
               Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding:
-                        EdgeInsets.only(left: 25.0, top: 20, bottom: 10),
+                    padding: EdgeInsets.only(left: 0, top: 20, bottom: 10),
                     child: MyText(
                       text: "Album Photos (9)",
                       fontSize: 18,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                    child: Row(
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 110,
-                              decoration: ShapeDecoration(
-                                image: const DecorationImage(
-                                  image: AssetImage(ImageAssets.image2),
-                                  fit: BoxFit.fill,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 6,
+                    direction: Axis.horizontal,
+                    children: List.generate(
+                        9,
+                        (index) => GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  currentIndex = index;
+                                });
+
+                                _pickImages(); // Call the method to pick an image
+                              },
                               child: Container(
-                              width: 16,
-                              height: 16,
-                              padding: const EdgeInsets.all(2),
-                              decoration: const ShapeDecoration(
-                                color: AppColor.blackColor,
-                                shape: OvalBorder(),
-                              ),
-                                child: Center(child: SvgPicture.asset(ImageAssets.deleteAc),),
-                            ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 3,),
-                        Stack(
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 110,
-                              decoration: ShapeDecoration(
-                                image: const DecorationImage(
-                                  image: AssetImage(ImageAssets.image3),
-                                  fit: BoxFit.fill,
+                                width: 103,
+                                height: 110,
+                                decoration: BoxDecoration(
+                                  color: AppColor.hintTextColor,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                child: imagePaths[index].isNotEmpty
+                                    ? Image.file(
+                                        File(imagePaths[index]),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Icon(
+                                        Icons.camera_alt_rounded,
+                                        color: currentIndex == index
+                                            ? Colors.white
+                                            : AppColor.primaryColor,
+                                      ),
+                                // child: const Icon(
+                                //   Icons.camera_alt_rounded,
+                                //   color: AppColor.primaryColor,
+                                // ),
+                                // Image(
+                                //   fit: BoxFit.fill,
+                                //   image: AssetImage(ImageAssets.image3),
+                                // )
                               ),
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                padding: const EdgeInsets.all(2),
-                                decoration: const ShapeDecoration(
-                                  color: AppColor.blackColor,
-                                  shape: OvalBorder(),
-                                ),
-                                child: Center(child: SvgPicture.asset(ImageAssets.deleteAc),),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 3,),
-                        Stack(
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 110,
-                              decoration: ShapeDecoration(
-                                image: const DecorationImage(
-                                  image: AssetImage(ImageAssets.image1),
-                                  fit: BoxFit.fill,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                padding: const EdgeInsets.all(2),
-                                decoration: const ShapeDecoration(
-                                  color: AppColor.blackColor,
-                                  shape: OvalBorder(),
-                                ),
-                                child: Center(child: SvgPicture.asset(ImageAssets.deleteAc),),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                    child: Row(
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 110,
-                              decoration: ShapeDecoration(
-                                image: const DecorationImage(
-                                  image: AssetImage(ImageAssets.image2),
-                                  fit: BoxFit.fill,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                padding: const EdgeInsets.all(2),
-                                decoration: const ShapeDecoration(
-                                  color: AppColor.blackColor,
-                                  shape: OvalBorder(),
-                                ),
-                                child: Center(child: SvgPicture.asset(ImageAssets.deleteAc),),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 3,),
-                        Stack(
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 110,
-                              decoration: ShapeDecoration(
-                                image: const DecorationImage(
-                                  image: AssetImage(ImageAssets.image3),
-                                  fit: BoxFit.fill,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                padding: const EdgeInsets.all(2),
-                                decoration: const ShapeDecoration(
-                                  color: AppColor.blackColor,
-                                  shape: OvalBorder(),
-                                ),
-                                child: Center(child: SvgPicture.asset(ImageAssets.deleteAc),),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 3,),
-                        Stack(
-                          children: [
-                            Container(
-                              width: 110,
-                              height: 110,
-                              decoration: ShapeDecoration(
-                                image: const DecorationImage(
-                                  image: AssetImage(ImageAssets.image1),
-                                  fit: BoxFit.fill,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                            ),
-                            Positioned(
-                              top: 5,
-                              right: 5,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                padding: const EdgeInsets.all(2),
-                                decoration: const ShapeDecoration(
-                                  color: AppColor.blackColor,
-                                  shape: OvalBorder(),
-                                ),
-                                child: Center(child: SvgPicture.asset(ImageAssets.deleteAc),),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 110,
-                          height: 110,
-                          decoration: BoxDecoration(
-                            color: AppColor.hintTextColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            color: AppColor.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 3,),
-                        Container(
-                          width: 110,
-                          height: 110,
-                          decoration: BoxDecoration(
-                            color: AppColor.hintTextColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            color: AppColor.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 3,),
-                        Container(
-                          width: 110,
-                          height: 110,
-                          decoration: BoxDecoration(
-                            color: AppColor.hintTextColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            color: AppColor.primaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
+                            )),
                   ),
                 ],
               ),
@@ -374,7 +733,7 @@ class UserProfile extends StatelessWidget {
                     CustomTextFormField(
                       height: Get.height * 0.08,
                       maxLine: 2,
-                      controller: TextEditingController(text: ""),
+                      controller: bioController,
                       hintText:
                           "Sed ut perspiciatis unde omnis iste natus error sit volu accusantium",
                       prefixImage: ImageAssets.newspaper,
@@ -392,7 +751,7 @@ class UserProfile extends StatelessWidget {
                       height: 5,
                     ),
                     CustomTextFormField(
-                      controller: TextEditingController(text: ""),
+                      controller: userNameController,
                       hintText: "Lubana Antique",
                       prefixImage: ImageAssets.user,
                       keyboardType: TextInputType.text,
@@ -409,7 +768,7 @@ class UserProfile extends StatelessWidget {
                       height: 5,
                     ),
                     CustomTextFormField(
-                      controller: TextEditingController(text: ""),
+                      controller: emailController,
                       hintText: "lubanaantique@gmail.com",
                       prefixImage: ImageAssets.email,
                       keyboardType: TextInputType.text,
@@ -426,7 +785,7 @@ class UserProfile extends StatelessWidget {
                       height: 5,
                     ),
                     CustomTextFormField(
-                      controller: TextEditingController(text: ""),
+                      controller: birthController,
                       hintText: "Date of birth",
                       // focusNode: focus5,
                       textInputAction: TextInputAction.done,
@@ -434,7 +793,7 @@ class UserProfile extends StatelessWidget {
                       prefixImage: ImageAssets.birthDate,
                       suffixImage: ImageAssets.calendar,
                       suffixTap: () {
-                        // _selectDate(context);
+                        _selectDate(context);
                       },
                     ),
                     const SizedBox(
@@ -449,7 +808,7 @@ class UserProfile extends StatelessWidget {
                     ),
                     Container(
                       width: Get.width * 0.84,
-                      height: Get.height * 0.055,
+                      height: Get.height * 0.060,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         color: AppColor.whiteColor,
@@ -463,102 +822,20 @@ class UserProfile extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: ButtonTheme(
-                        alignedDropdown: true,
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButtonFormField(
-                            // icon: SvgPicture.asset(
-                            //   ImageAssets.dropDown,
-                            // ),
-                            iconSize: 0,
-                            decoration: InputDecoration(
-                              suffixIcon: Padding(
-                                padding: const EdgeInsets.only(left: 10.0), // Adjust the padding as needed
-                                child: SvgPicture.asset(
-                                  ImageAssets.dropDown,
-                                  // fit: BoxFit.fill,
-                                  width: 20,
-                                  height: 20,
-                                ),
-                              ),
-                              prefixIcon: IconButton(
-                                onPressed: () {},
-                                icon: SvgPicture.asset(
-                                  ImageAssets.gender,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor: AppColor.whiteColor,
-                              border: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                                borderSide: BorderSide.none,
-                              ),
-                              errorBorder: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                                borderSide: BorderSide(
-                                  color: AppColor.redColor,
-                                  width: 1,
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              hintText: 'Select Gender',
-                              hintStyle: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: AppColor.hintTextColor,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              errorStyle: const TextStyle(
-                                color: AppColor.redColor,
-                                fontSize: 10,
-                                fontFamily: 'Inter-Bold',
-                              ),
-                            ),
-                            padding: const EdgeInsets.only(right: 5),
-                            borderRadius: BorderRadius.circular(12),
-                            items: genderType
-                                .map(
-                                  (item) => DropdownMenuItem<String>(
-                                    value: item,
-                                    onTap: selectedGender = null,
-                                    child: Text(
-                                      item,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        color: selectedGender != null
-                                            ? AppColor.hintTextColor
-                                            : AppColor.blackColor,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            value: selectedGender,
-                            onChanged: (value) {
-                              selectedGender = value;
-                            },
-                          ),
-                        ),
-                      ),
+                      child: RoundedDropdownMenu(
+                          width: MediaQuery.sizeOf(context).width * 0.85,
+                          hintText: userGenderName,
+                          onSelected: (p0) {
+                            print(p0);
+                            genderval = p0['genders_id'];
+                            print('$genderval');
+                          },
+                          dropdownMenuEntries: genderType
+                              .map(
+                                (dynamic value) => DropdownMenuEntry<dynamic>(
+                                    value: value, label: value['name'] ?? ''),
+                              )
+                              .toList()),
                     ),
                     const SizedBox(
                       height: 10,
@@ -571,7 +848,7 @@ class UserProfile extends StatelessWidget {
                       height: 5,
                     ),
                     CustomTextFormField(
-                      controller: TextEditingController(text: ""),
+                      controller: educationController,
                       hintText: "Graphic Designing",
                       prefixImage: ImageAssets.education,
                       keyboardType: TextInputType.text,
@@ -590,12 +867,27 @@ class UserProfile extends StatelessWidget {
                       fontSize: 18,
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Get.to(
-                              () => InterestTags(),
-                          transition: Transition.rightToLeft,
-                          duration: const Duration(milliseconds: 300),
-                        );
+                      onTap: () async {
+                        interests = await Get.to(
+                              () => InterestTags(interestList: interestList),
+                              transition: Transition.rightToLeft,
+                              duration: const Duration(milliseconds: 300),
+                            ) ??
+                            [];
+                        setState(() {
+                          if (interests.isNotEmpty) {
+                            // Assuming interests is a List, you may need to adjust accordingly
+                            interestList.addAll(interests);
+                          }
+                        });
+                        print('Selected List: $interestList');
+                        // Update your UI or perform any other actions with the selectedList
+                        // Initialize interestIds and interestIdsJson here
+                        interestIds = interestList
+                            .map((interest) => (interest['interests_tags_id']))
+                            .toList();
+                        interestIdsJson = interestIds;
+                        print('IDs: $interestIdsJson');
                       },
                       child: SvgPicture.asset(
                         ImageAssets.iconEdit,
@@ -609,31 +901,51 @@ class UserProfile extends StatelessWidget {
                 height: 12,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: const EdgeInsets.symmetric(horizontal: 11),
+                child: Column(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SmallButton(
-                      width: Get.width * 0.25,
-                      height: Get.height * 0.033,
-                      textColor: const Color(0xFFEE4433),
-                      text: "Photography",
-                      onTap: () {},
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 6,
+                      direction: Axis.horizontal,
+                      children: List.generate(
+                          interestList.length,
+                          (index) => Container(
+                                margin: EdgeInsets.only(right: 2),
+                                child: SizedBox(
+                                  // width: 80,
+                                  child: SmallButton(
+                                    width: Get.width * 0.27,
+                                    height: Get.height * 0.033,
+                                    textColor: const Color(0xFFEE4433),
+                                    text: interestList[index]['name'],
+                                    onTap: () {},
+                                  ),
+                                ),
+                              )),
                     ),
-                    SmallButton(
-                      width: Get.width * 0.25,
-                      height: Get.height * 0.033,
-                      textColor: const Color(0xFFEE4433),
-                      text: "Film Making",
-                      onTap: () {},
-                    ),
-                    SmallButton(
-                      width: Get.width * 0.25,
-                      height: Get.height * 0.033,
-                      textColor: const Color(0xFFEE4433),
-                      text: "Video editing",
-                      onTap: () {},
-                    ),
+                    // SmallButton(
+                    //   width: Get.width * 0.25,
+                    //   height: Get.height * 0.033,
+                    //   textColor: const Color(0xFFEE4433),
+                    //   text: "Photography",
+                    //   onTap: () {},
+                    // ),
+                    // SmallButton(
+                    //   width: Get.width * 0.25,
+                    //   height: Get.height * 0.033,
+                    //   textColor: const Color(0xFFEE4433),
+                    //   text: "Film Making",
+                    //   onTap: () {},
+                    // ),
+                    // SmallButton(
+                    //   width: Get.width * 0.25,
+                    //   height: Get.height * 0.033,
+                    //   textColor: const Color(0xFFEE4433),
+                    //   text: "Video editing",
+                    //   onTap: () {},
+                    // ),
                   ],
                 ),
               ),
@@ -642,7 +954,9 @@ class UserProfile extends StatelessWidget {
               ),
               LargeButton(
                 text: "Save Changes",
-                onTap: () {},
+                onTap: () {
+                  editprofile();
+                },
                 containerColor: AppColor.whiteColor,
                 gradientColor1: AppColor.whiteColor,
                 gradientColor2: AppColor.whiteColor,
@@ -657,5 +971,84 @@ class UserProfile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void uploadprofile(image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = uploadProfile;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {"users_customers_id": userId, "image": image},
+          ));
+      // print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Profile update successfully')));
+        imgurl = baseUrlImage + data['data']['image'];
+        setState(() {});
+      } else {}
+    } catch (e) {
+      print('errorfound');
+    }
+  }
+
+  uploadavators(String base64image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = uploadAvatars;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+              "name": "Avatars",
+              "image": base64image
+            },
+          ));
+      // print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text('Profile update successfully')));
+        setState(() {});
+      } else {}
+    } catch (e) {
+      print('errorfound');
+    }
+  }
+
+  getavators() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = getusersavatars;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+            },
+          ));
+      // print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        // imgurl = baseUrlImage + data['data']['image'];
+        imagesavators.add(baseUrlImage + data['data']['image']);
+        setState(() {});
+      } else {}
+    } catch (e) {
+      print('errorfound $e');
+    }
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:amoremio/Utills/AppUrls.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -12,28 +15,74 @@ import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
 import '../../BottomNavigationBar/BottomNavigationBar.dart';
 import 'package:amoremio/Screen/Authentication/SignupPage/SignUpPage.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
-   const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final formKey = GlobalKey<FormState>();
+  bool isPasswordVisible = true;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
-   final formKey = GlobalKey<FormState>();
-   bool isPasswordVisible= true;
-   final  emailController = TextEditingController();
-   final  passwordController = TextEditingController();
-
-   passwordTap() {
+  passwordTap() {
     setState(() {
       isPasswordVisible = !isPasswordVisible;
     });
-   }
+  }
 
-   @override
+  void login() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = logIn;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "email": emailController.text.toString(),
+              "password": passwordController.text.toString()
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        Navigator.of(context).pop();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        // await prefs.setString('users_data', data);
+        prefs.setString('user', response.body);
+        await prefs.setString(
+            'users_customers_id', data['data']['users_customers_id']);
+        if (formKey.currentState!.validate()) {
+          Get.to(
+            () => MyBottomNavigationBar(),
+            duration: const Duration(milliseconds: 300),
+            transition: Transition.rightToLeft,
+          );
+        }
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     FocusNode focus1 = FocusNode();
     FocusNode focus2 = FocusNode();
@@ -103,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                             focusNode: focus1,
                             validator: null,
                             // validator: validateEmail,
-                            onFieldSubmitted: (v){
+                            onFieldSubmitted: (v) {
                               FocusScope.of(context).requestFocus(focus2);
                             },
                           ),
@@ -125,34 +174,37 @@ class _LoginPageState extends State<LoginPage> {
                           delay: const Duration(milliseconds: 900),
                           duration: const Duration(milliseconds: 1000),
                           child: CustomTextFormField(
-                              controller: passwordController,
-                              hintText: "********",
-                              maxLine: isPasswordVisible ? 1 : null,
-                              focusNode: focus2,
-                              prefixImage: ImageAssets.password,
-                              textInputAction: TextInputAction.done,
-                              suffixImage: isPasswordVisible
-                                  ? ImageAssets.eyeOffImage
-                                  : ImageAssets.eyeOnImage,
-                              suffixImageColor: isPasswordVisible ? null : AppColor.primaryColor,
-                              suffixTap: () {
-                                passwordTap();
-                              },
-                              obscureText: isPasswordVisible,
-                              validator: null,
-                              // validator: validatePassword,
-                            ),
+                            controller: passwordController,
+                            hintText: "********",
+                            maxLine: isPasswordVisible ? 1 : null,
+                            focusNode: focus2,
+                            prefixImage: ImageAssets.password,
+                            textInputAction: TextInputAction.done,
+                            suffixImage: isPasswordVisible
+                                ? ImageAssets.eyeOffImage
+                                : ImageAssets.eyeOnImage,
+                            suffixImageColor: isPasswordVisible
+                                ? null
+                                : AppColor.primaryColor,
+                            suffixTap: () {
+                              passwordTap();
+                            },
+                            obscureText: isPasswordVisible,
+                            validator: null,
+                            // validator: validatePassword,
                           ),
+                        ),
                         FadeInDown(
                           delay: const Duration(milliseconds: 1000),
                           duration: const Duration(milliseconds: 1100),
                           child: Padding(
                             padding: EdgeInsets.only(
-                                top: Get.height * 0.02, bottom: Get.height * 0.08),
+                                top: Get.height * 0.02,
+                                bottom: Get.height * 0.08),
                             child: GestureDetector(
-                              onTap: (){
+                              onTap: () {
                                 Get.to(
-                                      () =>  ForgotPassword(),
+                                  () => ForgotPassword(),
                                   duration: const Duration(milliseconds: 350),
                                   transition: Transition.rightToLeft,
                                 );
@@ -183,13 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: Get.height * 0.065,
                     text: "Login",
                     onTap: () {
-                      if(formKey.currentState!.validate()){
-                        Get.to(
-                              () => MyBottomNavigationBar(),
-                          duration: const Duration(milliseconds: 350),
-                          transition: Transition.rightToLeft,
-                        );
-                      }
+                      login();
                     },
                   ),
                 ),
@@ -257,7 +303,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: Get.height * 0.045,
                         onTap: () {
                           Get.to(
-                                () => SocialLoginPage(),
+                            () => SocialLoginPage(),
                             duration: const Duration(milliseconds: 350),
                             transition: Transition.rightToLeft,
                           );
@@ -275,7 +321,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: Get.height * 0.045,
                         onTap: () {
                           Get.to(
-                                () => SocialLoginPage(),
+                            () => SocialLoginPage(),
                             duration: const Duration(milliseconds: 350),
                             transition: Transition.rightToLeft,
                           );
@@ -289,18 +335,18 @@ class _LoginPageState extends State<LoginPage> {
                   height: Get.height * 0.07,
                 ),
                 FadeInDown(
-                   delay: const Duration(milliseconds: 1400),
-                   duration: const Duration(milliseconds: 1500),
-                   child: Row(
+                  delay: const Duration(milliseconds: 1400),
+                  duration: const Duration(milliseconds: 1500),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const LabelField(
                         text: 'Don’t have an account?',
                       ),
                       InkWell(
-                        onTap: (){
+                        onTap: () {
                           Get.to(
-                                () => SignUpPage(),
+                            () => SignUpPage(),
                             duration: const Duration(milliseconds: 350),
                             transition: Transition.downToUp,
                           );
@@ -312,9 +358,11 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ],
-                   ),
-                 ),
-                SizedBox(height: Get.height * 0.02,),
+                  ),
+                ),
+                SizedBox(
+                  height: Get.height * 0.02,
+                ),
               ],
             ),
           ),

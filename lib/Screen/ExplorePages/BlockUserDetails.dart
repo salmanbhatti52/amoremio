@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../Utills/AppUrls.dart';
 import '../../Widgets/RoundedButton.dart';
 import '../../Resources/assets/assets.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -9,16 +13,17 @@ import 'package:amoremio/Widgets/large_Button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../Widgets/background_Image_container.dart';
 import '../BottomNavigationBar/BottomNavigationBar.dart';
+import 'package:http/http.dart' as http;
 
 class BlockUserDetails extends StatefulWidget {
-  const BlockUserDetails({super.key});
+  final String userid;
+  const BlockUserDetails({super.key, required this.userid});
 
   @override
   State<BlockUserDetails> createState() => _BlockUserDetailsState();
 }
 
 class _BlockUserDetailsState extends State<BlockUserDetails> {
-
   final List<String> imgList = [
     ImageAssets.exploreImage,
     ImageAssets.image1,
@@ -27,15 +32,90 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
     ImageAssets.introImage,
   ];
 
+  String address = '';
+  var username = '';
+  var dateofbirth;
   int _current = 0;
   final CarouselController _controller = CarouselController();
 
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loaddata();
+  }
+
+  void loaddata() async {
+    String apiUrl = getusersProfile;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {"users_customers_id": widget.userid},
+          ));
+      var userdetail = jsonDecode(response.body);
+      if (userdetail['status'] == 'success') {
+        print(userdetail);
+        setState(() {});
+        username = userdetail['data']['username'];
+        dateofbirth = userdetail['data']['date_of_birth'];
+        address = userdetail['data']['location'];
+      } else {
+        print(userdetail['status']);
+        var errormsg = userdetail['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error123456: $e');
+    }
+  }
+
+  unblockuser() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = userblockedunblocked;
+    // try {
+    var showdata = {
+      "users_customers_id": userId,
+      "blocked_id": widget.userid,
+      "status": "Unblocked"
+    };
+    final response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(showdata));
+    print(showdata);
+    var userdetail = jsonDecode(response.body);
+    if (userdetail['status'] == 'success') {
+      print('success');
+      Navigator.of(context).pop();
+      var msg = userdetail['message'];
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      setState(() {});
+    } else {
+      // print(userdetail['status']);
+      var errormsg = userdetail['message'];
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errormsg)));
+    }
+    // }
+    // catch (e) {
+    //   print('error123456:$e');
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
-
     List<Widget> imageSliders = [];
     for (int index = 0; index < imgList.length; index++) {
-
       imageSliders.add(
         ImageContainer(
           imagePath: imgList[index],
@@ -223,8 +303,8 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const MyText(
-                          text: "Lady Samurai, 21",
+                        MyText(
+                          text: "$username, ${calculateAge(dateofbirth)}",
                           fontSize: 18,
                           color: AppColor.blackColor,
                         ),
@@ -248,7 +328,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                   Padding(
                     padding: EdgeInsets.only(
                         left: Get.width * 0.06, bottom: Get.height * 0.02),
-                    child: const Row(
+                    child: Row(
                       children: [
                         // SvgPicture.asset(ImageAssets.locationWhite, color: AppColor.secondaryColor,),
                         Icon(
@@ -260,7 +340,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                           width: 3,
                         ),
                         MyText(
-                          text: "Tokyo 2.5 Km",
+                          text: "$address, ${'2.5 Km'}",
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                           color: Color(0xFF3B3B3B),
@@ -272,10 +352,23 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      GestureDetector( onTap : (){Get.to( MyBottomNavigationBar(),
-                        duration: const Duration(milliseconds: 350),
-                        transition: Transition.downToUp,);}, child: SvgPicture.asset(ImageAssets.explore2)),
-                      LargeButton(text: "Unblock", onTap: (){ Get.back();}, width: Get.width * 0.65,),
+                      GestureDetector(
+                          onTap: () {
+                            Get.to(
+                              MyBottomNavigationBar(),
+                              duration: const Duration(milliseconds: 350),
+                              transition: Transition.downToUp,
+                            );
+                          },
+                          child: SvgPicture.asset(ImageAssets.explore2)),
+                      LargeButton(
+                        text: "Unblock",
+                        onTap: () {
+                          // Get.back();
+                          unblockuser();
+                        },
+                        width: Get.width * 0.65,
+                      ),
                       SvgPicture.asset(ImageAssets.share),
                     ],
                   ),
@@ -286,5 +379,24 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
         ],
       ),
     );
+  }
+
+  int calculateAge(String? dateOfBirth) {
+    if (dateOfBirth == null) {
+      // Handle the case when dateOfBirth is null
+      return 0; // or any default value
+    }
+
+    DateTime today = DateTime.now();
+    DateTime birthDate = DateTime.parse(dateOfBirth);
+    int age = today.year - birthDate.year;
+
+    // Adjust age if the birthday hasn't occurred yet this year
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+
+    return age;
   }
 }

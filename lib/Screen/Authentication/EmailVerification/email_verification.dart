@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +9,22 @@ import 'package:animate_do/animate_do.dart';
 import '../ResetPassword/ResetPassword.dart';
 import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../Utills/AppUrls.dart';
+import 'package:http/http.dart' as http;
 
-class EmailVerify extends StatelessWidget {
-   EmailVerify({Key? key}) : super(key: key);
+class EmailVerify extends StatefulWidget {
+  EmailVerify({Key? key}) : super(key: key);
 
-   final formKey = GlobalKey<FormState>();
-   final TextEditingController pinController = TextEditingController();
+  @override
+  State<EmailVerify> createState() => _EmailVerifyState();
+}
+
+class _EmailVerifyState extends State<EmailVerify> {
+  dynamic argumentData = Get.arguments;
+  var email;
+  final formKey = GlobalKey<FormState>();
+
+  final TextEditingController pinController = TextEditingController();
 
   final defaultPinTheme = PinTheme(
     width: 52,
@@ -23,19 +35,63 @@ class EmailVerify extends StatelessWidget {
       fontWeight: FontWeight.w400,
     ),
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(12),
-      color: AppColor.whiteColor,
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x19000000),
-          blurRadius: 24,
-          offset: Offset(0, 0),
-          spreadRadius: 0,
-        ),
-      ]
-    ),
+        borderRadius: BorderRadius.circular(12),
+        color: AppColor.whiteColor,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 24,
+            offset: Offset(0, 0),
+            spreadRadius: 0,
+          ),
+        ]),
   );
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(argumentData[0]['email']);
+    email = argumentData[0]['email'];
+  }
+
+  void verifyOtp() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = verifyCode;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {"email": email, "verify_code": pinController.text.toString()},
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        Navigator.of(context).pop();
+        Get.to(
+          () => ResetPassword(),
+          arguments: [
+            {"email": email}
+          ],
+          duration: const Duration(milliseconds: 350),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context as BuildContext)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +141,8 @@ class EmailVerify extends StatelessWidget {
                   delay: const Duration(milliseconds: 400),
                   duration: const Duration(milliseconds: 500),
                   child: const MyText(
-                    text: "Enter a 4 digit verification code we have\nsent on your email!",
+                    text:
+                        "Enter a 4 digit verification code we have\nsent on your email!",
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                     color: AppColor.brownColor,
@@ -131,11 +188,12 @@ class EmailVerify extends StatelessWidget {
                     height: Get.height * 0.065,
                     text: "Verify",
                     onTap: () {
-                      Get.to(
-                            () => ResetPassword(),
-                        duration: const Duration(milliseconds: 350),
-                        transition: Transition.rightToLeft,
-                      );
+                      verifyOtp();
+                      // Get.to(
+                      //   () => ResetPassword(),
+                      //   duration: const Duration(milliseconds: 350),
+                      //   transition: Transition.rightToLeft,
+                      // );
                     },
                   ),
                 ),

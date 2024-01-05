@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../Widgets/TextFields.dart';
@@ -8,6 +10,8 @@ import '../../../Widgets/TextFieldLabel.dart';
 import '../../../Resources/assets/assets.dart';
 import '../../../Resources/colors/colors.dart';
 import 'package:amoremio/Screen/Authentication/LoginPage/login_page.dart';
+import '../../../Utills/AppUrls.dart';
+import 'package:http/http.dart' as http;
 
 // ignore: must_be_immutable
 class ResetPassword extends StatefulWidget {
@@ -18,23 +22,71 @@ class ResetPassword extends StatefulWidget {
 }
 
 class _ResetPasswordState extends State<ResetPassword> {
-
   final formKey = GlobalKey<FormState>();
-  bool isPasswordVisible= true;
-  bool isConfirmPasswordVisible= true;
+  dynamic argumentData = Get.arguments;
+  var email;
+  bool isPasswordVisible = true;
+  bool isConfirmPasswordVisible = true;
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
-  passwordTap(){
+  passwordTap() {
     setState(() {
       isPasswordVisible = !isPasswordVisible;
     });
   }
 
-  confirmPasswordTap(){
+  confirmPasswordTap() {
     setState(() {
       isConfirmPasswordVisible = !isConfirmPasswordVisible;
     });
+  }
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(argumentData[0]['email']);
+    email = argumentData[0]['email'];
+  }
+
+  void resetpassword() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = resetPassword;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "email": email,
+              "password": passwordController.text.toString(),
+              "confirm_password": confirmPasswordController.text.toString()
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        Navigator.of(context).pop();
+        Get.to(
+          () => const LoginPage(),
+          duration: const Duration(milliseconds: 350),
+          transition: Transition.upToDown,
+        );
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context as BuildContext)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error');
+    }
   }
 
   @override
@@ -119,24 +171,26 @@ class _ResetPasswordState extends State<ResetPassword> {
                           delay: const Duration(milliseconds: 600),
                           duration: const Duration(milliseconds: 700),
                           child: CustomTextFormField(
-                              controller: passwordController,
-                                  maxLine: isPasswordVisible ? 1 : null,
-                                  suffixImageColor: isPasswordVisible ? null : AppColor.primaryColor,
-                                  hintText: "********",
-                              prefixImage: ImageAssets.password,
-                              focusNode: focus1,
-                                  onFieldSubmitted: (v){
-                                    FocusScope.of(context).requestFocus(focus2);
-                                  },
-                                  suffixImage: isPasswordVisible
-                                      ? ImageAssets.eyeOffImage
-                                      : ImageAssets.eyeOnImage,
-                                  suffixTap: () {
-                                passwordTap();
-                              },
-                              obscureText: isPasswordVisible,
-                            ),
+                            controller: passwordController,
+                            maxLine: isPasswordVisible ? 1 : null,
+                            suffixImageColor: isPasswordVisible
+                                ? null
+                                : AppColor.primaryColor,
+                            hintText: "********",
+                            prefixImage: ImageAssets.password,
+                            focusNode: focus1,
+                            onFieldSubmitted: (v) {
+                              FocusScope.of(context).requestFocus(focus2);
+                            },
+                            suffixImage: isPasswordVisible
+                                ? ImageAssets.eyeOffImage
+                                : ImageAssets.eyeOnImage,
+                            suffixTap: () {
+                              passwordTap();
+                            },
+                            obscureText: isPasswordVisible,
                           ),
+                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -154,22 +208,24 @@ class _ResetPasswordState extends State<ResetPassword> {
                           delay: const Duration(milliseconds: 800),
                           duration: const Duration(milliseconds: 900),
                           child: CustomTextFormField(
-                              controller: confirmPasswordController,
-                                  maxLine: isConfirmPasswordVisible ? 1 : null,
-                                  hintText: "********",
-                              prefixImage: ImageAssets.password,
-                              focusNode: focus2,
-                              textInputAction: TextInputAction.done,
-                              suffixImage: isConfirmPasswordVisible
-                                  ? ImageAssets.eyeOffImage
-                                  : ImageAssets.eyeOnImage,
-                                  suffixImageColor: isConfirmPasswordVisible ? null : AppColor.primaryColor,
-                                  suffixTap: () {
-                                confirmPasswordTap();
-                              },
-                              obscureText: isConfirmPasswordVisible,
-                            ),
+                            controller: confirmPasswordController,
+                            maxLine: isConfirmPasswordVisible ? 1 : null,
+                            hintText: "********",
+                            prefixImage: ImageAssets.password,
+                            focusNode: focus2,
+                            textInputAction: TextInputAction.done,
+                            suffixImage: isConfirmPasswordVisible
+                                ? ImageAssets.eyeOffImage
+                                : ImageAssets.eyeOnImage,
+                            suffixImageColor: isConfirmPasswordVisible
+                                ? null
+                                : AppColor.primaryColor,
+                            suffixTap: () {
+                              confirmPasswordTap();
+                            },
+                            obscureText: isConfirmPasswordVisible,
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -185,11 +241,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                     height: Get.height * 0.065,
                     text: "Reset",
                     onTap: () {
-                      Get.to(
-                            () => const LoginPage(),
-                        duration: const Duration(milliseconds: 350),
-                        transition: Transition.upToDown,
-                      );
+                      resetpassword();
                     },
                   ),
                 ),
