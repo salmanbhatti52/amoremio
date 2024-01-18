@@ -546,6 +546,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               value: checkBoxValue,
                               onChanged: (bool? value) {
                                 checkBoxValue = value!;
+                                setState(() {});
                               },
                             ),
                           ),

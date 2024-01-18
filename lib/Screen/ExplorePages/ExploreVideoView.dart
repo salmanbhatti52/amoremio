@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Utills/AppUrls.dart';
+import '../BottomNavigationBar/BottomNavigationBar.dart';
 import 'BlockedUser.dart';
 import 'package:get/get.dart';
 import 'ExploreUserAbout.dart';
@@ -19,7 +20,9 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class ExploreVideoView extends StatefulWidget {
   final String userid;
-  const ExploreVideoView({Key? key, required this.userid}) : super(key: key);
+  final String match;
+  const ExploreVideoView({Key? key, required this.userid, required this.match})
+      : super(key: key);
 
   @override
   State<ExploreVideoView> createState() => _ExploreVideoViewState();
@@ -49,23 +52,25 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     _animateController.dispose();
   }
 
-  final List<String> imgList = [
-    ImageAssets.exploreImage,
-    ImageAssets.image1,
-    ImageAssets.image2,
-    ImageAssets.image3,
-    ImageAssets.introImage,
-  ];
+  // final List<String> imgList = [
+  //   ImageAssets.exploreImage,
+  //   ImageAssets.image1,
+  //   ImageAssets.image2,
+  //   ImageAssets.image3,
+  //   ImageAssets.introImage,
+  // ];
   List<dynamic> imgListavators = [];
   List<dynamic> userDataList = [];
   String address = '';
   var username = '';
+  var summary = '';
   var dateofbirth;
   int _current = 0;
   bool isLoading = true;
 
   final CarouselController _controller = CarouselController();
-
+  // Define sheetTopPosition here
+  double sheetTopPosition = 0;
   @override
   void initState() {
     // TODO: implement initState
@@ -85,12 +90,14 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
           ));
       var userdetail = jsonDecode(response.body);
       if (userdetail['status'] == 'success') {
-        // print(userdetail);
+        print(userdetail);
         getavators();
         setState(() {});
         username = userdetail['data']['username'];
         dateofbirth = userdetail['data']['date_of_birth'];
         address = userdetail['data']['location'];
+        summary = userdetail['data']['summary'];
+
         fetchuserliked();
       } else {
         // print(userdetail['status']);
@@ -179,9 +186,6 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         // images = baseUrlImage + data['data']['image'];
       } else {
         print(data['status']);
-        var errormsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
       print('error :$e');
@@ -211,11 +215,16 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     print(showdata);
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
-      print('success');
       Navigator.of(context).pop();
       var msg = userdetail['message'];
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-      setState(() {});
+      setState(() {
+        Get.to(
+          () => MyBottomNavigationBar(),
+          duration: const Duration(milliseconds: 300),
+          transition: Transition.rightToLeft,
+        );
+      });
     } else {
       // print(userdetail['status']);
       var errormsg = userdetail['message'];
@@ -324,7 +333,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                       }),
                 )
               : ImageContainer(
-                  child: Image.asset(ImageAssets.introImage),
+                  child: Image.network(
+                    ImageAssets.dummyImage,
+                    fit: BoxFit.fill,
+                  ),
                 ),
           Positioned(
             bottom: Get.height * 0.315,
@@ -452,147 +464,331 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
               icon: ImageAssets.exploreImage,
             ),
           ),
+
+          // Positioned(
+          //   bottom: 0,
+          //   left: 0,
+          //   right: 0,
+          //   child: Container(
+          //     // width: 172,
+          //     height: Get.height * 0.22,
+          //     decoration: const BoxDecoration(
+          //       color: AppColor.whiteColor,
+          //       borderRadius: BorderRadius.only(
+          //         topLeft: Radius.circular(27),
+          //         topRight: Radius.circular(27),
+          //       ),
+          //     ),
+          //     child: Column(
+          //       children: [
+          //         const SizedBox(
+          //           height: 5,
+          //         ),
+          //         GestureDetector(
+          //           onTap: () {
+          //             // if (exploreController.isButtonClicked.value) {
+          //             aboutExploreUser(context);
+          //             // }
+          //           },
+          //           child: Padding(
+          //             padding:
+          //                 EdgeInsets.symmetric(horizontal: Get.width * 0.28),
+          //             child: Container(
+          //               height: 7,
+          //               decoration: BoxDecoration(
+          //                 borderRadius: BorderRadius.circular(12),
+          //                 color: const Color(0xFFFFC3C3),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //         Padding(
+          //           padding: EdgeInsets.only(
+          //             left: Get.width * 0.06,
+          //             top: Get.height * 0.02,
+          //             right: Get.width * 0.06,
+          //             bottom: Get.height * 0.01,
+          //           ),
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //             children: [
+          //               MyText(
+          //                 text: "$username, ${calculateAge(dateofbirth)}",
+          //                 fontSize: 18,
+          //                 color: AppColor.blackColor,
+          //               ),
+          //               Row(
+          //                 children: [
+          //                   SvgPicture.asset(
+          //                     ImageAssets.createStory1,
+          //                     color: AppColor.secondaryColor,
+          //                   ),
+          //                   const MyText(
+          //                     text: "0",
+          //                     fontWeight: FontWeight.w500,
+          //                     fontSize: 14,
+          //                     color: AppColor.secondaryColor,
+          //                   ),
+          //                 ],
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //         Padding(
+          //           padding: EdgeInsets.only(
+          //               left: Get.width * 0.06, bottom: Get.height * 0.02),
+          //           child: Row(
+          //             children: [
+          //               // SvgPicture.asset(ImageAssets.locationWhite, color: AppColor.secondaryColor,),
+          //               const Icon(
+          //                 Icons.location_on,
+          //                 color: AppColor.secondaryColor,
+          //                 size: 17,
+          //               ),
+          //               const SizedBox(
+          //                 width: 3,
+          //               ),
+          //               MyText(
+          //                 text: "$address, ${'2.5 Km'}",
+          //                 fontWeight: FontWeight.w500,
+          //                 fontSize: 12,
+          //                 color: const Color(0xFF3B3B3B),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //         Row(
+          //           mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //           crossAxisAlignment: CrossAxisAlignment.end,
+          //           children: [
+          //             GestureDetector(
+          //                 onTap: () {
+          //                   Get.back();
+          //                 },
+          //                 child: SvgPicture.asset(ImageAssets.explore2)),
+          //             RoundedButton(
+          //               onTap: () {
+          //                 blockuser();
+          //                 // Get.to(
+          //                 //   () => BlockedUser(),
+          //                 //   duration: const Duration(milliseconds: 350),
+          //                 //   transition: Transition.downToUp,
+          //                 // );
+          //               },
+          //               icon: ImageAssets.block,
+          //             ),
+          //             ScaleTransition(
+          //               scale: Tween(begin: 0.5, end: 1.0).animate(
+          //                   CurvedAnimation(
+          //                       parent: _animateController,
+          //                       curve: Curves.easeOut)),
+          //               child: RoundedButton(
+          //                 onTap: () {
+          //                   // handleButtonTap();
+          //                   likeduser();
+          //                   _animateController
+          //                       .reverse()
+          //                       .then((value) => _animateController.forward());
+          //                 },
+          //                 icon: isButtonClicked
+          //                     ? ImageAssets.favorite
+          //                     : ImageAssets.favorite,
+          //                 imageColor: isButtonClicked
+          //                     ? AppColor.whiteColor
+          //                     : AppColor.hintTextColor,
+          //                 containerColor: isButtonClicked
+          //                     ? Colors.red
+          //                     : AppColor.whiteColor,
+          //               ),
+          //             ),
+          //             SvgPicture.asset(ImageAssets.share),
+          //           ],
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+          NotificationListener<DraggableScrollableNotification>(
+            onNotification: (notification) {
+              if (notification.extent < 1.0) {
+                setState(() {
+                  sheetTopPosition = notification.extent;
+                });
+              }
+              return true;
+            },
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.22, // Initial height of the sheet
+              minChildSize: 0.22, // Minimum height when dragged down
+              maxChildSize: 0.7, // Maximum height when fully expanded
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Container(
+                    height: Get.height * (0.22 + 0.78 * sheetTopPosition),
+                    decoration: const BoxDecoration(
+                      color: AppColor.whiteColor,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(27),
+                        topRight: Radius.circular(27),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            aboutExploreUser(context);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: Get.width * 0.28),
+                            child: Container(
+                              height: 7,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: const Color(0xFFFFC3C3),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: Get.width * 0.06,
+                            top: Get.height * 0.02,
+                            right: Get.width * 0.06,
+                            bottom: Get.height * 0.01,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              MyText(
+                                text: "$username, ${calculateAge(dateofbirth)}",
+                                fontSize: 18,
+                                color: AppColor.blackColor,
+                              ),
+                              Row(
+                                children: [
+                                  SvgPicture.asset(
+                                    ImageAssets.createStory1,
+                                    color: AppColor.secondaryColor,
+                                  ),
+                                  const MyText(
+                                    text: "0",
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                    color: AppColor.secondaryColor,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: Get.width * 0.06,
+                              bottom: Get.height * 0.02),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on,
+                                color: AppColor.secondaryColor,
+                                size: 17,
+                              ),
+                              const SizedBox(
+                                width: 3,
+                              ),
+                              MyText(
+                                text: "$address, ${'2.5 Km'}",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                                color: const Color(0xFF3B3B3B),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Visibility(
+                          visible: sheetTopPosition >
+                              0.3, // Adjust the threshold as needed
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                left: Get.width * 0.06,
+                                bottom: Get.height * 0.02),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const MyText(
+                                  text: 'About me',
+                                  fontSize: 14,
+                                  color: AppColor.blackColor,
+                                ),
+                                MyText(
+                                  text: summary,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                  color: const Color(0xFF646464),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
-              // width: 172,
-              height: Get.height * 0.22,
-              decoration: const BoxDecoration(
-                color: AppColor.whiteColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(27),
-                  topRight: Radius.circular(27),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: SvgPicture.asset(ImageAssets.explore2),
                 ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  GestureDetector(
+                RoundedButton(
+                  onTap: () {
+                    blockuser();
+                  },
+                  icon: ImageAssets.block,
+                ),
+                ScaleTransition(
+                  scale: Tween(begin: 0.5, end: 1.0).animate(CurvedAnimation(
+                    parent: _animateController,
+                    curve: Curves.easeOut,
+                  )),
+                  child: RoundedButton(
                     onTap: () {
-                      // if (exploreController.isButtonClicked.value) {
-                      aboutExploreUser(context);
-                      // }
+                      likeduser();
+                      _animateController
+                          .reverse()
+                          .then((value) => _animateController.forward());
                     },
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: Get.width * 0.28),
-                      child: Container(
-                        height: 7,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: const Color(0xFFFFC3C3),
-                        ),
-                      ),
-                    ),
+                    icon: isButtonClicked
+                        ? ImageAssets.favorite
+                        : ImageAssets.favorite,
+                    imageColor: isButtonClicked
+                        ? AppColor.whiteColor
+                        : AppColor.hintTextColor,
+                    containerColor:
+                        isButtonClicked ? Colors.red : AppColor.whiteColor,
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: Get.width * 0.06,
-                      top: Get.height * 0.02,
-                      right: Get.width * 0.06,
-                      bottom: Get.height * 0.01,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        MyText(
-                          text: "$username, ${calculateAge(dateofbirth)}",
-                          fontSize: 18,
-                          color: AppColor.blackColor,
-                        ),
-                        Row(
-                          children: [
-                            SvgPicture.asset(
-                              ImageAssets.createStory1,
-                              color: AppColor.secondaryColor,
-                            ),
-                            const MyText(
-                              text: "0",
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                              color: AppColor.secondaryColor,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: Get.width * 0.06, bottom: Get.height * 0.02),
-                    child: Row(
-                      children: [
-                        // SvgPicture.asset(ImageAssets.locationWhite, color: AppColor.secondaryColor,),
-                        const Icon(
-                          Icons.location_on,
-                          color: AppColor.secondaryColor,
-                          size: 17,
-                        ),
-                        const SizedBox(
-                          width: 3,
-                        ),
-                        MyText(
-                          text: "$address, ${'2.5 Km'}",
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12,
-                          color: const Color(0xFF3B3B3B),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                          onTap: () {
-                            Get.back();
-                          },
-                          child: SvgPicture.asset(ImageAssets.explore2)),
-                      RoundedButton(
-                        onTap: () {
-                          blockuser();
-                          // Get.to(
-                          //   () => BlockedUser(),
-                          //   duration: const Duration(milliseconds: 350),
-                          //   transition: Transition.downToUp,
-                          // );
-                        },
-                        icon: ImageAssets.block,
-                      ),
-                      ScaleTransition(
-                        scale: Tween(begin: 0.5, end: 1.0).animate(
-                            CurvedAnimation(
-                                parent: _animateController,
-                                curve: Curves.easeOut)),
-                        child: RoundedButton(
-                          onTap: () {
-                            // handleButtonTap();
-                            likeduser();
-                            _animateController
-                                .reverse()
-                                .then((value) => _animateController.forward());
-                          },
-                          icon: isButtonClicked
-                              ? ImageAssets.favorite
-                              : ImageAssets.favorite,
-                          imageColor: isButtonClicked
-                              ? AppColor.whiteColor
-                              : AppColor.hintTextColor,
-                          containerColor: isButtonClicked
-                              ? Colors.red
-                              : AppColor.whiteColor,
-                        ),
-                      ),
-                      SvgPicture.asset(ImageAssets.share),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+                SvgPicture.asset(ImageAssets.share),
+              ],
             ),
           ),
         ],

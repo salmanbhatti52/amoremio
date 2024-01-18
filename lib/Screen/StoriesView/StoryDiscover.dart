@@ -16,7 +16,7 @@ class StoryDiscover extends StatelessWidget {
         onTap();
       },
       child: Container(
-        width: Get.width * 0.22,
+        width: Get.width * 0.24,
         padding: const EdgeInsets.only(left: 2),
         decoration: BoxDecoration(
           color: const Color(0x14EDEDED),
@@ -60,7 +60,9 @@ Widget buildBottomSheet() {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -72,7 +74,7 @@ Widget buildBottomSheet() {
               const SizedBox(
                 width: 3,
               ),
-               const MyText(
+              const MyText(
                 text: "Discover",
                 color: AppColor.blackColor,
                 fontSize: 12,
@@ -80,9 +82,18 @@ Widget buildBottomSheet() {
               ),
             ],
           ),
-          const SizedBox(height: 5,),
-          const Divider(color: Color(0x7CDCDCDC), height: 0.34, indent: 10, endIndent: 10,),
-          const SizedBox(height: 5,),
+          const SizedBox(
+            height: 5,
+          ),
+          const Divider(
+            color: Color(0x7CDCDCDC),
+            height: 0.34,
+            indent: 10,
+            endIndent: 10,
+          ),
+          const SizedBox(
+            height: 5,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -102,13 +113,24 @@ Widget buildBottomSheet() {
               ),
             ],
           ),
-          const SizedBox(height: 5,),
-          const Divider(color: Color(0x7CDCDCDC), height: 0.34, indent: 10, endIndent: 10,),
-          const SizedBox(height: 5,),
+          const SizedBox(
+            height: 5,
+          ),
+          const Divider(
+            color: Color(0x7CDCDCDC),
+            height: 0.34,
+            indent: 10,
+            endIndent: 10,
+          ),
+          const SizedBox(
+            height: 5,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(width: 10,),
+              const SizedBox(
+                width: 10,
+              ),
               SvgPicture.asset(
                 ImageAssets.liked,
                 width: 25,

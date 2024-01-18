@@ -6,24 +6,29 @@ import 'package:amoremio/Widgets/Text.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:amoremio/Screen/ExplorePages/BlockedUser.dart';
+import 'package:http/http.dart' as http;
 
 // ignore: must_be_immutable
+typedef void SearchCallback(String searchText);
+
 class ExploreSearch extends StatefulWidget {
-  ExploreSearch({Key? key}) : super(key: key);
+  final SearchCallback onSearch;
+  ExploreSearch({Key? key, required this.onSearch}) : super(key: key);
 
   @override
   State<ExploreSearch> createState() => _ExploreSearchState();
 }
 
 class _ExploreSearchState extends State<ExploreSearch> {
-
   final TextEditingController searchController = TextEditingController();
   List<String> genderType = ["Male", "Female", "Other"];
   String? selectedGender;
   double value = 50.0;
 
+  String searchText = ''; // Variable to store the search text
   void slider(double newValue) {
     setState(() {
       value = newValue;
@@ -53,6 +58,14 @@ class _ExploreSearchState extends State<ExploreSearch> {
                 fontWeight: FontWeight.w400,
               ),
               controller: searchController,
+              onChanged: (text) {
+                // Update the searchText variable when the text changes
+                searchText = text;
+                var textinto = searchText.toString();
+                setState(() {
+                  widget.onSearch(searchText.toString());
+                });
+              },
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.symmetric(
                     horizontal: Get.width * 0.03, vertical: 10),
@@ -84,7 +97,9 @@ class _ExploreSearchState extends State<ExploreSearch> {
             ),
           ),
         ),
-        SizedBox(width: 5,),
+        SizedBox(
+          width: 5,
+        ),
         GestureDetector(
           onTap: () {
             showDialog(
@@ -280,23 +295,24 @@ class _ExploreSearchState extends State<ExploreSearch> {
                               ),
                             ),
                             SfSlider(
-                                min: 0.0,
-                                max: 1000.0,
-                                value: value, // Access the value with .value
-                                interval: 50,
-                                enableTooltip: true,
-                                // shouldAlwaysShowTooltip: true,
-                                inactiveColor: const Color(0xFFD9D9D9),
-                                activeColor: AppColor.primaryColor,
-                                minorTicksPerInterval: 1,
-                                onChanged: (dynamic value) {
-                                  slider(value);
-                                },
-                              ),
+                              min: 0.0,
+                              max: 1000.0,
+                              value: value, // Access the value with .value
+                              interval: 50,
+                              enableTooltip: true,
+                              // shouldAlwaysShowTooltip: true,
+                              inactiveColor: const Color(0xFFD9D9D9),
+                              activeColor: AppColor.primaryColor,
+                              minorTicksPerInterval: 1,
+                              onChanged: (dynamic value) {
+                                slider(value);
+                              },
+                            ),
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 20.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   MyText(
                                     text: "50 Km",
@@ -317,16 +333,20 @@ class _ExploreSearchState extends State<ExploreSearch> {
                         ),
                         SizedBox(height: Get.height * 0.01),
                         GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                              Get.to(()=> BlockedUser(), duration: Duration(milliseconds: 300), transition: Transition.leftToRight,);
-                            },
-                            child: const MyText(
-                              text: "Blocked Users",
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.secondaryColor,
-                            ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Get.to(
+                              () => BlockedUser(),
+                              duration: Duration(milliseconds: 300),
+                              transition: Transition.leftToRight,
+                            );
+                          },
+                          child: const MyText(
+                            text: "Blocked Users",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColor.secondaryColor,
+                          ),
                         ),
                       ],
                     ),

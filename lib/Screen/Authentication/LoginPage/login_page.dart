@@ -72,12 +72,13 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       } else {
-        print(data['status']);
+        Navigator.of(context).pop();
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
+      Navigator.of(context).pop();
       print('error');
     }
   }

@@ -43,7 +43,9 @@ class _UserProfileState extends State<UserProfile> {
   List<dynamic> interestList = [];
 
   int currentIndex = -1;
-  List<dynamic> imagePaths = List.generate(9, (index) => '');
+
+  // List<dynamic> imagePaths = [];
+  List<Map<String, dynamic>> imagePaths = [];
   List<String> imagesavators = [];
 
   final TextEditingController userNameController = TextEditingController();
@@ -62,6 +64,7 @@ class _UserProfileState extends State<UserProfile> {
     super.initState();
 
     fetchGenders();
+    getavators();
   }
 
   Future pickimage() async {
@@ -88,20 +91,33 @@ class _UserProfileState extends State<UserProfile> {
 
   //upload avators///
   Future<void> _pickImages() async {
-    final pickedImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    // Check if the number of selected images is less than the limit (9)
+    if (imagePaths.where((path) => path.isNotEmpty).length < 9) {
+      final pickedImage =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    if (pickedImage != null) {
-      setState(() {
-        var path = pickedImage.path;
-        imagePaths[currentIndex] = pickedImage.path;
-      });
-      List<int> imageBytes = await pickedImage.readAsBytes();
+      if (pickedImage != null) {
+        // setState(() {
+        //   int emptyIndex = imagePaths.indexWhere((element) => element.isEmpty);
+        //   if (emptyIndex != -1) {
+        //     imagePaths[emptyIndex] = {"image": pickedImage.path};
+        //     currentIndex = emptyIndex;
+        //   } else {
+        //     imagePaths.add({"image": pickedImage.path});
+        //     currentIndex = imagePaths.length - 1;
+        //   }
+        // });
+        List<int> imageBytes = await pickedImage.readAsBytes();
 
-      // Encode the image bytes to base64
-      String base64Image = base64Encode(imageBytes);
-      print('base64Image $base64Image');
-      uploadavators(base64Image);
+        // Encode the image bytes to base64
+        String base64Image = base64Encode(imageBytes);
+        print('base64Image $base64Image');
+        uploadavators(base64Image);
+      }
+    } else {
+      print("You can't take more than 9 images");
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("You can't take more than 9 images")));
     }
   }
 
@@ -234,7 +250,7 @@ class _UserProfileState extends State<UserProfile> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = editProfile;
-    print(interestIdsJson);
+    // print(interestIdsJson);
     try {
       var showdata = {
         "users_customers_id": userId,
@@ -252,7 +268,7 @@ class _UserProfileState extends State<UserProfile> {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(showdata));
-      print(showdata);
+      // print(showdata);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         // Get.to(
@@ -272,6 +288,51 @@ class _UserProfileState extends State<UserProfile> {
       }
     } catch (e) {
       print('error123456: $e');
+    }
+  }
+
+  // void removeImage(int index) {
+  //   setState(() {
+  //     imagePaths.removeAt(index);
+  //     imagePaths.add('');
+  //     print('image remove path : $imagePaths');
+  //   });
+  // }
+  void removeImage(int index) async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = deleteAvator;
+    try {
+      var showdata = {
+        "users_customers_id": imagePaths[index]['users_customers_id'],
+        "users_avatars_id": imagePaths[index]['users_avatars_id']
+      };
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(showdata));
+      // print(showdata);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {
+          imagePaths.removeAt(index);
+          print('image remove path : $imagePaths');
+        });
+        Navigator.of(context).pop();
+        var msg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg)));
+      } else {
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error delete avator: $e');
     }
   }
 
@@ -310,7 +371,7 @@ class _UserProfileState extends State<UserProfile> {
                       image: DecorationImage(
                         fit: BoxFit.cover,
                         image: imgurl.isEmpty
-                            ? AssetImage(ImageAssets.mediumImage)
+                            ? NetworkImage(ImageAssets.dummyImage)
                                 as ImageProvider<Object>
                             : NetworkImage(imgurl),
                       ),
@@ -675,43 +736,81 @@ class _UserProfileState extends State<UserProfile> {
                     runSpacing: 6,
                     direction: Axis.horizontal,
                     children: List.generate(
-                        9,
-                        (index) => GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  currentIndex = index;
-                                });
+                      9,
+                      (index) => GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            currentIndex = index;
+                          });
 
-                                _pickImages(); // Call the method to pick an image
-                              },
-                              child: Container(
-                                width: 103,
-                                height: 110,
-                                decoration: BoxDecoration(
-                                  color: AppColor.hintTextColor,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: imagePaths[index].isNotEmpty
-                                    ? Image.file(
-                                        File(imagePaths[index]),
-                                        fit: BoxFit.cover,
+                          _pickImages(); // Call the method to pick an image
+                        },
+                        child: Container(
+                          width: 103,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            color: AppColor.hintTextColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Stack(
+                            children: [
+                              // Image or camera icon
+                              Align(
+                                alignment: Alignment.center,
+                                child: (imagePaths.length > index &&
+                                        imagePaths[index].isNotEmpty)
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                            8), // Border radius for the image
+                                        // child: Image.file(
+                                        //   File(imagePaths[index]),
+                                        //   fit: BoxFit.cover,
+                                        //   width: double.infinity,
+                                        // ),
+                                        child: Image.network(
+                                            baseUrlImage +
+                                                imagePaths[index]['image'],
+                                            fit: BoxFit.cover,
+                                            width: double.infinity),
                                       )
-                                    : Icon(
+                                    : const Icon(
                                         Icons.camera_alt_rounded,
-                                        color: currentIndex == index
-                                            ? Colors.white
-                                            : AppColor.primaryColor,
+                                        color: AppColor.primaryColor,
+                                        // color: currentIndex == index
+                                        //     ? Colors.white
+                                        //     : AppColor.primaryColor,
                                       ),
-                                // child: const Icon(
-                                //   Icons.camera_alt_rounded,
-                                //   color: AppColor.primaryColor,
-                                // ),
-                                // Image(
-                                //   fit: BoxFit.fill,
-                                //   image: AssetImage(ImageAssets.image3),
-                                // )
                               ),
-                            )),
+                              // Delete icon (displayed only when image is not empty)
+                              if (imagePaths.length > index &&
+                                  imagePaths[index].isNotEmpty)
+                                Positioned(
+                                  top: 5,
+                                  right: 5,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      removeImage(index);
+                                    },
+                                    child: Container(
+                                      width: 16,
+                                      height: 16,
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const ShapeDecoration(
+                                        color: AppColor.blackColor,
+                                        shape: OvalBorder(),
+                                      ),
+                                      child: Center(
+                                        child: SvgPicture.asset(
+                                            ImageAssets.deleteAc),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -985,13 +1084,15 @@ class _UserProfileState extends State<UserProfile> {
           body: jsonEncode(
             {"users_customers_id": userId, "image": image},
           ));
-      // print(response.body);
+      print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Profile update successfully')));
-        imgurl = baseUrlImage + data['data']['image'];
-        setState(() {});
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text('Profile update successfully')));
+
+        setState(() {
+          imgurl = baseUrlImage + data['data']['image'];
+        });
       } else {}
     } catch (e) {
       print('errorfound');
@@ -999,6 +1100,11 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   uploadavators(String base64image) async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = uploadAvatars;
@@ -1017,9 +1123,11 @@ class _UserProfileState extends State<UserProfile> {
       // print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(content: Text('Profile update successfully')));
-        setState(() {});
+        Navigator.of(context).pop();
+        setState(() {
+          imagePaths.add(data['data']);
+          print('image path aaddd: $imagePaths');
+        });
       } else {}
     } catch (e) {
       print('errorfound');
@@ -1040,15 +1148,14 @@ class _UserProfileState extends State<UserProfile> {
               "users_customers_id": userId,
             },
           ));
-      // print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        // imgurl = baseUrlImage + data['data']['image'];
-        imagesavators.add(baseUrlImage + data['data']['image']);
+        imagePaths = List<Map<String, dynamic>>.from(data['data']);
+        print('avators total : $imagePaths');
         setState(() {});
       } else {}
     } catch (e) {
-      print('errorfound $e');
+      print('errorfound in get avators $e');
     }
   }
 }

@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:amoremio/Screen/ExplorePages/BlockedUser.dart';
+import 'package:amoremio/Screen/ProfilePages/ProfileMain/ProfilePage.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -42,8 +44,12 @@ class BuyStoryDialog extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             GestureDetector(
-              onTap: (){
-                Get.back();
+              onTap: () {
+                // Get.back();
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => const BlockedUser()),
+                // );
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.6,
@@ -109,7 +115,10 @@ class BuyStory2Dialog extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset(ImageAssets.videoPlay, width: 15,),
+              SvgPicture.asset(
+                ImageAssets.videoPlay,
+                width: 15,
+              ),
               const SizedBox(width: 2),
               const MyText(
                 align: TextAlign.center,
@@ -120,7 +129,7 @@ class BuyStory2Dialog extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           GestureDetector(
-            onTap: (){
+            onTap: () {
               Get.back();
             },
             child: Container(
@@ -149,5 +158,3 @@ class BuyStory2Dialog extends StatelessWidget {
     );
   }
 }
-
-

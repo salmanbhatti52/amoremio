@@ -164,7 +164,10 @@ class _BlockedUserState extends State<BlockedUser> {
     });
   }
 
+  List<dynamic> originalUserDataList = [];
   List<dynamic> userDataList = [];
+  List<dynamic> userDatasearch = [];
+
   List<dynamic> mainImages = [
     ImageAssets.exploreImage,
     ImageAssets.image1,
@@ -173,6 +176,8 @@ class _BlockedUserState extends State<BlockedUser> {
     ImageAssets.introImage,
     // Add more image assets as needed
   ];
+
+  String searchText = '';
   @override
   void initState() {
     // TODO: implement initState
@@ -199,7 +204,8 @@ class _BlockedUserState extends State<BlockedUser> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {});
-        userDataList = data['data']['data'];
+        originalUserDataList = data['data']['data'];
+        userDataList = originalUserDataList;
         print(userDataList);
         // images = baseUrlImage + data['data']['image'];
       } else {
@@ -246,6 +252,36 @@ class _BlockedUserState extends State<BlockedUser> {
                       fontWeight: FontWeight.w400,
                     ),
                     controller: searchController,
+                    onChanged: (text) {
+                      // Update the searchText variable when the text changes
+                      searchText = text;
+                      var textinto = searchText.toString();
+                      setState(() {
+                        print(searchText.toString());
+                      });
+                      if (searchText.isEmpty) {
+                        // If empty, show the complete data or specific results
+                        setState(() {
+                          userDataList =
+                              originalUserDataList; // Restore the original data
+                        });
+                      } else {
+                        // If not empty, filter the original data based on the search text
+                        List searchResults = originalUserDataList
+                            .where((user) =>
+                                user['blocked_user']['username'] != null &&
+                                user['blocked_user']['username']
+                                    .toLowerCase()
+                                    .contains(searchText.toLowerCase()))
+                            .toList();
+
+                        setState(() {
+                          userDataList = searchResults;
+                        });
+                        // Print the search results
+                        print(searchResults);
+                      }
+                    },
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(
                           horizontal: Get.width * 0.03, vertical: 10),
@@ -292,7 +328,7 @@ class _BlockedUserState extends State<BlockedUser> {
                 height: 10,
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height,
+                height: MediaQuery.of(context).size.height * 0.78,
                 child: LiveGrid.options(
                   options: options,
                   itemCount: userDataList.length,
@@ -341,13 +377,17 @@ class _BlockedUserState extends State<BlockedUser> {
                                     height: 160,
                                     decoration: ShapeDecoration(
                                       image: DecorationImage(
-                                        image: currentUserData['blocked_user']
-                                                    ['image'] ==
-                                                null
-                                            ? AssetImage(ImageAssets.image1)
+                                        image: (currentUserData['blocked_user']
+                                                        ['avatars'] ==
+                                                    null ||
+                                                currentUserData['blocked_user']
+                                                        ['avatars']
+                                                    .isEmpty)
+                                            ? NetworkImage(
+                                                    ImageAssets.dummyImage)
                                                 as ImageProvider<Object>
                                             : NetworkImage(
-                                                'https://mio.eigix.net/${currentUserData['blocked_user']['image']}',
+                                                'https://mio.eigix.net/${currentUserData['blocked_user']['avatars'][0]['image']}',
                                               ),
                                         fit: BoxFit.fill,
                                       ),
@@ -389,7 +429,8 @@ class _BlockedUserState extends State<BlockedUser> {
                                           image: currentUserData['blocked_user']
                                                       ['image'] ==
                                                   null
-                                              ? AssetImage(ImageAssets.image1)
+                                              ? NetworkImage(
+                                                      ImageAssets.dummyImage)
                                                   as ImageProvider<Object>
                                               : NetworkImage(
                                                   'https://mio.eigix.net/${currentUserData['blocked_user']['image']}',

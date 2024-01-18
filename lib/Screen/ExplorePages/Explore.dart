@@ -18,6 +18,8 @@ import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:http/http.dart' as http;
 import 'package:auto_animated/auto_animated.dart';
 
+import 'UserMatchShowPage.dart';
+
 // ignore: must_be_immutable
 class ExplorePage extends StatefulWidget {
   ExplorePage({Key? key}) : super(key: key);
@@ -55,8 +57,14 @@ class _ExplorePageState extends State<ExplorePage> {
     ImageAssets.introImage,
     // Add more image assets as needed
   ];
+  List<dynamic> originalUserDataList = [];
   List<dynamic> userDataList = [];
+  List<dynamic> userDatasearch = [];
+
   List<dynamic> imgListavators = [];
+
+  String searchTerm = '';
+
   void toggleSwitch(bool newValue) {
     setState(() {
       status = newValue;
@@ -71,6 +79,7 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   void fetchuserDiscover() async {
+    originalUserDataList = [];
     isloading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
@@ -86,13 +95,14 @@ class _ExplorePageState extends State<ExplorePage> {
               "users_customers_id": userId,
             },
           ));
-      // print(response.body);
+      print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {});
-        userDataList = data['data'];
+        originalUserDataList = data['data'];
+        userDataList = originalUserDataList;
         isloading = false;
-        print(userDataList);
+        print('userDataList $userDataList');
         // images = baseUrlImage + data['data']['image'];
       } else {
         isloading = false;
@@ -103,7 +113,7 @@ class _ExplorePageState extends State<ExplorePage> {
       }
     } catch (e) {
       isloading = false;
-      print('error');
+      print('error user discover $e');
     }
   }
 
@@ -127,11 +137,11 @@ class _ExplorePageState extends State<ExplorePage> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {});
-        userDataList = data['data'];
-        print(userDataList);
+        originalUserDataList = data['data'];
+        userDataList = originalUserDataList;
+
         // images = baseUrlImage + data['data']['image'];
       } else {
-        print(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
@@ -162,11 +172,11 @@ class _ExplorePageState extends State<ExplorePage> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {});
-        userDataList = data['data'];
-        print(userDataList);
+        originalUserDataList = data['data'];
+        userDataList = originalUserDataList;
+
         // images = baseUrlImage + data['data']['image'];
       } else {
-        print(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
@@ -197,12 +207,11 @@ class _ExplorePageState extends State<ExplorePage> {
       print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        setState(() {});
-        userDataList = data['data']['data'];
-        print(userDataList);
-        // images = baseUrlImage + data['data']['image'];
+        setState(() {
+          originalUserDataList = data['data'];
+          userDataList = originalUserDataList;
+        });
       } else {
-        print(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
@@ -223,7 +232,36 @@ class _ExplorePageState extends State<ExplorePage> {
             children: [
               const ExploreAppbar(title: "LOGO", title2: "Explore"),
               SizedBox(height: Get.height * 0.02),
-              ExploreSearch(),
+              ExploreSearch(
+                onSearch: (searchText) {
+                  // Handle the search text here
+                  print('Received search text in ExplorePage: $searchText');
+
+                  if (searchText.isEmpty) {
+                    // If empty, show the complete data or specific results
+                    setState(() {
+                      userDataList =
+                          originalUserDataList; // Restore the original data
+                    });
+                  } else {
+                    // If not empty, filter the original data based on the search text
+                    List searchResults = originalUserDataList
+                        .where((user) =>
+                            user['username'] != null &&
+                            user['username']
+                                .toLowerCase()
+                                .contains(searchText.toLowerCase()))
+                        .toList();
+
+                    setState(() {
+                      userDataList = searchResults;
+                    });
+                    // Print the search results
+                    print(searchResults);
+                  }
+                },
+              ),
+
               Padding(
                 padding: EdgeInsets.only(
                   left: Get.width * 0.04,
@@ -283,7 +321,8 @@ class _ExplorePageState extends State<ExplorePage> {
               //   ),
               // ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: Get.width * 0.01),
+                padding: EdgeInsets.symmetric(
+                    horizontal: Get.width * 0.01, vertical: 5),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -391,7 +430,7 @@ class _ExplorePageState extends State<ExplorePage> {
               /////userdiscover////
               selectedIndex1 == true
                   ? SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.61,
+                      height: MediaQuery.of(context).size.height * 0.57,
                       child: isloading == true
                           ? Center(
                               child: CircularProgressIndicator(),
@@ -432,7 +471,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                         Get.to(
                                           () => ExploreVideoView(
                                               userid: currentUserData[
-                                                  'users_customers_id']),
+                                                  'users_customers_id'],
+                                              match: 'no'),
                                           duration: const Duration(seconds: 1),
                                           transition: Transition.native,
                                         );
@@ -446,15 +486,19 @@ class _ExplorePageState extends State<ExplorePage> {
                                                 height: 160,
                                                 decoration: ShapeDecoration(
                                                   image: DecorationImage(
-                                                    image: currentUserData[
-                                                                'image'] ==
-                                                            null
-                                                        ? AssetImage(ImageAssets
-                                                                .image1)
+                                                    image: (currentUserData[
+                                                                    'avatars'] ==
+                                                                null ||
+                                                            currentUserData[
+                                                                    'avatars']
+                                                                .isEmpty)
+                                                        ? NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage)
                                                             as ImageProvider<
                                                                 Object>
                                                         : NetworkImage(
-                                                            'https://mio.eigix.net/${currentUserData['image']}',
+                                                            'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
                                                           ),
                                                     fit: BoxFit.fill,
                                                   ),
@@ -488,7 +532,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0),
+                                                horizontal: 17.0),
                                             child: Row(
                                               children: [
                                                 Container(
@@ -499,9 +543,9 @@ class _ExplorePageState extends State<ExplorePage> {
                                                       image: currentUserData[
                                                                   'image'] ==
                                                               null
-                                                          ? AssetImage(
+                                                          ? NetworkImage(
                                                                   ImageAssets
-                                                                      .image1)
+                                                                      .dummyImage)
                                                               as ImageProvider<
                                                                   Object>
                                                           : NetworkImage(
@@ -577,11 +621,17 @@ class _ExplorePageState extends State<ExplorePage> {
                                 onTap: () {
                                   // Get.to(
                                   //   () => ExploreVideoView(
-                                  //       userid: currentUserData['liked_user']
-                                  //           ['users_customers_id']),
+                                  //       userid: currentUserData[
+                                  //           'users_customers_id'],
+                                  //       match: 'yes'),
                                   //   duration: const Duration(seconds: 1),
                                   //   transition: Transition.native,
                                   // );
+                                  Get.to(
+                                    () => const UserMatchesPage(),
+                                    duration: const Duration(milliseconds: 350),
+                                    transition: Transition.rightToLeft,
+                                  );
                                 },
                                 child: Column(
                                   children: [
@@ -592,15 +642,16 @@ class _ExplorePageState extends State<ExplorePage> {
                                           height: 160,
                                           decoration: ShapeDecoration(
                                             image: DecorationImage(
-                                              image: currentUserData[
-                                                              'user_data']
-                                                          ['image'] ==
-                                                      null
-                                                  ? AssetImage(
-                                                          ImageAssets.image1)
+                                              image: (currentUserData[
+                                                              'avatars'] ==
+                                                          null ||
+                                                      currentUserData['avatars']
+                                                          .isEmpty)
+                                                  ? NetworkImage(ImageAssets
+                                                          .dummyImage)
                                                       as ImageProvider<Object>
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
                                                     ),
                                               fit: BoxFit.fill,
                                             ),
@@ -641,14 +692,13 @@ class _ExplorePageState extends State<ExplorePage> {
                                             decoration: ShapeDecoration(
                                               image: DecorationImage(
                                                 image: currentUserData[
-                                                                'user_data']
-                                                            ['image'] ==
+                                                            'image'] ==
                                                         null
-                                                    ? AssetImage(
+                                                    ? NetworkImage(
                                                             ImageAssets.image1)
                                                         as ImageProvider<Object>
                                                     : NetworkImage(
-                                                        'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                        'https://mio.eigix.net/${currentUserData['image']}',
                                                       ),
                                                 fit: BoxFit.fill,
                                               ),
@@ -663,7 +713,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                           ),
                                           MyText(
                                             text:
-                                                "${currentUserData['user_data']['username']}, ${calculateAge(currentUserData['user_data']['date_of_birth'])}",
+                                                "${currentUserData['username']}, ${calculateAge(currentUserData['date_of_birth'])}",
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -716,13 +766,14 @@ class _ExplorePageState extends State<ExplorePage> {
                               // Paste you Widget
                               child: GestureDetector(
                                 onTap: () {
-                                  // Get.to(
-                                  //   () => ExploreVideoView(
-                                  //       userid: currentUserData['liked_user']
-                                  //           ['users_customers_id']),
-                                  //   duration: const Duration(seconds: 1),
-                                  //   transition: Transition.native,
-                                  // );
+                                  Get.to(
+                                    () => ExploreVideoView(
+                                        userid: currentUserData[
+                                            'users_customers_id'],
+                                        match: 'no'),
+                                    duration: const Duration(seconds: 1),
+                                    transition: Transition.native,
+                                  );
                                 },
                                 child: Column(
                                   children: [
@@ -733,15 +784,16 @@ class _ExplorePageState extends State<ExplorePage> {
                                           height: 160,
                                           decoration: ShapeDecoration(
                                             image: DecorationImage(
-                                              image: currentUserData[
-                                                              'liked_user']
-                                                          ['image'] ==
-                                                      null
-                                                  ? AssetImage(
-                                                          ImageAssets.image1)
+                                              image: (currentUserData[
+                                                              'avatars'] ==
+                                                          null ||
+                                                      currentUserData['avatars']
+                                                          .isEmpty)
+                                                  ? NetworkImage(ImageAssets
+                                                          .dummyImage)
                                                       as ImageProvider<Object>
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['liked_user']['image']}',
+                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
                                                     ),
                                               fit: BoxFit.fill,
                                             ),
@@ -782,14 +834,13 @@ class _ExplorePageState extends State<ExplorePage> {
                                             decoration: ShapeDecoration(
                                               image: DecorationImage(
                                                 image: currentUserData[
-                                                                'liked_user']
-                                                            ['image'] ==
+                                                            'image'] ==
                                                         null
-                                                    ? AssetImage(
+                                                    ? NetworkImage(
                                                             ImageAssets.image1)
                                                         as ImageProvider<Object>
                                                     : NetworkImage(
-                                                        'https://mio.eigix.net/${currentUserData['liked_user']['image']}',
+                                                        'https://mio.eigix.net/${currentUserData['image']}',
                                                       ),
                                                 fit: BoxFit.fill,
                                               ),
@@ -804,7 +855,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                           ),
                                           MyText(
                                             text:
-                                                "${currentUserData['liked_user']['username']}, ${calculateAge(currentUserData['liked_user']['date_of_birth'])}",
+                                                "${currentUserData['username']}, ${calculateAge(currentUserData['date_of_birth'])}",
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -824,7 +875,7 @@ class _ExplorePageState extends State<ExplorePage> {
               //userlikedby/////
               selectedIndex4 == true
                   ? SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.61,
+                      height: MediaQuery.of(context).size.height * 0.57,
                       child: LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
@@ -858,13 +909,14 @@ class _ExplorePageState extends State<ExplorePage> {
                               // Paste you Widget
                               child: GestureDetector(
                                 onTap: () {
-                                  // Get.to(
-                                  //   () => ExploreVideoView(
-                                  //       userid: currentUserData['liked_user']
-                                  //           ['users_customers_id']),
-                                  //   duration: const Duration(seconds: 1),
-                                  //   transition: Transition.native,
-                                  // );
+                                  Get.to(
+                                    () => ExploreVideoView(
+                                        userid: currentUserData['user_data']
+                                            ['users_customers_id'],
+                                        match: 'no'),
+                                    duration: const Duration(seconds: 1),
+                                    transition: Transition.native,
+                                  );
                                 },
                                 child: Column(
                                   children: [
@@ -875,15 +927,16 @@ class _ExplorePageState extends State<ExplorePage> {
                                           height: 160,
                                           decoration: ShapeDecoration(
                                             image: DecorationImage(
-                                              image: currentUserData[
-                                                              'user_data']
-                                                          ['image'] ==
-                                                      null
-                                                  ? AssetImage(
-                                                          ImageAssets.image1)
+                                              image: (currentUserData[
+                                                              'avatars'] ==
+                                                          null ||
+                                                      currentUserData['avatars']
+                                                          .isEmpty)
+                                                  ? NetworkImage(ImageAssets
+                                                          .dummyImage)
                                                       as ImageProvider<Object>
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
                                                     ),
                                               fit: BoxFit.fill,
                                             ),
@@ -924,14 +977,13 @@ class _ExplorePageState extends State<ExplorePage> {
                                             decoration: ShapeDecoration(
                                               image: DecorationImage(
                                                 image: currentUserData[
-                                                                'user_data']
-                                                            ['image'] ==
+                                                            'image'] ==
                                                         null
-                                                    ? AssetImage(
+                                                    ? NetworkImage(
                                                             ImageAssets.image1)
                                                         as ImageProvider<Object>
                                                     : NetworkImage(
-                                                        'https://mio.eigix.net/${currentUserData['user_data']['image']}',
+                                                        'https://mio.eigix.net/${currentUserData['image']}',
                                                       ),
                                                 fit: BoxFit.fill,
                                               ),
@@ -946,7 +998,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                           ),
                                           MyText(
                                             text:
-                                                "${currentUserData['user_data']['username']}, ${calculateAge(currentUserData['user_data']['date_of_birth'])}",
+                                                "${currentUserData['username']}, ${calculateAge(currentUserData['date_of_birth'])}",
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),

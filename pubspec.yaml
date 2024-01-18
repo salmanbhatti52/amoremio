@@ -44,7 +44,7 @@ dependencies:
   flutter_switch: ^0.3.2
   syncfusion_flutter_sliders: ^23.1.36
   bottom_sheet: ^4.0.0
-  video_player: ^2.7.2
+  video_player: ^2.8.2
   flutter_animated_icons: ^1.0.1
   pinput: ^3.0.1
   animate_do: ^3.1.2

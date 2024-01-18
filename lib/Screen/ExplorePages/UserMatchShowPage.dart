@@ -6,6 +6,9 @@ import 'package:amoremio/Widgets/large_Button.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:amoremio/Widgets/background_Image_container.dart';
 
+import '../ChatPages/ChatDetailsPage/ChatDetailsPage.dart';
+import '../ChatPages/ChatPage/ChatPage.dart';
+
 class UserMatchesPage extends StatelessWidget {
   const UserMatchesPage({Key? key}) : super(key: key);
 
@@ -57,7 +60,16 @@ class UserMatchesPage extends StatelessWidget {
               containerColor: AppColor.whiteColor,
               gradientColor1: AppColor.whiteColor,
               gradientColor2: AppColor.whiteColor,
-              onTap: () {},
+              onTap: () {
+                Get.to(
+                  () => ChatDetailsPage(),
+                  // arguments: [
+                  //   {"email": emailController.text.toString()},
+                  // ],
+                  duration: const Duration(milliseconds: 350),
+                  transition: Transition.rightToLeft,
+                );
+              },
             ),
           ],
         ),

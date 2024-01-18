@@ -23,3 +23,5 @@ String getuserlikedme = '${baseUrl}get_users_liked_you';
 String getusermatch = '${baseUrl}users_matches';
 String deactivateUser = '${baseUrl}deactivate_user';
 String deleteUser = '${baseUrl}delete_user';
+String deleteAvator = '${baseUrl}delete_avatars';
+String searchUsers = '${baseUrl}search_users';

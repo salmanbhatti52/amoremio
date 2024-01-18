@@ -109,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       image: DecorationImage(
                         fit: BoxFit.cover,
                         image: imgurl.isEmpty
-                            ? AssetImage(ImageAssets.mediumImage)
+                            ? NetworkImage(ImageAssets.dummyImage)
                                 as ImageProvider<Object>
                             : NetworkImage(imgurl),
                       ),

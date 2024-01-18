@@ -36,6 +36,8 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
   var username = '';
   var dateofbirth;
   int _current = 0;
+  List<dynamic> imgListavators = [];
+  bool isLoading = true;
   final CarouselController _controller = CarouselController();
 
   void initState() {
@@ -56,7 +58,8 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
           ));
       var userdetail = jsonDecode(response.body);
       if (userdetail['status'] == 'success') {
-        print(userdetail);
+        // print(userdetail);
+        getavators();
         setState(() {});
         username = userdetail['data']['username'];
         dateofbirth = userdetail['data']['date_of_birth'];
@@ -69,6 +72,45 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
       }
     } catch (e) {
       print('error123456: $e');
+    }
+  }
+
+  getavators() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = getusersavatars;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": widget.userid,
+            },
+          ));
+
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        print('avatoes::::: ${response.body}');
+        // imgurl = baseUrlImage + data['data']['image'];
+        imgListavators = data['data'];
+        setState(() {
+          Navigator.of(context).pop();
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('errorfound $e');
     }
   }
 
@@ -99,7 +141,14 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
       Navigator.of(context).pop();
       var msg = userdetail['message'];
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-      setState(() {});
+
+      setState(() {
+        Get.to(
+          () => MyBottomNavigationBar(),
+          duration: const Duration(milliseconds: 300),
+          transition: Transition.rightToLeft,
+        );
+      });
     } else {
       // print(userdetail['status']);
       var errormsg = userdetail['message'];
@@ -114,14 +163,23 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
 
   @override
   Widget build(BuildContext context) {
+    // List<Widget> imageSliders = [];
+    // for (int index = 0; index < imgList.length; index++) {
+    //   imageSliders.add(
+    //     ImageContainer(
+    //       imagePath: imgList[index],
+    //       child: SizedBox(),
+    //     ),
+    //   );
+    // }
     List<Widget> imageSliders = [];
-    for (int index = 0; index < imgList.length; index++) {
-      imageSliders.add(
-        ImageContainer(
-          imagePath: imgList[index],
-          child: SizedBox(),
-        ),
-      );
+    for (int index = 0; index < imgListavators.length; index++) {
+      imageSliders.add(Image.network(
+        baseUrlImage + imgListavators[index]['image'],
+        width: MediaQuery.sizeOf(context).width,
+        height: MediaQuery.sizeOf(context).height,
+        fit: BoxFit.fill,
+      ));
     }
     return Scaffold(
       body: Stack(
@@ -129,31 +187,38 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
           // ImageContainer(
           //   child: Image.asset(image1 ? image2 ? ImageAssets.image2 : ImageAssets.introImage : ImageAssets.introImage),
           // ),
-          CarouselSlider(
-            items: imageSliders,
-            carouselController: _controller,
-            options: CarouselOptions(
-                autoPlay: false,
-                scrollPhysics: const ScrollPhysics(),
-                disableCenter: false,
-                enlargeCenterPage: false,
-                viewportFraction: 0.999,
-                aspectRatio: 2,
-                animateToClosest: false,
-                enableInfiniteScroll: false,
-                height: double.infinity,
-                onPageChanged: (index, reason) {
-                  setState(() {
-                    _current = index;
-                  });
-                }),
-          ),
+          imgListavators.isNotEmpty
+              ? CarouselSlider(
+                  items: imageSliders,
+                  carouselController: _controller,
+                  options: CarouselOptions(
+                      autoPlay: false,
+                      scrollPhysics: const ScrollPhysics(),
+                      disableCenter: false,
+                      enlargeCenterPage: false,
+                      viewportFraction: 0.999,
+                      aspectRatio: 2,
+                      animateToClosest: false,
+                      enableInfiniteScroll: false,
+                      height: double.infinity,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _current = index;
+                        });
+                      }),
+                )
+              : ImageContainer(
+                  child: Image.network(
+                    ImageAssets.dummyImage,
+                    fit: BoxFit.fill,
+                  ),
+                ),
           Positioned(
             bottom: Get.height * 0.315,
             left: Get.width * 0.355,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: imgList.asMap().entries.map((entry) {
+              children: imgListavators.asMap().entries.map((entry) {
                 return GestureDetector(
                   onTap: () => _controller.animateToPage(entry.key),
                   child: Container(
@@ -315,7 +380,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                               color: AppColor.secondaryColor,
                             ),
                             const MyText(
-                              text: "2745",
+                              text: "0",
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
                               color: AppColor.secondaryColor,
@@ -331,12 +396,12 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                     child: Row(
                       children: [
                         // SvgPicture.asset(ImageAssets.locationWhite, color: AppColor.secondaryColor,),
-                        Icon(
+                        const Icon(
                           Icons.location_on,
                           color: AppColor.secondaryColor,
                           size: 17,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 3,
                         ),
                         MyText(

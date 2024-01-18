@@ -1,7 +1,9 @@
 class ImageAssets {
-
-               // ***** Images *****
+  // ***** Images *****
   static const String introImage = 'assets/images/introImage.png';
+
+  static const String dummyImage =
+      'https://mio.eigix.net/uploads/placeholder.jpg';
 
   static const String image1 = 'assets/images/image1.png';
 
@@ -33,7 +35,9 @@ class ImageAssets {
 
   static const String gifts = 'assets/images/gifts.png';
 
-               // ***** Icons *****
+  static const String logo = 'assets/images/Logo.svg';
+
+  // ***** Icons *****
   static const String favorite = 'assets/icons/favorite.svg';
 
   static const String backArrow = 'assets/icons/backArrow.svg';
@@ -166,7 +170,7 @@ class ImageAssets {
 
   static const String copy = 'assets/icons/copy.svg';
 
-               // ***** BottomBar Icons *****
+  // ***** BottomBar Icons *****
   static const String explore1 = 'assets/icons/explore1.svg';
 
   static const String explore2 = 'assets/icons/explore2.svg';
@@ -186,5 +190,4 @@ class ImageAssets {
   static const String createStory1 = 'assets/icons/createStory1.svg';
 
   static const String createStory2 = 'assets/icons/createStory2.svg';
-
 }

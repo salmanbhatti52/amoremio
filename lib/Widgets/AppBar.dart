@@ -4,6 +4,8 @@ import 'package:amoremio/Widgets/Text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 
+import '../Resources/assets/assets.dart';
+
 class ExploreAppbar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String title2;
@@ -26,12 +28,8 @@ class ExploreAppbar extends StatelessWidget implements PreferredSizeWidget {
           statusBarBrightness: Brightness.light,
         ),
         leading: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: MyText(
-            text: title,
-            fontSize: 23,
-          ),
-        ),
+            padding: const EdgeInsets.only(top: 0),
+            child: SvgPicture.asset(ImageAssets.logo)),
         leadingWidth: 110,
         title: MyText(
           text: title2,

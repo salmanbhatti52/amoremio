@@ -3,6 +3,16 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@android:color/white" />
 
+<!--    &lt;!&ndash; Linear Gradient &ndash;&gt;-->
+<!--    <item>-->
+<!--        <shape>-->
+<!--            <gradient-->
+<!--                android:startColor="#DA286F"-->
+<!--            android:endColor="#EE4433"-->
+<!--            android:angle="270"-->
+<!--            />-->
+<!--        </shape>-->
+<!--    </item>-->
     <!-- You can insert your own image assets here -->
     <!-- <item>
         <bitmap
