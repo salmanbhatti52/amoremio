@@ -29,8 +29,7 @@ class _StoryViewState extends State<StoryView> {
   late PageController _pageController;
   late List<VideoPlayerController> _videoControllers;
   final List<String> videos = [
-    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'
-        'https://mio.eigix.net/uploads/stories/1704432707-testingvideo.mp4',
+    'https://mio.eigix.net/uploads/stories/1704432707-testingvideo.mp4',
     'https://mio.eigix.net/uploads/stories/1704433425-testingvideo7.mp4',
   ];
 
