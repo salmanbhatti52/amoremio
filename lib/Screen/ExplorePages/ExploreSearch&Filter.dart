@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
@@ -11,12 +13,18 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:amoremio/Screen/ExplorePages/BlockedUser.dart';
 import 'package:http/http.dart' as http;
 
+import '../../Utills/AppUrls.dart';
+
 // ignore: must_be_immutable
 typedef void SearchCallback(String searchText);
+typedef GenderCallback = void Function(String? gender);
 
 class ExploreSearch extends StatefulWidget {
   final SearchCallback onSearch;
-  ExploreSearch({Key? key, required this.onSearch}) : super(key: key);
+  final GenderCallback onGenderSelect;
+  ExploreSearch(
+      {Key? key, required this.onSearch, required this.onGenderSelect})
+      : super(key: key);
 
   @override
   State<ExploreSearch> createState() => _ExploreSearchState();
@@ -24,15 +32,45 @@ class ExploreSearch extends StatefulWidget {
 
 class _ExploreSearchState extends State<ExploreSearch> {
   final TextEditingController searchController = TextEditingController();
-  List<String> genderType = ["Male", "Female", "Other"];
+  // List<String> genderType = ["Male", "Female", "Other"];
+  List<dynamic> genderType = [];
   String? selectedGender;
   double value = 50.0;
 
   String searchText = ''; // Variable to store the search text
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchGenders();
+  }
+
   void slider(double newValue) {
     setState(() {
       value = newValue;
     });
+  }
+
+  Future<void> fetchGenders() async {
+    String apiUrl = getGender;
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      final responseString = response.body;
+      var data = jsonDecode(responseString);
+      String status = data['status'];
+      if (status == 'success') {
+        setState(() {
+          genderType = data['data'];
+        });
+      }
+      print("genderApi: $genderType");
+    } catch (e) {
+      print('Error: $e');
+      print('Failed to connect to the server.');
+    }
   }
 
   @override
@@ -190,11 +228,11 @@ class _ExploreSearchState extends State<ExploreSearch> {
                                 borderRadius: BorderRadius.circular(12),
                                 items: genderType
                                     .map(
-                                      (item) => DropdownMenuItem<String>(
+                                      (item) => DropdownMenuItem<dynamic>(
                                         value: item,
                                         onTap: selectedGender = null,
                                         child: Text(
-                                          item,
+                                          item['name'],
                                           style: GoogleFonts.poppins(
                                             fontSize: 14,
                                             color: selectedGender != null
@@ -208,7 +246,12 @@ class _ExploreSearchState extends State<ExploreSearch> {
                                     .toList(),
                                 value: selectedGender,
                                 onChanged: (value) {
-                                  selectedGender = value;
+                                  print('on selecte $value');
+                                  setState(() {
+                                    selectedGender = value['name'];
+                                  });
+                                  widget.onGenderSelect(value['name']);
+                                  Navigator.pop(context);
                                 },
                               ),
                             ),

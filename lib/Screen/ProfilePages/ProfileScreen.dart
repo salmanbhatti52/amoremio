@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import '../../Utills/AppUrls.dart';
 import '../../Widgets/rounded_dropdown_menu.dart';
+import '../BottomNavigationBar/BottomNavigationBar.dart';
 import 'InterestTags.dart';
 import 'package:get/get.dart';
 import 'EditAvatorProfile.dart';
@@ -247,48 +248,66 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void editprofile() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = editProfile;
     // print(interestIdsJson);
-    try {
-      var showdata = {
-        "users_customers_id": userId,
-        "summary": bioController.text.toString(),
-        "username": userNameController.text.toString(),
-        "email": emailController.text.toString(),
-        "genders_id": genderval,
-        "date_of_birth": birthController.text.toString(),
-        "education": educationController.text.toString(),
-        "verified": "No",
-        "interests": interestIdsJson
-      };
-      final response = await http.post(Uri.parse(apiUrl),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
+    // try {
+    var showdata = {
+      "users_customers_id": userId,
+      "summary": bioController.text.toString(),
+      "username": userNameController.text.toString(),
+      "email": emailController.text.toString(),
+      "genders_id": genderval,
+      "date_of_birth": birthController.text.toString(),
+      "education": educationController.text.toString(),
+      "verified": "No",
+      "interests": interestIdsJson
+    };
+    final response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": userId,
+            "summary": bioController.text.toString(),
+            "username": userNameController.text.toString(),
+            "email": emailController.text.toString(),
+            "genders_id": genderval,
+            "date_of_birth": birthController.text.toString(),
+            "education": educationController.text.toString(),
+            "verified": "No",
+            "interests": interestIdsJson
           },
-          body: jsonEncode(showdata));
-      // print(showdata);
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'success') {
-        // Get.to(
-        //   () => MyBottomNavigationBar(),
-        //   duration: const Duration(milliseconds: 350),
-        //   transition: Transition.rightToLeft,
-        // );
-        var msg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
-      } else {
-        print('error');
-        print(data['message']);
-        var errormsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
-      }
-    } catch (e) {
-      print('error123456: $e');
+        ));
+    // body: jsonEncode(showdata));
+    print(showdata);
+    var data = jsonDecode(response.body);
+    if (data['status'] == 'success') {
+      Navigator.of(context).pop();
+      Get.to(
+        () => MyBottomNavigationBar(),
+        duration: const Duration(milliseconds: 350),
+        transition: Transition.rightToLeft,
+      );
+      var msg = data['message'];
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } else {
+      print('error');
+      print(data['message']);
+      var errormsg = data['message'];
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errormsg)));
     }
+    // } catch (e) {
+    //   print('error123456: $e');
+    // }
   }
 
   // void removeImage(int index) {
@@ -1073,6 +1092,11 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void uploadprofile(image) async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = uploadProfile;
@@ -1089,12 +1113,15 @@ class _UserProfileState extends State<UserProfile> {
       if (data['status'] == 'success') {
         // ScaffoldMessenger.of(context).showSnackBar(
         //     SnackBar(content: Text('Profile update successfully')));
-
+        Navigator.of(context).pop();
         setState(() {
           imgurl = baseUrlImage + data['data']['image'];
         });
-      } else {}
+      } else {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
+      Navigator.of(context).pop();
       print('errorfound');
     }
   }

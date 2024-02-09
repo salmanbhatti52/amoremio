@@ -232,35 +232,36 @@ class _ExplorePageState extends State<ExplorePage> {
             children: [
               const ExploreAppbar(title: "LOGO", title2: "Explore"),
               SizedBox(height: Get.height * 0.02),
-              ExploreSearch(
-                onSearch: (searchText) {
-                  // Handle the search text here
-                  print('Received search text in ExplorePage: $searchText');
+              ExploreSearch(onSearch: (searchText) {
+                // Handle the search text here
+                print('Received search text in ExplorePage: $searchText');
 
-                  if (searchText.isEmpty) {
-                    // If empty, show the complete data or specific results
-                    setState(() {
-                      userDataList =
-                          originalUserDataList; // Restore the original data
-                    });
-                  } else {
-                    // If not empty, filter the original data based on the search text
-                    List searchResults = originalUserDataList
-                        .where((user) =>
-                            user['username'] != null &&
-                            user['username']
-                                .toLowerCase()
-                                .contains(searchText.toLowerCase()))
-                        .toList();
+                if (searchText.isEmpty) {
+                  // If empty, show the complete data or specific results
+                  setState(() {
+                    userDataList =
+                        originalUserDataList; // Restore the original data
+                  });
+                } else {
+                  // If not empty, filter the original data based on the search text
+                  List searchResults = originalUserDataList
+                      .where((user) =>
+                          user['username'] != null &&
+                          user['username']
+                              .toLowerCase()
+                              .contains(searchText.toLowerCase()))
+                      .toList();
 
-                    setState(() {
-                      userDataList = searchResults;
-                    });
-                    // Print the search results
-                    print(searchResults);
-                  }
-                },
-              ),
+                  setState(() {
+                    userDataList = searchResults;
+                  });
+                  // Print the search results
+                  print(searchResults);
+                }
+              }, onGenderSelect: (gender) {
+                // Handle the selected gender here
+                print('Selected gender: $gender');
+              }),
 
               Padding(
                 padding: EdgeInsets.only(
@@ -432,7 +433,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   ? SizedBox(
                       height: MediaQuery.of(context).size.height * 0.57,
                       child: isloading == true
-                          ? Center(
+                          ? const Center(
                               child: CircularProgressIndicator(),
                             )
                           : LiveGrid.options(
@@ -492,15 +493,24 @@ class _ExplorePageState extends State<ExplorePage> {
                                                             currentUserData[
                                                                     'avatars']
                                                                 .isEmpty)
-                                                        ? NetworkImage(
+                                                        ? currentUserData[
+                                                                    'genders_id'] ==
+                                                                "1"
+                                                            ? const NetworkImage(
                                                                 ImageAssets
-                                                                    .dummyImage)
-                                                            as ImageProvider<
-                                                                Object>
+                                                                    .dummyImage) // First image for genderId == 1
+                                                            : currentUserData[
+                                                                        'genders_id'] ==
+                                                                    "2"
+                                                                ? const NetworkImage(
+                                                                    ImageAssets
+                                                                        .dummyImage1) // Second image for genderId == 2
+                                                                : const NetworkImage(
+                                                                    ImageAssets
+                                                                        .dummyImage2) // Third image for any other case
                                                         : NetworkImage(
-                                                            'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
-                                                          ),
-                                                    fit: BoxFit.fill,
+                                                            'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
+                                                    fit: BoxFit.cover,
                                                   ),
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
@@ -532,7 +542,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 17.0),
+                                                horizontal: 16.0),
                                             child: Row(
                                               children: [
                                                 Container(
@@ -543,11 +553,21 @@ class _ExplorePageState extends State<ExplorePage> {
                                                       image: currentUserData[
                                                                   'image'] ==
                                                               null
-                                                          ? NetworkImage(
+                                                          ? currentUserData[
+                                                                      'genders_id'] ==
+                                                                  "1"
+                                                              ? const NetworkImage(
                                                                   ImageAssets
-                                                                      .dummyImage)
-                                                              as ImageProvider<
-                                                                  Object>
+                                                                      .dummyImage) // First image for genderId == 1
+                                                              : currentUserData[
+                                                                          'genders_id'] ==
+                                                                      "2"
+                                                                  ? const NetworkImage(
+                                                                      ImageAssets
+                                                                          .dummyImage1) // Second image for genderId == 2
+                                                                  : const NetworkImage(
+                                                                      ImageAssets
+                                                                          .dummyImage2)
                                                           : NetworkImage(
                                                               'https://mio.eigix.net/${currentUserData['image']}',
                                                             ),
@@ -581,7 +601,7 @@ class _ExplorePageState extends State<ExplorePage> {
                               },
                             ),
                     )
-                  : SizedBox(),
+                  : const SizedBox(),
               /////usermatch//////
               selectedIndex2 == true
                   ? SizedBox(
@@ -628,7 +648,10 @@ class _ExplorePageState extends State<ExplorePage> {
                                   //   transition: Transition.native,
                                   // );
                                   Get.to(
-                                    () => const UserMatchesPage(),
+                                    () => UserMatchesPage(
+                                      userid:
+                                          currentUserData['users_customers_id'],
+                                    ),
                                     duration: const Duration(milliseconds: 350),
                                     transition: Transition.rightToLeft,
                                   );
@@ -647,12 +670,23 @@ class _ExplorePageState extends State<ExplorePage> {
                                                           null ||
                                                       currentUserData['avatars']
                                                           .isEmpty)
-                                                  ? NetworkImage(ImageAssets
-                                                          .dummyImage)
-                                                      as ImageProvider<Object>
+                                                  ? currentUserData[
+                                                              'genders_id'] ==
+                                                          "1"
+                                                      ? const NetworkImage(
+                                                          ImageAssets
+                                                              .dummyImage) // First image for genderId == 1
+                                                      : currentUserData[
+                                                                  'genders_id'] ==
+                                                              "2"
+                                                          ? const NetworkImage(
+                                                              ImageAssets
+                                                                  .dummyImage1) // Second image for genderId == 2
+                                                          : const NetworkImage(
+                                                              ImageAssets
+                                                                  .dummyImage2) // Third image for any other case
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
-                                                    ),
+                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
                                               fit: BoxFit.fill,
                                             ),
                                             shape: RoundedRectangleBorder(
@@ -683,7 +717,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 20.0),
+                                          horizontal: 16.0),
                                       child: Row(
                                         children: [
                                           Container(
@@ -694,9 +728,21 @@ class _ExplorePageState extends State<ExplorePage> {
                                                 image: currentUserData[
                                                             'image'] ==
                                                         null
-                                                    ? NetworkImage(
-                                                            ImageAssets.image1)
-                                                        as ImageProvider<Object>
+                                                    ? currentUserData[
+                                                                'genders_id'] ==
+                                                            "1"
+                                                        ? const NetworkImage(
+                                                            ImageAssets
+                                                                .dummyImage) // First image for genderId == 1
+                                                        : currentUserData[
+                                                                    'genders_id'] ==
+                                                                "2"
+                                                            ? const NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage1) // Second image for genderId == 2
+                                                            : const NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage2)
                                                     : NetworkImage(
                                                         'https://mio.eigix.net/${currentUserData['image']}',
                                                       ),
@@ -728,7 +774,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         },
                       ),
                     )
-                  : SizedBox(),
+                  : const SizedBox(),
               // userliked/////
               selectedIndex3 == true
                   ? SizedBox(
@@ -789,12 +835,23 @@ class _ExplorePageState extends State<ExplorePage> {
                                                           null ||
                                                       currentUserData['avatars']
                                                           .isEmpty)
-                                                  ? NetworkImage(ImageAssets
-                                                          .dummyImage)
-                                                      as ImageProvider<Object>
+                                                  ? currentUserData[
+                                                              'genders_id'] ==
+                                                          "1"
+                                                      ? const NetworkImage(
+                                                          ImageAssets
+                                                              .dummyImage) // First image for genderId == 1
+                                                      : currentUserData[
+                                                                  'genders_id'] ==
+                                                              "2"
+                                                          ? const NetworkImage(
+                                                              ImageAssets
+                                                                  .dummyImage1) // Second image for genderId == 2
+                                                          : const NetworkImage(
+                                                              ImageAssets
+                                                                  .dummyImage2) // Third image for any other case
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
-                                                    ),
+                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
                                               fit: BoxFit.fill,
                                             ),
                                             shape: RoundedRectangleBorder(
@@ -825,7 +882,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 20.0),
+                                          horizontal: 16.0),
                                       child: Row(
                                         children: [
                                           Container(
@@ -836,9 +893,21 @@ class _ExplorePageState extends State<ExplorePage> {
                                                 image: currentUserData[
                                                             'image'] ==
                                                         null
-                                                    ? NetworkImage(
-                                                            ImageAssets.image1)
-                                                        as ImageProvider<Object>
+                                                    ? currentUserData[
+                                                                'genders_id'] ==
+                                                            "1"
+                                                        ? const NetworkImage(
+                                                            ImageAssets
+                                                                .dummyImage) // First image for genderId == 1
+                                                        : currentUserData[
+                                                                    'genders_id'] ==
+                                                                "2"
+                                                            ? const NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage1) // Second image for genderId == 2
+                                                            : const NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage2)
                                                     : NetworkImage(
                                                         'https://mio.eigix.net/${currentUserData['image']}',
                                                       ),
@@ -870,7 +939,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         },
                       ),
                     )
-                  : SizedBox(),
+                  : const SizedBox(),
 
               //userlikedby/////
               selectedIndex4 == true
@@ -911,8 +980,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                 onTap: () {
                                   Get.to(
                                     () => ExploreVideoView(
-                                        userid: currentUserData['user_data']
-                                            ['users_customers_id'],
+                                        userid: currentUserData[
+                                            'users_customers_id'],
                                         match: 'no'),
                                     duration: const Duration(seconds: 1),
                                     transition: Transition.native,
@@ -932,12 +1001,23 @@ class _ExplorePageState extends State<ExplorePage> {
                                                           null ||
                                                       currentUserData['avatars']
                                                           .isEmpty)
-                                                  ? NetworkImage(ImageAssets
-                                                          .dummyImage)
-                                                      as ImageProvider<Object>
+                                                  ? currentUserData[
+                                                              'genders_id'] ==
+                                                          "1"
+                                                      ? const NetworkImage(
+                                                          ImageAssets
+                                                              .dummyImage) // First image for genderId == 1
+                                                      : currentUserData[
+                                                                  'genders_id'] ==
+                                                              "2"
+                                                          ? const NetworkImage(
+                                                              ImageAssets
+                                                                  .dummyImage1) // Second image for genderId == 2
+                                                          : const NetworkImage(
+                                                              ImageAssets
+                                                                  .dummyImage2) // Third image for any other case
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
-                                                    ),
+                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
                                               fit: BoxFit.fill,
                                             ),
                                             shape: RoundedRectangleBorder(
@@ -968,7 +1048,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 20.0),
+                                          horizontal: 16.0),
                                       child: Row(
                                         children: [
                                           Container(
@@ -979,9 +1059,21 @@ class _ExplorePageState extends State<ExplorePage> {
                                                 image: currentUserData[
                                                             'image'] ==
                                                         null
-                                                    ? NetworkImage(
-                                                            ImageAssets.image1)
-                                                        as ImageProvider<Object>
+                                                    ? currentUserData[
+                                                                'genders_id'] ==
+                                                            "1"
+                                                        ? const NetworkImage(
+                                                            ImageAssets
+                                                                .dummyImage) // First image for genderId == 1
+                                                        : currentUserData[
+                                                                    'genders_id'] ==
+                                                                "2"
+                                                            ? const NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage1) // Second image for genderId == 2
+                                                            : const NetworkImage(
+                                                                ImageAssets
+                                                                    .dummyImage2)
                                                     : NetworkImage(
                                                         'https://mio.eigix.net/${currentUserData['image']}',
                                                       ),
@@ -1013,7 +1105,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         },
                       ),
                     )
-                  : SizedBox()
+                  : const SizedBox()
             ],
           ),
         ),

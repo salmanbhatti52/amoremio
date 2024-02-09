@@ -9,6 +9,9 @@ class MyText extends StatelessWidget {
   final TextAlign align;
   final FontStyle? style;
   final TextDecoration? textDecoration;
+  final bool softWrap;
+  final int? maxLines;
+  final TextOverflow overflow;
   const MyText({
     super.key,
     required this.text,
@@ -18,6 +21,9 @@ class MyText extends StatelessWidget {
     this.fontSize = 24,
     this.fontWeight = FontWeight.w600,
     this.align = TextAlign.center,
+    this.softWrap = true,
+    this.maxLines = 2,
+    this.overflow = TextOverflow.fade,
   });
 
   @override
@@ -33,6 +39,9 @@ class MyText extends StatelessWidget {
         fontWeight: fontWeight,
       ),
       textAlign: align,
+      softWrap: softWrap,
+      maxLines: maxLines,
+      overflow: overflow,
     );
   }
 }

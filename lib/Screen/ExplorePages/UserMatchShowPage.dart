@@ -10,7 +10,8 @@ import '../ChatPages/ChatDetailsPage/ChatDetailsPage.dart';
 import '../ChatPages/ChatPage/ChatPage.dart';
 
 class UserMatchesPage extends StatelessWidget {
-  const UserMatchesPage({Key? key}) : super(key: key);
+  final String userid;
+  const UserMatchesPage({Key? key, required this.userid}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +63,7 @@ class UserMatchesPage extends StatelessWidget {
               gradientColor2: AppColor.whiteColor,
               onTap: () {
                 Get.to(
-                  () => ChatDetailsPage(),
+                  () => ChatDetailsPage(userId: userid),
                   // arguments: [
                   //   {"email": emailController.text.toString()},
                   // ],

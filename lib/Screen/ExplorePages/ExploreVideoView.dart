@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../Utills/AppUrls.dart';
 import '../BottomNavigationBar/BottomNavigationBar.dart';
@@ -61,6 +63,8 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   // ];
   List<dynamic> imgListavators = [];
   List<dynamic> userDataList = [];
+  List<dynamic> uservideos = [];
+
   String address = '';
   var username = '';
   var summary = '';
@@ -71,6 +75,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   final CarouselController _controller = CarouselController();
   // Define sheetTopPosition here
   double sheetTopPosition = 0;
+  Map<String, Uint8List?> thumbnails = {};
   @override
   void initState() {
     // TODO: implement initState
@@ -119,8 +124,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     // setState(() {
     //   isLoading = true; // Show loader
     // });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? userId = prefs.getString('users_customers_id');
+
     String apiUrl = getusersavatars;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -135,9 +139,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
 
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        print('avatoes::::: ${response.body}');
+        // print('avatoes::::: ${response.body}');
         // imgurl = baseUrlImage + data['data']['image'];
         imgListavators = data['data'];
+        userstories();
         setState(() {
           Navigator.of(context).pop();
         });
@@ -151,6 +156,58 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         isLoading = false;
       });
       print('errorfound $e');
+    }
+  }
+
+  userstories() async {
+    String apiUrl = getuserallstories;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": widget.userid,
+            },
+          ));
+
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        print('user stories::::: ${response.body}');
+        // imgurl = baseUrlImage + data['data']['image'];
+        uservideos = data['data'];
+        await generateAllThumbnails(uservideos);
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('errorfound $e');
+    }
+  }
+
+  Future<void> generateAllThumbnails(List<dynamic> videos) async {
+    bool shouldUpdate = false;
+    for (var video in videos) {
+      if (video['media_type'] == 'Video') {
+        var thumbnail = await generateThumbnail(baseUrlImage + video['media']);
+        if (thumbnail != null) {
+          thumbnails[video['media']] = thumbnail;
+          shouldUpdate = true;
+        }
+      }
+    }
+    if (shouldUpdate) {
+      setState(
+          () {}); // Only call setState if at least one thumbnail was updated
     }
   }
 
@@ -175,8 +232,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         setState(() {});
         userDataList = data['data'];
         for (var i = 0; i < userDataList.length; i++) {
-          if (userDataList[i]['liked_user']['users_customers_id'] ==
-              widget.userid) {
+          if (userDataList[i]['users_customers_id'] == widget.userid) {
             setState(() {
               isButtonClicked = !isButtonClicked;
             });
@@ -269,7 +325,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       Navigator.of(context).pop();
       var msg = userdetail['message'];
       print('userdetail $userdetail');
-      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       setState(() {
         isButtonClicked = !isButtonClicked;
       });
@@ -293,7 +349,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         baseUrlImage + imgListavators[index]['image'],
         width: MediaQuery.sizeOf(context).width,
         height: MediaQuery.sizeOf(context).height,
-        fit: BoxFit.fill,
+        fit: BoxFit.cover,
       )
           // ImageContainer(
           //   imagePath: imgList[index],
@@ -332,136 +388,45 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                         });
                       }),
                 )
-              : ImageContainer(
-                  child: Image.network(
-                    ImageAssets.dummyImage,
-                    fit: BoxFit.fill,
-                  ),
+              : SizedBox(),
+          // Center(
+          //         child: Container(
+          //           child: CircularProgressIndicator(),
+          //           // child: Image.asset(
+          //           //   ImageAssets.dummystory,
+          //           //   fit: BoxFit.fitWidth,
+          //           //   width: MediaQuery.sizeOf(context).width,
+          //           //   height: MediaQuery.sizeOf(context).height,
+          //           // ),
+          //         ),
+          //       ),
+          Positioned(
+            bottom: Get.height * 0.325,
+            // left: Get.width * 0.405,
+            child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                constraints: BoxConstraints(maxWidth: Get.width * 0.99),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: imgListavators.asMap().entries.map((entry) {
+                    return GestureDetector(
+                      onTap: () => _controller.animateToPage(entry.key),
+                      child: Container(
+                        width: 10.0,
+                        height: 10.0,
+                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _current == entry.key
+                              ? AppColor.whiteColor
+                              : Colors.white30,
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
-          Positioned(
-            bottom: Get.height * 0.315,
-            left: Get.width * 0.405,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: imgListavators.asMap().entries.map((entry) {
-                return GestureDetector(
-                  onTap: () => _controller.animateToPage(entry.key),
-                  child: Container(
-                    width: 10.0,
-                    height: 10.0,
-                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _current == entry.key
-                          ? AppColor.whiteColor
-                          : Colors.white30,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          // Positioned(
-          //   bottom: Get.height * 0.324,
-          //   left: Get.width * 0.355,
-          //   child: RoundedContainer(
-          //     onTap: () {},
-          //     containerColor: image1 ?  AppColor.whiteColor : Colors.white30,
-          //   ),
-          // ),
-          // Positioned(
-          //   bottom: Get.height * 0.324,
-          //   left: Get.width * 0.395,
-          //   child: RoundedContainer(
-          //     onTap: () {},
-          //     containerColor: image2 ?  AppColor.whiteColor : Colors.white30,
-          //   ),
-          // ),
-          // Positioned(
-          //   bottom: Get.height * 0.324,
-          //   left: Get.width * 0.43,
-          //   child: RoundedContainer(
-          //     onTap: () {},
-          //     containerColor: Colors.white30,
-          //   ),
-          // ),
-          // Positioned(
-          //   bottom: Get.height * 0.324,
-          //   left: Get.width * 0.47,
-          //   child: RoundedContainer(
-          //     onTap: () {},
-          //     containerColor: Colors.white30,
-          //   ),
-          // ),
-          // Positioned(
-          //   bottom: Get.height * 0.324,
-          //   left: Get.width * 0.51,
-          //   child: RoundedContainer(
-          //     onTap: () {},
-          //     containerColor: Colors.white30,
-          //   ),
-          // ),
-          // Positioned(
-          //   bottom: Get.height * 0.324,
-          //   left: Get.width * 0.55,
-          //   child: RoundedContainer(
-          //     onTap: () {},
-          //     containerColor: Colors.white30,
-          //   ),
-          // ),
-          Positioned(
-            bottom: Get.height * 0.23,
-            left: Get.width * 0.06,
-            child: RoundedImage(
-              onTap: () {},
-              width: Get.width * 0.15,
-              height: Get.height * 0.07,
-              containerColor: AppColor.whiteColor,
-              icon: ImageAssets.introImage,
-            ),
-          ),
-          Positioned(
-            bottom: Get.height * 0.23,
-            left: Get.width * 0.24,
-            child: RoundedImage(
-              onTap: () {},
-              width: Get.width * 0.15,
-              height: Get.height * 0.07,
-              containerColor: AppColor.whiteColor,
-              icon: ImageAssets.image2,
-            ),
-          ),
-          Positioned(
-            bottom: Get.height * 0.23,
-            left: Get.width * 0.43,
-            child: RoundedImage(
-              onTap: () {},
-              width: Get.width * 0.15,
-              height: Get.height * 0.07,
-              containerColor: AppColor.whiteColor,
-              icon: ImageAssets.introImage,
-            ),
-          ),
-          Positioned(
-            bottom: Get.height * 0.23,
-            right: Get.width * 0.24,
-            child: RoundedImage(
-              onTap: () {},
-              width: Get.width * 0.15,
-              height: Get.height * 0.07,
-              containerColor: AppColor.whiteColor,
-              icon: ImageAssets.image3,
-            ),
-          ),
-          Positioned(
-            bottom: Get.height * 0.23,
-            right: Get.width * 0.06,
-            child: RoundedImage(
-              onTap: () {},
-              width: Get.width * 0.15,
-              height: Get.height * 0.07,
-              containerColor: AppColor.whiteColor,
-              icon: ImageAssets.exploreImage,
+              ),
             ),
           ),
 
@@ -608,6 +573,79 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
           //     ),
           //   ),
           // ),
+          Positioned(
+            bottom: 160,
+            left: 0,
+            right: 0,
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.10,
+                    width: MediaQuery.of(context).size.width,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: uservideos.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var story = uservideos[index];
+                        var videoPath = story;
+                        if (videoPath['media_type'] == 'Video' &&
+                            thumbnails.containsKey(story['media'])) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 0.0),
+                            child: Column(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                      top: 1, left: 13, right: 1),
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    border: Border.all(
+                                      width: 2,
+                                      color: AppColor.whiteColor,
+                                    ),
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: GestureDetector(
+                                      onTap: () {},
+                                      child: Image.memory(
+                                        thumbnails[story['media']]!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return Container(
+                            margin: const EdgeInsets.only(
+                              bottom: 12,
+                              left: 10,
+                            ),
+                            width: 60,
+                            height: 60,
+                            decoration: ShapeDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    'https://mio.eigix.net/${story['media']}'),
+                                fit: BoxFit.fill,
+                              ),
+                              shape: CircleBorder(
+                                side: BorderSide(width: 2, color: Colors.white),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+          ),
           NotificationListener<DraggableScrollableNotification>(
             onNotification: (notification) {
               if (notification.extent < 1.0) {
@@ -662,7 +700,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                             left: Get.width * 0.06,
                             top: Get.height * 0.02,
                             right: Get.width * 0.06,
-                            bottom: Get.height * 0.01,
+                            bottom: Get.height * 0.0,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -672,28 +710,29 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                 fontSize: 18,
                                 color: AppColor.blackColor,
                               ),
-                              Row(
-                                children: [
-                                  SvgPicture.asset(
-                                    ImageAssets.createStory1,
-                                    color: AppColor.secondaryColor,
-                                  ),
-                                  const MyText(
-                                    text: "0",
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                    color: AppColor.secondaryColor,
-                                  ),
-                                ],
-                              ),
+                              // Row(
+                              //   children: [
+                              //     SvgPicture.asset(
+                              //       ImageAssets.createStory1,
+                              //       color: AppColor.secondaryColor,
+                              //     ),
+                              //     const MyText(
+                              //       text: "0",
+                              //       fontWeight: FontWeight.w500,
+                              //       fontSize: 14,
+                              //       color: AppColor.secondaryColor,
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
                         ),
                         Padding(
                           padding: EdgeInsets.only(
-                              left: Get.width * 0.06,
+                              left: Get.width * 0.05,
                               bottom: Get.height * 0.02),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
                                 Icons.location_on,
@@ -703,11 +742,13 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                               const SizedBox(
                                 width: 3,
                               ),
-                              MyText(
-                                text: "$address, ${'2.5 Km'}",
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                                color: const Color(0xFF3B3B3B),
+                              Expanded(
+                                child: MyText(
+                                    text: "$address, ${'2.5 Km'}",
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12,
+                                    color: const Color(0xFF3B3B3B),
+                                    align: TextAlign.left),
                               ),
                             ],
                           ),
@@ -746,7 +787,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
             ),
           ),
           Positioned(
-            bottom: 0,
+            bottom: 3,
             left: 0,
             right: 0,
             child: Row(
@@ -755,7 +796,12 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
               children: [
                 GestureDetector(
                   onTap: () {
-                    Get.back();
+                    // Get.back();
+                    Get.to(
+                      () => MyBottomNavigationBar(),
+                      duration: const Duration(milliseconds: 300),
+                      transition: Transition.rightToLeft,
+                    );
                   },
                   child: SvgPicture.asset(ImageAssets.explore2),
                 ),
@@ -813,5 +859,20 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     }
 
     return age;
+  }
+
+  Future<Uint8List?> generateThumbnail(String videoUrl) async {
+    try {
+      final uint8list = await VideoThumbnail.thumbnailData(
+        video: videoUrl,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 128, // specify the width of the thumbnail
+        quality: 25,
+      );
+      return uint8list;
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 }

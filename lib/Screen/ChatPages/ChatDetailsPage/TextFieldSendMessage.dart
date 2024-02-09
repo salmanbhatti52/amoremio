@@ -4,8 +4,19 @@ import '../../../Resources/assets/assets.dart';
 import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-Widget sendMessageTextFields(Key key, TextEditingController controller, ) {
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'dart:io';
 
+// required void Function() onCameraIconClick
+Widget sendMessageTextFields(Key key, TextEditingController controller,
+    {required void Function(String text) onSendMessage,
+    required void Function() closekeyboard,
+    required BuildContext context,
+    required ScrollController scrollController,
+    required void Function() onCameraIconClick,
+    required GlobalKey<AnimatedListState> listKey,
+    required bool isEmojiVisible,
+    required void Function() toggleEmojiPicker}) {
   return Form(
     key: key,
     child: Expanded(
@@ -17,6 +28,7 @@ Widget sendMessageTextFields(Key key, TextEditingController controller, ) {
         child: Row(
           children: [
             GestureDetector(
+              onTap: toggleEmojiPicker,
               child: Padding(
                 padding: const EdgeInsets.only(left: 15.0),
                 child: SvgPicture.asset(ImageAssets.emoji),
@@ -24,8 +36,22 @@ Widget sendMessageTextFields(Key key, TextEditingController controller, ) {
             ),
             Expanded(
               child: TextField(
+                onTap: closekeyboard,
                 textAlign: TextAlign.left,
                 controller: controller,
+                onEditingComplete: () {
+                  onSendMessage(controller?.text ?? "");
+                  controller?.clear();
+                  FocusScope.of(context).unfocus();
+                  // This function will be called when the keyboard submit button is pressed
+
+                  // Scroll to the bottom
+                  scrollController.animateTo(
+                    scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  );
+                },
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.only(left: 10, bottom: 3),
                   hintText: "Type a message",
@@ -46,11 +72,14 @@ Widget sendMessageTextFields(Key key, TextEditingController controller, ) {
                 color: Color(0xff706D6D),
               ),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(left: 5.0, right: 5),
-              child: Icon(
-                Icons.photo_camera,
-                color: Color(0xff706D6D),
+              child: GestureDetector(
+                onTap: onCameraIconClick,
+                child: Icon(
+                  Icons.photo_camera,
+                  color: Color(0xff706D6D),
+                ),
               ),
             ),
           ],

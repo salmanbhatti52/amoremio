@@ -17,8 +17,8 @@ class CreateStory extends StatefulWidget {
   State<CreateStory> createState() => _CreateStoryState();
 }
 
-class _CreateStoryState extends State<CreateStory> with SingleTickerProviderStateMixin {
-
+class _CreateStoryState extends State<CreateStory>
+    with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
   @override
@@ -33,7 +33,12 @@ class _CreateStoryState extends State<CreateStory> with SingleTickerProviderStat
       body: ExploreContainer(
         child: Column(
           children: [
-            const CreateStoryAppbar(title: "LOGO", title2: "Stories",title3:  "Sort By", icon: ImageAssets.sort,),
+            const CreateStoryAppbar(
+              title: "LOGO",
+              title2: "Stories",
+              title3: "Sort By",
+              icon: ImageAssets.sort,
+            ),
             Container(
               width: Get.width * 0.9,
               height: Get.height * 0.05,
@@ -80,14 +85,12 @@ class _CreateStoryState extends State<CreateStory> with SingleTickerProviderStat
             ),
             SizedBox(height: Get.height * 0.03),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                  children:  [
-                    const OwnedStories(),
-                    PaidStories(),
-                    FreeStories(),
-                    const StatusStories(),
-                  ]),
+              child: TabBarView(controller: _tabController, children: [
+                const OwnedStories(),
+                PaidStories(),
+                FreeStories(),
+                const StatusStories(),
+              ]),
             )
           ],
         ),

@@ -383,9 +383,19 @@ class _BlockedUserState extends State<BlockedUser> {
                                                 currentUserData['blocked_user']
                                                         ['avatars']
                                                     .isEmpty)
-                                            ? NetworkImage(
-                                                    ImageAssets.dummyImage)
-                                                as ImageProvider<Object>
+                                            ? currentUserData['blocked_user']
+                                                        ['genders_id'] ==
+                                                    "1"
+                                                ? const NetworkImage(ImageAssets
+                                                    .dummyImage) // First image for genderId == 1
+                                                : currentUserData[
+                                                                'blocked_user']
+                                                            ['genders_id'] ==
+                                                        "2"
+                                                    ? const NetworkImage(ImageAssets
+                                                        .dummyImage1) // Second image for genderId == 2
+                                                    : const NetworkImage(
+                                                        ImageAssets.dummyImage2)
                                             : NetworkImage(
                                                 'https://mio.eigix.net/${currentUserData['blocked_user']['avatars'][0]['image']}',
                                               ),
@@ -429,9 +439,21 @@ class _BlockedUserState extends State<BlockedUser> {
                                           image: currentUserData['blocked_user']
                                                       ['image'] ==
                                                   null
-                                              ? NetworkImage(
-                                                      ImageAssets.dummyImage)
-                                                  as ImageProvider<Object>
+                                              ? currentUserData['blocked_user']
+                                                          ['genders_id'] ==
+                                                      "1"
+                                                  ? const NetworkImage(ImageAssets
+                                                      .dummyImage) // First image for genderId == 1
+                                                  : currentUserData[
+                                                                  'blocked_user']
+                                                              ['genders_id'] ==
+                                                          "2"
+                                                      ? const NetworkImage(
+                                                          ImageAssets
+                                                              .dummyImage1) // Second image for genderId == 2
+                                                      : const NetworkImage(
+                                                          ImageAssets
+                                                              .dummyImage2)
                                               : NetworkImage(
                                                   'https://mio.eigix.net/${currentUserData['blocked_user']['image']}',
                                                 ),

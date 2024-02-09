@@ -18,7 +18,7 @@ class ExploreAppbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
+      padding: const EdgeInsets.only(top: 0.0),
       child: AppBar(
         backgroundColor: Colors.transparent, // Set a transparent background
         flexibleSpace: gradientColor(context), // Apply the gradient background
@@ -27,9 +27,7 @@ class ExploreAppbar extends StatelessWidget implements PreferredSizeWidget {
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.light,
         ),
-        leading: Padding(
-            padding: const EdgeInsets.only(top: 0),
-            child: SvgPicture.asset(ImageAssets.logo)),
+        leading: SvgPicture.asset(ImageAssets.logo),
         leadingWidth: 110,
         title: MyText(
           text: title2,
