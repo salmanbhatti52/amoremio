@@ -212,7 +212,7 @@ class _FreeStoryState extends State<FreeStory> {
                                         );
                                       }
                                     } else {
-                                      return const CircularProgressIndicator(); // Loading indicator
+                                      return const SizedBox();
                                     }
                                   },
                                 )
@@ -267,79 +267,82 @@ class _FreeStoryState extends State<FreeStory> {
                           child: Container(
                             width: Get.width * 0.3,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
+                              borderRadius: const BorderRadius.only(
                                 bottomRight: Radius.circular(3.40),
                                 bottomLeft: Radius.circular(3.40),
                               ),
-                              color: AppColor.redColor.withOpacity(0.9),
+                              color: AppColor.redColor.withOpacity(0.5),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Column(
-                                  children: [
-                                    const Icon(
-                                      Icons.remove_red_eye,
-                                      color: AppColor.whiteColor,
-                                      size: 10,
-                                    ),
-                                    MyText(
-                                      text: Userstory['stats']['total_views']
-                                          .toString(),
-                                      fontSize: 5.12,
-                                      fontWeight: FontWeight.w500,
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    SvgPicture.asset(
-                                      width: 10,
-                                      height: 10,
-                                      color: Colors.white,
-                                      ImageAssets.createStory1,
-                                    ),
-                                    MyText(
-                                      text: Userstory['stats']['total_likes']
-                                          .toString(),
-                                      fontSize: 5.12,
-                                      fontWeight: FontWeight.w500,
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    SvgPicture.asset(
-                                      width: 10,
-                                      height: 10,
-                                      color: Colors.white,
-                                      ImageAssets.chat1,
-                                    ),
-                                    MyText(
-                                      text: Userstory['stats']['total_comments']
-                                          .toString(),
-                                      fontSize: 5.12,
-                                      fontWeight: FontWeight.w500,
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    SvgPicture.asset(
-                                      width: 10,
-                                      height: 10,
-                                      color: Colors.white,
-                                      ImageAssets.share,
-                                    ),
-                                    MyText(
-                                      text: Userstory['stats']['total_shares']
-                                          .toString(),
-                                      fontSize: 5.12,
-                                      fontWeight: FontWeight.w500,
-                                    )
-                                  ],
-                                ),
-                              ],
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0, right: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    children: [
+                                      const Icon(
+                                        Icons.remove_red_eye,
+                                        color: AppColor.whiteColor,
+                                        size: 10,
+                                      ),
+                                      MyText(
+                                        text: Userstory['stats']['total_views']
+                                            .toString(),
+                                        fontSize: 5.12,
+                                        fontWeight: FontWeight.w500,
+                                      )
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      SvgPicture.asset(
+                                        width: 10,
+                                        height: 10,
+                                        color: Colors.white,
+                                        ImageAssets.createStory1,
+                                      ),
+                                      MyText(
+                                        text: Userstory['stats']['total_likes']
+                                            .toString(),
+                                        fontSize: 5.12,
+                                        fontWeight: FontWeight.w500,
+                                      )
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      SvgPicture.asset(
+                                        width: 10,
+                                        height: 10,
+                                        color: Colors.white,
+                                        ImageAssets.chat1,
+                                      ),
+                                      MyText(
+                                        text: Userstory['stats']['total_comments']
+                                            .toString(),
+                                        fontSize: 5.12,
+                                        fontWeight: FontWeight.w500,
+                                      )
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      SvgPicture.asset(
+                                        width: 10,
+                                        height: 10,
+                                        color: Colors.white,
+                                        ImageAssets.share,
+                                      ),
+                                      MyText(
+                                        text: Userstory['stats']['total_shares']
+                                            .toString(),
+                                        fontSize: 5.12,
+                                        fontWeight: FontWeight.w500,
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

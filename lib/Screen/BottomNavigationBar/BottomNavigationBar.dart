@@ -10,7 +10,9 @@ import 'package:amoremio/Screen/CreateStory/createstory.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
+  final int initialIndex;
   const MyBottomNavigationBar({
+    this.initialIndex = 0,
     Key? key,
   }) : super(key: key);
 
@@ -32,6 +34,12 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     setState(() {
       currentIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = widget.initialIndex;
   }
 
   @override

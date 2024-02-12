@@ -194,12 +194,15 @@ class _ChatPageState extends State<ChatPage> {
                                       image: user['image'] == null
                                           ? user['genders_id'] == "1"
                                               ? const NetworkImage(ImageAssets
-                                                  .dummyImage) // First image for genderId == 1
+                                                  .dummyImage,
+                                      )
                                               : user['genders_id'] == "2"
                                                   ? const NetworkImage(ImageAssets
-                                                      .dummyImage1) // Second image for genderId == 2
+                                                      .dummyImage1,
+                                      )
                                                   : const NetworkImage(
-                                                      ImageAssets.dummyImage2)
+                                                      ImageAssets.dummyImage2,
+                                      )
                                           : NetworkImage(
                                               'https://mio.eigix.net/${user['image']}',
                                             ),
@@ -207,7 +210,7 @@ class _ChatPageState extends State<ChatPage> {
                                     ),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(50),
-                                        side: BorderSide(
+                                        side: const BorderSide(
                                             color: Colors.white, width: 2.5)),
                                   ),
                                 ),
@@ -227,7 +230,7 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                             MyText(
                               text: user['username'],
-                              color: Color(0xFFFFD6D6),
+                              color: const Color(0xFFFFD6D6),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -302,7 +305,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 decoration: ShapeDecoration(
                                                   image: DecorationImage(
                                                     image: image
-                                                        ? NetworkImage(
+                                                        ? const NetworkImage(
                                                                 ImageAssets
                                                                     .dummyImage)
                                                             as ImageProvider<
@@ -313,7 +316,7 @@ class _ChatPageState extends State<ChatPage> {
                                                                     ['image']),
                                                     fit: BoxFit.fill,
                                                   ),
-                                                  shape: OvalBorder(),
+                                                  shape: const OvalBorder(),
                                                 ),
                                               ),
                                               SizedBox(
@@ -340,7 +343,7 @@ class _ChatPageState extends State<ChatPage> {
                                                       text: chats['user_data']
                                                               ['last_message']
                                                           ['message'],
-                                                      color: Color(0xFF727171),
+                                                      color: const Color(0xFF727171),
                                                       fontSize: 10,
                                                       fontWeight:
                                                           FontWeight.w400,
@@ -377,7 +380,7 @@ class _ChatPageState extends State<ChatPage> {
                                             children: [
                                               MyText(
                                                 text: timeAgo,
-                                                color: Color(0xFF727171),
+                                                color: const Color(0xFF727171),
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w400,
                                               ),

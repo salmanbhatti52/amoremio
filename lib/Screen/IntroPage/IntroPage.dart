@@ -1,3 +1,4 @@
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../Resources/assets/assets.dart';
@@ -28,16 +29,17 @@ class IntroPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Padding(
+                 Padding(
                   padding: EdgeInsets.only(left: 15.0),
                   child: Align(
                     alignment: Alignment.topLeft,
-                    child: MyText(
-                      text: "LOGO",
-                      fontSize: 27.50,
+                    child: SvgPicture.asset(
+                      ImageAssets.logo,
+                      height: 100,
+                      width: 100,
                     ),
                   ),
-                ),
+                  ),
                 Column(
                   children: [
                     FadeInUp(

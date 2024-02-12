@@ -1,3 +1,5 @@
+import 'package:amoremio/Resources/assets/assets.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:flutter/material.dart';
@@ -27,12 +29,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: ExploreContainer(
         child: Center(
-          child: MyText(
-            text: "LOGO",
-            fontSize: 40,
+          child: SvgPicture.asset(
+            ImageAssets.logo,
+            height: 170,
           ),
         ),
       ),

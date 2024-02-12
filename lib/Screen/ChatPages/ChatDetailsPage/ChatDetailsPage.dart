@@ -204,11 +204,6 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     print('attachment type $attachmentTpye');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(child: CircularProgressIndicator());
-        });
     String apiUrl = sendChatmessages;
     try {
       var data1 = {
@@ -236,10 +231,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
         setState(() {
           // chatmessages.add(data);
           this.fetchMessages();
-          Navigator.of(context).pop();
         });
       } else {
-        Navigator.of(context).pop();
         print(userdetail['status']);
         var errormsg = userdetail['message'];
         ScaffoldMessenger.of(context)
@@ -598,8 +591,178 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
           //     ),
           //   ),
           // ),
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                barrierColor: Colors.grey.withOpacity(0.9),
+                barrierDismissible: false,
+                builder: (BuildContext context) => FadeInDown(
+                  child: Dialog(
+                    backgroundColor: Colors.transparent,
+                    alignment: Alignment.center,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.topCenter,
+                      children: [
+                        Container(
+                          width: Get.width * 0.8, //350,
+                          height: Get.height * 0.50, // 321,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const SizedBox(),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.back();
+                                      },
+                                      child: const Icon(
+                                        Icons.clear,
+                                        color: AppColor.blackColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Image.asset(ImageAssets.gifts),
+                              SizedBox(
+                                height: Get.height * 0.02,
+                              ),
+                              const MyText(
+                                text: "Congratulations!",
+                                fontSize: 18,
+                                color: AppColor.secondaryColor,
+                              ),
+                              SizedBox(
+                                height: Get.height * 0.02,
+                              ),
+                              const Padding(
+                                padding:
+                                EdgeInsets.symmetric(horizontal: 15.0),
+                                child: MyText(
+                                  text:
+                                  "Your Call duration was just 2 Mints",
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
+                                  color: Color(0xFF727171),
+                                ),
+                              ),
+                              SizedBox(
+                                height: Get.height * 0.025,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment:
+                                CrossAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(ImageAssets.alarm),
+                                  const MyText(
+                                    text: " 1 Min",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColor.blackColor,
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Icon(
+                                      CupertinoIcons.equal,
+                                      color: AppColor.blackColor,
+                                    ),
+                                  ),
+                                  SvgPicture.asset(ImageAssets.healthicons),
+                                  const MyText(
+                                    text: " 10 Coins ",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColor.blackColor,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: Get.height * 0.025,
+                              ),
+                              Container(
+                                width: Get.width * 0.64,
+                                height: Get.height * 0.065,
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      AppColor.primaryColor,
+                                      AppColor.secondaryColor,
+                                    ],
+                                    begin: Alignment(0.20, -0.98),
+                                    end: Alignment(-0.2, 0.98),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      ImageAssets.healthicons,
+                                      width: 30,
+                                      height: 30,
+                                      color: AppColor.whiteColor,
+                                    ),
+                                    const SizedBox(
+                                      width: 15,
+                                    ),
+                                    const MyText(
+                                      text: "Send 20 Coins",
+                                      fontSize: 18,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: const ShapeDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment(0.85, -0.53),
+                  end: Alignment(-0.85, 0.53),
+                  colors: [Colors.white, Color(0xFFFFBFBF)],
+                ),
+                shape: OvalBorder(),
+                shadows: [
+                  BoxShadow(
+                    color: Color(0x3F000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 0),
+                    spreadRadius: 1,
+                  )
+                ],
+              ),
+              child: Center(child: SvgPicture.asset(ImageAssets.gift,),),
+            ),
+          ),
           const SizedBox(
-            width: 5,
+            width: 10,
           ),
           InkWell(
             onTap: () {
@@ -1054,18 +1217,16 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                 child: Column(
                   children: [
                     SizedBox(
-                      // height: Get.height * 0.65,
                       child: ListView.builder(
-                        shrinkWrap:
-                            true, // Allows the ListView to take up only as much space as it needs
-                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
                         controller: scrollController,
                         itemCount: chatmessages.length,
+                        reverse: true,
                         itemBuilder: (context, index) {
-                          Map<String, dynamic> message = chatmessages[index];
-                          bool isSentMessage =
-                              message['sender_id'] != widget.userId;
-
+                          int reverseIndex = chatmessages.length - 1 - index;
+                          Map<String, dynamic> message = chatmessages[reverseIndex];
+                          bool isSentMessage = message['sender_id'] != widget.userId;
                           return Align(
                             alignment: isSentMessage
                                 ? Alignment.topRight
@@ -1245,7 +1406,6 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                       ),
                     ),
                     const SizedBox(width: 05),
-                    // Obx(() {return
                     Container(
                       width: 48,
                       height: 48,
@@ -1254,12 +1414,26 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                         color: AppColor.whiteColor,
                         borderRadius: BorderRadius.circular(31),
                       ),
-                      child: FloatingActionButton(
-                        onPressed: () async {
-                          _showRecordingModal(context);
+                      child: GestureDetector(
+                        onLongPressStart: (_) async {
+                        if (await audioRecord.hasPermission()) {
+                          setState(() {
+                            startrecording();
+                            isRecording = true;
+                          });
+                          }
                         },
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
+                        onLongPressEnd: (_) {
+                          setState(() {
+                            stoprecording();
+                            isRecording = false;
+                          });
+                        },
+                        // onPressed: () async {
+                        //   _showRecordingModal(context);
+                        // },
+                        // backgroundColor: Colors.transparent,
+                        // elevation: 0,
                         child: const Icon(
                           Icons.mic,
                           size: 30,
@@ -1308,199 +1482,6 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
           ],
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 48.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            // Define the action to be taken when the FAB is pressed
-            // For instance, scroll to the bottom of the chat
-            scrollController.animateTo(
-              scrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }, // Define the icon you want
-          // Optional: Customize your FAB appearance
-          backgroundColor: Colors.transparent,
-          elevation: 0.0,
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0, top: 10),
-              child: GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierColor: Colors.grey.withOpacity(0.9),
-                    barrierDismissible: false,
-                    builder: (BuildContext context) => FadeInDown(
-                      child: Dialog(
-                        backgroundColor: Colors.transparent,
-                        alignment: Alignment.center,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          alignment: Alignment.topCenter,
-                          children: [
-                            Container(
-                              width: Get.width * 0.8, //350,
-                              height: Get.height * 0.50, // 321,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Column(
-                                children: [
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const SizedBox(),
-                                        GestureDetector(
-                                          onTap: () {
-                                            Get.back();
-                                          },
-                                          child: const Icon(
-                                            Icons.clear,
-                                            color: AppColor.blackColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Image.asset(ImageAssets.gifts),
-                                  SizedBox(
-                                    height: Get.height * 0.02,
-                                  ),
-                                  const MyText(
-                                    text: "Congratulations!",
-                                    fontSize: 18,
-                                    color: AppColor.secondaryColor,
-                                  ),
-                                  SizedBox(
-                                    height: Get.height * 0.02,
-                                  ),
-                                  const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 15.0),
-                                    child: MyText(
-                                      text:
-                                          "Your Call duration was just 2 Mints",
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                      color: Color(0xFF727171),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: Get.height * 0.025,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(ImageAssets.alarm),
-                                      const MyText(
-                                        text: " 1 Min",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColor.blackColor,
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                        child: Icon(
-                                          CupertinoIcons.equal,
-                                          color: AppColor.blackColor,
-                                        ),
-                                      ),
-                                      SvgPicture.asset(ImageAssets.healthicons),
-                                      const MyText(
-                                        text: " 10 Coins ",
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColor.blackColor,
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: Get.height * 0.025,
-                                  ),
-                                  Container(
-                                    width: Get.width * 0.64,
-                                    height: Get.height * 0.065,
-                                    clipBehavior: Clip.antiAlias,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(30),
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          AppColor.primaryColor,
-                                          AppColor.secondaryColor,
-                                        ],
-                                        begin: Alignment(0.20, -0.98),
-                                        end: Alignment(-0.2, 0.98),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        SvgPicture.asset(
-                                          ImageAssets.healthicons,
-                                          width: 30,
-                                          height: 30,
-                                          color: AppColor.whiteColor,
-                                        ),
-                                        const SizedBox(
-                                          width: 15,
-                                        ),
-                                        const MyText(
-                                          text: "Send 20 Coins",
-                                          fontSize: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: const ShapeDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment(0.85, -0.53),
-                      end: Alignment(-0.85, 0.53),
-                      colors: [Colors.white, Color(0xFFFFBFBF)],
-                    ),
-                    shape: OvalBorder(),
-                    shadows: [
-                      BoxShadow(
-                        color: Color(0x3F000000),
-                        blurRadius: 4,
-                        offset: Offset(0, 0),
-                        spreadRadius: 1,
-                      )
-                    ],
-                  ),
-                  child: Center(child: SvgPicture.asset(ImageAssets.gift)),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -1530,6 +1511,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       if (data['status'] == 'success') {
         setState(() {
           chatmessages = data['data'];
+          print(chatmessages);
           Navigator.of(context).pop();
         });
       } else {
@@ -1543,7 +1525,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       print('error123456');
     }
   }
-
+  bool isRecording = false;
   void _showRecordingModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -1632,7 +1614,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     } catch (e) {
       print('error: $e');
     }
-    Navigator.pop(context);
+    // Navigator.pop(context);
   }
 
   Future<void> playrecording() async {

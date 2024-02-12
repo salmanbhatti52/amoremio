@@ -207,7 +207,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     }
     if (shouldUpdate) {
       setState(
-          () {}); // Only call setState if at least one thumbnail was updated
+          () {});
     }
   }
 
@@ -578,7 +578,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
             left: 0,
             right: 0,
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? Center(child: Padding(
+                  padding: const EdgeInsets.only(bottom: 32.0),
+                  child: CircularProgressIndicator(),
+                ))
                 : SizedBox(
                     height: MediaQuery.of(context).size.height * 0.10,
                     width: MediaQuery.of(context).size.width,
@@ -611,7 +614,13 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(30),
                                     child: GestureDetector(
-                                      onTap: () {},
+                                      onTap: () {
+                                        Get.to(
+                                              () => const MyBottomNavigationBar(initialIndex: 1),
+                                          duration: const Duration(seconds: 1),
+                                          transition: Transition.native,
+                                        );
+                                      },
                                       child: Image.memory(
                                         thumbnails[story['media']]!,
                                         fit: BoxFit.cover,
@@ -623,21 +632,30 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                             ),
                           );
                         } else {
-                          return Container(
-                            margin: const EdgeInsets.only(
-                              bottom: 12,
-                              left: 10,
-                            ),
-                            width: 60,
-                            height: 60,
-                            decoration: ShapeDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(
-                                    'https://mio.eigix.net/${story['media']}'),
-                                fit: BoxFit.fill,
+                          return GestureDetector(
+                            onTap: (){
+                              Get.to(
+                                    () => const MyBottomNavigationBar(initialIndex: 1),
+                                duration: const Duration(seconds: 1),
+                                transition: Transition.native,
+                              );
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(
+                                bottom: 12,
+                                left: 10,
                               ),
-                              shape: CircleBorder(
-                                side: BorderSide(width: 2, color: Colors.white),
+                              width: 60,
+                              height: 60,
+                              decoration: ShapeDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                      'https://mio.eigix.net/${story['media']}'),
+                                  fit: BoxFit.fill,
+                                ),
+                                shape: CircleBorder(
+                                  side: BorderSide(width: 2, color: Colors.white),
+                                ),
                               ),
                             ),
                           );

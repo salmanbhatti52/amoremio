@@ -403,12 +403,9 @@ class _StoryViewState extends State<StoryView> {
                             child: ListView.builder(
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
-                              itemCount: videos[_currentPage]['user_data']
-                                      ['users_stories']
-                                  .length,
+                              itemCount: videos[_currentPage]['user_data']['users_stories'].length,
                               itemBuilder: (BuildContext context, int index) {
-                                var story = videos[_currentPage]['user_data']
-                                    ['users_stories'][index];
+                                var story = videos[_currentPage]['user_data']['users_stories'][index];
                                 var videoPath = story;
                                 if (videoPath['media_type'] == 'Video') {
                                   return FutureBuilder<Uint8List?>(
@@ -463,12 +460,20 @@ class _StoryViewState extends State<StoryView> {
                                           return const CircularProgressIndicator(); // Or some other placeholder
                                         }
                                       } else {
-                                        return const SizedBox(
+                                        return SizedBox(
                                           width: 65,
                                           height: 65,
                                           child: Center(
-                                              child:
-                                                  CircularProgressIndicator()),
+                                              child: Container(
+                                                width: 60,
+                                                height: 60,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(30),
+                                                  border: Border.all(width: 2, color: Colors.white,),
+                                                ),
+                                                margin: const EdgeInsets.all(5),
+                                              ),
+                                          ),
                                         ); // Loading indicator while the thumbnail is being generated
                                       }
                                     },
@@ -477,6 +482,7 @@ class _StoryViewState extends State<StoryView> {
                                   return Container(
                                     width: 60,
                                     height: 60,
+                                    margin: EdgeInsets.all(5),
                                     decoration: ShapeDecoration(
                                       image: DecorationImage(
                                         image: NetworkImage(
