@@ -16,7 +16,8 @@ Widget sendMessageTextFields(Key key, TextEditingController controller,
     required void Function() onCameraIconClick,
     required GlobalKey<AnimatedListState> listKey,
     required bool isEmojiVisible,
-    required void Function() toggleEmojiPicker}) {
+    required void Function() toggleEmojiPicker,
+    required void Function() pickWordOrPdfFile}) {
   return Form(
     key: key,
     child: Expanded(
@@ -65,11 +66,14 @@ Widget sendMessageTextFields(Key key, TextEditingController controller,
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(left: 15.0),
-              child: Icon(
-                Icons.attach_file_rounded,
-                color: Color(0xff706D6D),
+            GestureDetector(
+              onTap: pickWordOrPdfFile,
+              child: const Padding(
+                padding: EdgeInsets.only(left: 5.0),
+                child: Icon(
+                  Icons.attach_file_rounded,
+                  color: Color(0xff706D6D),
+                ),
               ),
             ),
             Padding(

@@ -66,6 +66,8 @@ dependencies:
   record: ^4.4.4
   video_trimmer: ^3.0.1
   emoji_picker_flutter: ^1.6.3
+  file_picker: ^6.1.1
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:

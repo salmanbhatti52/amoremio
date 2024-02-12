@@ -248,9 +248,9 @@ class _ExploreSearchState extends State<ExploreSearch> {
                                 onChanged: (value) {
                                   print('on selecte $value');
                                   setState(() {
-                                    selectedGender = value['name'];
+                                    selectedGender = value['genders_id'];
                                   });
-                                  widget.onGenderSelect(value['name']);
+                                  widget.onGenderSelect(value['genders_id']);
                                   Navigator.pop(context);
                                 },
                               ),

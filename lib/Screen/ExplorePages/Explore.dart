@@ -64,6 +64,7 @@ class _ExplorePageState extends State<ExplorePage> {
   List<dynamic> imgListavators = [];
 
   String searchTerm = '';
+  dynamic category;
 
   void toggleSwitch(bool newValue) {
     setState(() {
@@ -221,6 +222,40 @@ class _ExplorePageState extends State<ExplorePage> {
     }
   }
 
+  filteruser(genderId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print(userId);
+    String apiUrl = usersFilter;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+              "genders_id": genderId,
+              "category": category
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {
+          originalUserDataList = data['data'];
+          userDataList = originalUserDataList;
+        });
+      } else {
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error :$e');
+    }
+  }
+
   /// //////////////
   @override
   Widget build(BuildContext context) {
@@ -261,6 +296,10 @@ class _ExplorePageState extends State<ExplorePage> {
               }, onGenderSelect: (gender) {
                 // Handle the selected gender here
                 print('Selected gender: $gender');
+                setState(() {
+                  userDataList = [];
+                  filteruser(gender);
+                });
               }),
 
               Padding(
@@ -341,7 +380,9 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex4 = false;
                         userDataList = [];
                         fetchuserDiscover();
-                        setState(() {});
+                        setState(() {
+                          category = 'discover';
+                        });
                         // showDialog(
                         //     context: context,
                         //     barrierColor: Colors.white60,
@@ -372,7 +413,9 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex4 = false;
                         userDataList = [];
                         fetchusermatches();
-                        setState(() {});
+                        setState(() {
+                          category = 'matches';
+                        });
                         // Get.to(
                         //   () => const UserMatchesPage(),
                         //   duration: const Duration(milliseconds: 350),
@@ -394,7 +437,9 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex4 = false;
                         userDataList = [];
                         fetchuserliked();
-                        setState(() {});
+                        setState(() {
+                          category = 'liked';
+                        });
                       },
                     ),
                     SmallButton(
@@ -411,7 +456,9 @@ class _ExplorePageState extends State<ExplorePage> {
                         selectedIndex4 = true;
                         userDataList = [];
                         fetchuserlikedme();
-                        setState(() {});
+                        setState(() {
+                          category = 'like you';
+                        });
                       },
                     ),
                   ],

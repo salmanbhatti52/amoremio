@@ -20,6 +20,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChatDetailsPage extends StatefulWidget {
   final String userId;
@@ -52,6 +55,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
 
   String audioPath = '';
   bool isShowingEmojiPicker = false;
+  dynamic fileext;
   @override
   void initState() {
     // TODO: implement initState
@@ -243,6 +247,112 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       }
     } catch (e) {
       print('error123456 $e');
+    }
+  }
+
+  Future<File?> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (result != null) {
+      // Get the extension
+      String? extension = result.files.single.extension;
+      fileext = extension;
+      return File(result.files.single.path!);
+    }
+    return null;
+  }
+
+  Future<String> fileToBase64(File file) async {
+    final bytes = await file.readAsBytes();
+    return base64Encode(bytes);
+  }
+
+  Future<void> sendFileToApi(String base64String) async {
+    print('base64String $base64String');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = sendChatmessages;
+    try {
+      var data1 = {
+        "users_customers_id": userId, // sender_id
+        "others_users_customers_id": widget.userId, //receiver_id
+        "message": base64string,
+        "message_type": "attachment",
+        "attachment_type": fileext
+      };
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(data1));
+      var userdetail = jsonDecode(response.body);
+      print(userdetail);
+      if (userdetail['status'] == 'success') {
+        setState(() {
+          // chatmessages.add(data);
+          this.fetchMessages();
+          Navigator.of(context).pop();
+        });
+      } else {
+        Navigator.of(context).pop();
+        print(userdetail['status']);
+        var errormsg = userdetail['message'];
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error123456 $e');
+    }
+  }
+
+  Future<void> pickWordOrPdfFile() async {
+    File? file = await pickFile();
+    if (file != null) {
+      String base64File = await fileToBase64(file);
+      await sendFileToApi(base64File);
+    }
+  }
+
+  Future<bool> requestPermissions() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      status = await Permission.storage.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<void> downloadFile(String url, String fileName) async {
+    // Request storage permissions
+    bool hasPermission = await requestPermissions();
+    if (!hasPermission) {
+      print("Storage permission not granted");
+      return;
+    }
+
+    // Get the application documents directory
+    Directory dir = await getApplicationDocumentsDirectory();
+
+    // Build the file path
+    File file = File('${dir.path}/$fileName');
+
+    try {
+      // Download the file
+      http.Response response = await http.get(Uri.parse(url));
+      // Write the file
+      await file.writeAsBytes(response.bodyBytes);
+      print("File downloaded to ${file.path}");
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("File downloaded to ${file.path}")));
+    } catch (e) {
+      print("Error downloading file: $e");
     }
   }
 
@@ -1027,6 +1137,37 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                           height: 100,
                                         )
                                       : SizedBox(),
+                                  message['attachment_type'] == 'pdf'
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            downloadFile(
+                                                baseUrlImage +
+                                                    message['message'],
+                                                'downloadedFile.pdf');
+                                          },
+                                          child: Image.asset(
+                                            'assets/images/pdf.png',
+                                            width: 100,
+                                            height: 100,
+                                          ),
+                                        )
+                                      : SizedBox(),
+                                  message['attachment_type'] == 'docx' ||
+                                          message['attachment_type'] == 'docx'
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            downloadFile(
+                                                baseUrlImage +
+                                                    message['message'],
+                                                'downloadedDocument.docx');
+                                          },
+                                          child: Image.asset(
+                                            'assets/images/word.jpeg',
+                                            width: 100,
+                                            height: 100,
+                                          ),
+                                        )
+                                      : SizedBox(),
                                   message['attachment_type'] == 'voice'
                                       ? Container(
                                           margin: EdgeInsets.symmetric(
@@ -1078,6 +1219,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                           isEmojiVisible, // Step 3: Pass the visibility state
                       toggleEmojiPicker: toggleEmojiPicker,
                       closekeyboard: closekeyboard,
+                      pickWordOrPdfFile: pickWordOrPdfFile,
                       listKey: _listKey,
                     ),
                     const SizedBox(width: 05),
