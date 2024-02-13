@@ -37,7 +37,6 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   final GlobalKey<FormState> sendMessageFormKey = GlobalKey<FormState>();
   final TextEditingController sendMessageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
-
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   String username = '';
@@ -61,17 +60,25 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     // TODO: implement initState
     super.initState();
     loaddata();
-
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
-
+    fetchMessages();
+    // WidgetsBinding.instance?.addPostFrameCallback((_) {
+      // Scroll to the end of the list after a short delay
+      // Future.delayed(Duration(milliseconds: 300), () {
+      //   _scrollToBottom();
+      // });
+    // });
     audioPlayer = AudioPlayer();
     audioRecord = Record();
+  }
+
+  void _scrollToBottom() {
+    if (_listKey.currentContext != null) {
+      Scrollable.ensureVisible(
+        _listKey.currentContext!,
+        alignment: 1.0,
+        duration: const Duration(milliseconds: 300),
+      );
+    }
   }
 
   bool isEmojiVisible = false;
@@ -114,7 +121,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       setState(() {
         username = userdetail['data']['username'];
         imgurl = userdetail['data']['image'];
-        fetchMessages();
+        // fetchMessages();
       });
     } else {
       print(userdetail['status']);
@@ -1213,19 +1220,21 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: scrollController,
                 child: Column(
                   children: [
                     SizedBox(
                       child: ListView.builder(
+                        // key: _listKey,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        controller: scrollController,
+                        // controller: scrollController,
                         itemCount: chatmessages.length,
-                        reverse: true,
+                        // reverse: true,
                         itemBuilder: (context, index) {
-                          int reverseIndex = chatmessages.length - 1 - index;
-                          Map<String, dynamic> message = chatmessages[reverseIndex];
+                          // int reverseIndex = chatmessages.length - 1 - index;
+                          Map<String, dynamic> message = chatmessages[index];
                           bool isSentMessage = message['sender_id'] != widget.userId;
                           return Align(
                             alignment: isSentMessage
@@ -1486,11 +1495,11 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   }
 
   fetchMessages() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(child: CircularProgressIndicator());
-        });
+    // showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return const Center(child: CircularProgressIndicator());
+    //     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
 
@@ -1512,12 +1521,17 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
         setState(() {
           chatmessages = data['data'];
           print(chatmessages);
-          Navigator.of(context).pop();
+          // Navigator.of(context).pop();
+          Future.delayed(Duration(milliseconds: 300), () {
+            if (scrollController.hasClients) {
+              scrollController.jumpTo(scrollController.position.maxScrollExtent);
+            }
+          });
         });
       } else {
         print(data['status']);
         var errormsg = data['message'];
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }

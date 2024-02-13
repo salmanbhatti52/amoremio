@@ -21,7 +21,9 @@ import 'package:http/http.dart' as http;
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 class StoryView extends StatefulWidget {
-  const StoryView({Key? key}) : super(key: key);
+  final String? usersStoriesId;
+  final String? usersCustomersId;
+  const StoryView({Key? key, this.usersStoriesId, this.usersCustomersId}) : super(key: key);
 
   @override
   State<StoryView> createState() => _StoryViewState();
@@ -42,9 +44,12 @@ class _StoryViewState extends State<StoryView> {
   @override
   void initState() {
     super.initState();
-
+    print('userStoriesID ${widget.usersStoriesId}');
+    print('userStoriesID ${widget.usersCustomersId}');
     loadstories();
   }
+
+
 
   void loadstories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

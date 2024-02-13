@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:amoremio/Screen/ExplorePages/ExploreVideoViewDetails.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -67,10 +68,13 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
 
   String address = '';
   var username = '';
+  String userImage = '';
   var summary = '';
   var dateofbirth;
   int _current = 0;
   bool isLoading = true;
+  String userStoriesID = "";
+  String usersCustomersId = "";
 
   final CarouselController _controller = CarouselController();
   // Define sheetTopPosition here
@@ -98,11 +102,12 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         print(userdetail);
         getavators();
         setState(() {});
+        userImage = userdetail['data']['image'];
         username = userdetail['data']['username'];
         dateofbirth = userdetail['data']['date_of_birth'];
         address = userdetail['data']['location'];
         summary = userdetail['data']['summary'];
-
+        print("userImage ${baseUrlImage + userImage}");
         fetchuserliked();
       } else {
         // print(userdetail['status']);
@@ -206,8 +211,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       }
     }
     if (shouldUpdate) {
-      setState(
-          () {});
+      setState(() {});
     }
   }
 
@@ -615,8 +619,16 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                     borderRadius: BorderRadius.circular(30),
                                     child: GestureDetector(
                                       onTap: () {
+                                        print('users_stories_id ::::: ${story["users_stories_id"]}');
+                                        print('users_customers_id ::::: ${story["users_customers_id"]}');
+                                        setState(() {
+                                          userStoriesID = story["users_stories_id"];
+                                          usersCustomersId = story["users_customers_id"];
+                                          print('userStoriesID $userStoriesID');
+                                          print('users_customers_id $usersCustomersId');
+                                        });
                                         Get.to(
-                                              () => const MyBottomNavigationBar(initialIndex: 1),
+                                              () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
                                           duration: const Duration(seconds: 1),
                                           transition: Transition.native,
                                         );
@@ -634,8 +646,16 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                         } else {
                           return GestureDetector(
                             onTap: (){
+                              print('users_stories_id ::::: ${story["users_stories_id"]}');
+                              print('users_customers_id ::::: ${story["users_customers_id"]}');
+                              setState(() {
+                                userStoriesID = story["users_stories_id"];
+                                usersCustomersId = story["users_customers_id"];
+                                print('userStoriesID $userStoriesID');
+                                print('users_customers_id $usersCustomersId');
+                              });
                               Get.to(
-                                    () => const MyBottomNavigationBar(initialIndex: 1),
+                                    () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
                                 duration: const Duration(seconds: 1),
                                 transition: Transition.native,
                               );

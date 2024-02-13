@@ -10,8 +10,12 @@ import 'package:amoremio/Screen/CreateStory/createstory.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
+  final String? usersStoriesId;
+  final String? usersCustomersId;
   final int initialIndex;
   const MyBottomNavigationBar({
+    this.usersStoriesId,
+    this.usersCustomersId,
     this.initialIndex = 0,
     Key? key,
   }) : super(key: key);
@@ -21,14 +25,8 @@ class MyBottomNavigationBar extends StatefulWidget {
 }
 
 class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
-  List pages = [
-    ExplorePage(),
-    const StoryView(),
-    const CreateStory(),
-    ChatPage(),
-    ProfilePage(),
-  ];
 
+  late List pages;
   int currentIndex = 0;
   void onTap(int index) {
     setState(() {
@@ -40,6 +38,13 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   void initState() {
     super.initState();
     currentIndex = widget.initialIndex;
+     pages = [
+      ExplorePage(),
+      StoryView(usersStoriesId: widget.usersStoriesId, usersCustomersId: widget.usersCustomersId,),
+      const CreateStory(),
+      ChatPage(),
+      ProfilePage(),
+    ];
   }
 
   @override
