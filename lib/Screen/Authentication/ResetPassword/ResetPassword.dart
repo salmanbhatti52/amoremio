@@ -43,6 +43,7 @@ class _ResetPasswordState extends State<ResetPassword> {
     });
   }
 
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -81,7 +82,7 @@ class _ResetPasswordState extends State<ResetPassword> {
       } else {
         print(data['status']);
         var errormsg = data['message'];
-        ScaffoldMessenger.of(context as BuildContext)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {

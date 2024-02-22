@@ -7,13 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../Utills/AppUrls.dart';
-import '../../Widgets/RoundedButton.dart';
 import '../../Resources/assets/assets.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../Resources/colors/colors.dart';
 import 'package:amoremio/Widgets/large_Button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../../Widgets/background_Image_container.dart';
 import '../BottomNavigationBar/BottomNavigationBar.dart';
 import 'package:http/http.dart' as http;
 
@@ -44,6 +42,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
   final CarouselController _controller = CarouselController();
   Map<String, Uint8List?> thumbnails = {};
 
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -201,7 +200,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
 
       setState(() {
         Get.to(
-          () => MyBottomNavigationBar(),
+          () => const MyBottomNavigationBar(),
           duration: const Duration(milliseconds: 300),
           transition: Transition.rightToLeft,
         );
@@ -264,7 +263,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                         });
                       }),
                 )
-              : SizedBox(),
+              : const SizedBox(),
           // : ImageContainer(
           //     child: Image.network(
           //       ImageAssets.dummyImage,
@@ -327,7 +326,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
             left: 0,
             right: 0,
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : SizedBox(
                     height: MediaQuery.of(context).size.height * 0.10,
                     width: MediaQuery.of(context).size.width,
@@ -385,7 +384,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                                     'https://mio.eigix.net/${story['media']}'),
                                 fit: BoxFit.fill,
                               ),
-                              shape: CircleBorder(
+                              shape: const CircleBorder(
                                 side: BorderSide(width: 2, color: Colors.white),
                               ),
                             ),
@@ -479,7 +478,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                       GestureDetector(
                           onTap: () {
                             Get.to(
-                              MyBottomNavigationBar(),
+                              const MyBottomNavigationBar(),
                               duration: const Duration(milliseconds: 350),
                               transition: Transition.downToUp,
                             );

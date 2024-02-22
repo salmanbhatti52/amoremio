@@ -30,7 +30,7 @@ class IntroPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                  Padding(
-                  padding: EdgeInsets.only(left: 15.0),
+                  padding: const EdgeInsets.only(left: 15.0),
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: SvgPicture.asset(
@@ -57,7 +57,7 @@ class IntroPage extends StatelessWidget {
                       height: Get.height * 0.065,
                       onTap: () {
                         Get.to(
-                              () => LoginPage(),
+                              () => const LoginPage(),
                           duration: const Duration(milliseconds: 350),
                           transition: Transition.rightToLeft,
                         );

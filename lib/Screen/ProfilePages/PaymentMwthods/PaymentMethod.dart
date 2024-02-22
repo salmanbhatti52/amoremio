@@ -281,10 +281,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
                       toggleSize: 12.0,
                       value: status,
                       borderRadius: 11,
-                      inactiveColor: Color(0xFFC6C6C6),
+                      inactiveColor: const Color(0xFFC6C6C6),
                       activeColor: AppColor.secondaryColor,
                       activeToggleColor: AppColor.whiteColor,
-                      inactiveToggleColor: Color(0xFFD9D9D9),
+                      inactiveToggleColor: const Color(0xFFD9D9D9),
                       showOnOff: false,
                       onToggle: (val) {
                         toggleSwitch(val);
@@ -334,10 +334,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           toggleSize: 12.0,
                           value: status2,
                           borderRadius: 11,
-                          inactiveColor: Color(0xFFC6C6C6),
+                          inactiveColor: const Color(0xFFC6C6C6),
                           activeColor: AppColor.secondaryColor,
                           activeToggleColor: AppColor.whiteColor,
-                          inactiveToggleColor: Color(0xFFD9D9D9),
+                          inactiveToggleColor: const Color(0xFFD9D9D9),
                           showOnOff: false,
                           onToggle: (val) {
                             toggleSwitch2(val);

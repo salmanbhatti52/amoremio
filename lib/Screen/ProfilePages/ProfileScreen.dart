@@ -6,7 +6,6 @@ import '../../Widgets/rounded_dropdown_menu.dart';
 import '../BottomNavigationBar/BottomNavigationBar.dart';
 import 'InterestTags.dart';
 import 'package:get/get.dart';
-import 'EditAvatorProfile.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../Widgets/AppBar.dart';
 import '../../Widgets/TextFields.dart';
@@ -16,7 +15,6 @@ import '../../Widgets/TextFieldLabel.dart';
 import '../../Resources/assets/assets.dart';
 import '../../Resources/colors/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:amoremio/Widgets/large_Button.dart';
 import '../ExplorePages/ExploreBackgroundContainer.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,7 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfile extends StatefulWidget {
-  UserProfile({super.key});
+  const UserProfile({super.key});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -118,7 +116,7 @@ class _UserProfileState extends State<UserProfile> {
     } else {
       print("You can't take more than 9 images");
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("You can't take more than 9 images")));
+          const SnackBar(content: Text("You can't take more than 9 images")));
     }
   }
 
@@ -292,7 +290,7 @@ class _UserProfileState extends State<UserProfile> {
     if (data['status'] == 'success') {
       Navigator.of(context).pop();
       Get.to(
-        () => MyBottomNavigationBar(),
+        () => const MyBottomNavigationBar(),
         duration: const Duration(milliseconds: 350),
         transition: Transition.rightToLeft,
       );
@@ -390,7 +388,7 @@ class _UserProfileState extends State<UserProfile> {
                       image: DecorationImage(
                         fit: BoxFit.cover,
                         image: imgurl.isEmpty
-                            ? NetworkImage(ImageAssets.dummyImage)
+                            ? const NetworkImage(ImageAssets.dummyImage)
                                 as ImageProvider<Object>
                             : NetworkImage(imgurl),
                       ),
@@ -1030,7 +1028,7 @@ class _UserProfileState extends State<UserProfile> {
                       children: List.generate(
                           interestList.length,
                           (index) => Container(
-                                margin: EdgeInsets.only(right: 2),
+                                margin: const EdgeInsets.only(right: 2),
                                 child: SizedBox(
                                   // width: 80,
                                   child: SmallButton(

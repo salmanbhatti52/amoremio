@@ -126,7 +126,7 @@ class AccountVerification5 extends StatelessWidget {
                                         child: Text(
                                           "Your Account will be verified in\n24 hours Successfully!",
                                           style: GoogleFonts.poppins(
-                                            color: Color(0xFF008D7D),
+                                            color: const Color(0xFF008D7D),
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
                                           ),

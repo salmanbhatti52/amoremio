@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
             'users_customers_id', data['data']['users_customers_id']);
         if (formKey.currentState!.validate()) {
           Get.to(
-            () => MyBottomNavigationBar(),
+            () => const MyBottomNavigationBar(),
             duration: const Duration(milliseconds: 300),
             transition: Transition.rightToLeft,
           );
@@ -205,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: GestureDetector(
                               onTap: () {
                                 Get.to(
-                                  () => ForgotPassword(),
+                                  () => const ForgotPassword(),
                                   duration: const Duration(milliseconds: 350),
                                   transition: Transition.rightToLeft,
                                 );
@@ -304,7 +304,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: Get.height * 0.045,
                         onTap: () {
                           Get.to(
-                            () => SocialLoginPage(),
+                            () => const SocialLoginPage(),
                             duration: const Duration(milliseconds: 350),
                             transition: Transition.rightToLeft,
                           );
@@ -322,7 +322,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: Get.height * 0.045,
                         onTap: () {
                           Get.to(
-                            () => SocialLoginPage(),
+                            () => const SocialLoginPage(),
                             duration: const Duration(milliseconds: 350),
                             transition: Transition.rightToLeft,
                           );
@@ -347,7 +347,7 @@ class _LoginPageState extends State<LoginPage> {
                       InkWell(
                         onTap: () {
                           Get.to(
-                            () => SignUpPage(),
+                            () => const SignUpPage(),
                             duration: const Duration(milliseconds: 350),
                             transition: Transition.downToUp,
                           );

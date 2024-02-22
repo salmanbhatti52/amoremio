@@ -5,20 +5,15 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../Utills/AppUrls.dart';
-import '../ExplorePages/BlockedUser.dart';
-import 'StoryBuyDialouge.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../Resources/assets/assets.dart';
 import '../../Resources/colors/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:amoremio/Widgets/ImagewithText.dart';
-import 'package:amoremio/Widgets/RoundedButton.dart';
 import 'package:amoremio/Screen/StoriesView/StoryDiscover.dart';
-import 'package:amoremio/Widgets/background_Image_container.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 class StoryView extends StatefulWidget {
   final String? usersStoriesId;
@@ -30,31 +25,25 @@ class StoryView extends StatefulWidget {
 }
 
 class _StoryViewState extends State<StoryView> {
-  bool image1 = false;
-  bool isButtonClicked = false;
-  bool selectedIndex1 = true;
-  bool selectedIndex2 = false;
-  bool selectedIndex3 = false;
 
   late PageController _pageController;
   int _currentPage = 0;
   late List<VideoPlayerController> _videoControllers;
   List<dynamic> videos = [];
+  bool isThumbnailClicked = false;
+  String selectedImageUrl = '';
+
 
   @override
   void initState() {
     super.initState();
-    print('userStoriesID ${widget.usersStoriesId}');
-    print('userStoriesID ${widget.usersCustomersId}');
     loadstories();
   }
-
-
 
   void loadstories() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
-    print(userId);
+    debugPrint(userId);
     String apiUrl = getstories;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -66,7 +55,7 @@ class _StoryViewState extends State<StoryView> {
               "users_customers_id": userId,
             },
           ));
-      print(response.body);
+      debugPrint(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {});
@@ -87,13 +76,13 @@ class _StoryViewState extends State<StoryView> {
           return controller;
         }).toList();
       } else {
-        print(data['status']);
+        debugPrint(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      print('error user discover $e');
+      debugPrint('error user discover $e');
     }
   }
 
@@ -132,16 +121,10 @@ class _StoryViewState extends State<StoryView> {
     super.dispose();
   }
 
-  void handleButtonTap() {
-    setState(() {
-      isButtonClicked = !isButtonClicked;
-    });
-  }
-
   likeduser(usersstories) async {
     var storyid = usersstories['users_stories_id'];
     var Like = usersstories['liked'];
-    print('likeeee $Like');
+    debugPrint('likeeee $Like');
     showDialog(
         context: context,
         builder: (context) {
@@ -172,7 +155,7 @@ class _StoryViewState extends State<StoryView> {
     if (userdetail['status'] == 'success') {
       Navigator.of(context).pop();
       var msg = userdetail['message'];
-      print('userdetail $userdetail');
+      debugPrint('userdetail $userdetail');
       setState(() {
         if (Like == 'Yes') {
           setState(() {
@@ -185,14 +168,14 @@ class _StoryViewState extends State<StoryView> {
         }
       });
     } else {
-      // print(userdetail['status']);
+      // debugPrint(userdetail['status']);
       var errormsg = userdetail['message'];
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errormsg)));
     }
     // }
     // catch (e) {
-    //   print('error123456:$e');
+    //   debugPrint('error123456:$e');
     // }
   }
 
@@ -202,37 +185,88 @@ class _StoryViewState extends State<StoryView> {
       body: videos.isNotEmpty
           ? Stack(
               children: [
-                PageView.builder(
-                  controller: _pageController,
-                  scrollDirection: Axis.vertical,
-                  itemCount: videos.length,
-                  onPageChanged: (index) {
-                    for (var controller in _videoControllers) {
-                      controller.pause(); // Pause all other videos
-                    }
-                    if (videos[index]['media_type'] == 'Video') {
-                      _videoControllers[index]
-                          .play(); // Play the video of the current page
-                    }
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    if (videos[index]['media_type'] == 'Video') {
-                      // Show Video widget
-                      return Video(
-                        videoController: _videoControllers[index],
-                        isPlaying: index == _currentPage,
-                      );
-                    } else {
-                      // Show Image widget
-                      return Image.network(
-                        'https://mio.eigix.net/${videos[index]['media']}', // Adjust based on your URL
-                        fit: BoxFit.cover,
-                      );
-                    }
-                  },
+                Visibility(
+                  visible: isThumbnailClicked,
+                  child: GestureDetector(
+                    onVerticalDragEnd: (details) {
+                      if (details.primaryVelocity! > 0) {
+                        print('Swiped downward - Hello');
+                        setState(() {
+                          isThumbnailClicked = false;
+                        });
+                        _videoControllers = videos.map((videoData) {
+                          String url = 'https://mio.eigix.net/' + videoData['media'];
+                          var controller = VideoPlayerController.network(url);
+                          controller.initialize().then((_) {
+                            if (_videoControllers.indexOf(controller) == 0) {
+                              controller.play();
+                            }
+                            setState(() {});
+                          });
+                          return controller;
+                        }).toList();
+                      } else if (details.primaryVelocity! < 0) {
+                        setState(() {
+                          isThumbnailClicked = false;
+                        });
+                        _videoControllers = videos.map((videoData) {
+                          String url = 'https://mio.eigix.net/' + videoData['media'];
+                          var controller = VideoPlayerController.network(url);
+                          controller.initialize().then((_) {
+                            if (_videoControllers.indexOf(controller) == 0) {
+                              controller.play();
+                            }
+                            setState(() {});
+                          });
+                          return controller;
+                        }).toList();
+                        print('Swiped upward - Hello');
+                      }
+                    },
+                    child: SizedBox(
+                      height: Get.height,
+                      child: selectedImageUrl.isNotEmpty
+                          ? Image.network(
+                        selectedImageUrl,
+                        fit: BoxFit.fill,
+                      ) : Video2(
+                        videoController: _videoControllers[_currentPage],
+                        isPlaying: true,
+                      ),
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: !isThumbnailClicked,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    scrollDirection: Axis.vertical,
+                    itemCount: videos.length,
+                    onPageChanged: (index) {
+                      for (var controller in _videoControllers) {
+                        controller.pause();
+                      }
+                      if (videos[index]['media_type'] == 'Video') {
+                        _videoControllers[index].play();
+                      }
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemBuilder: (BuildContext context, int index) {
+                      if (videos[index]['media_type'] == 'Video') {
+                        return Video(
+                          videoController: _videoControllers[index],
+                          isPlaying: index == _currentPage,
+                        );
+                      } else {
+                        return Image.network(
+                          'https://mio.eigix.net/${videos[index]['media']}',
+                          fit: BoxFit.cover,
+                        );
+                      }
+                    },
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 0.0),
@@ -265,19 +299,6 @@ class _StoryViewState extends State<StoryView> {
                                   fontWeight: FontWeight.w500,
                                   color: Colors.white),
                             ),
-                            // ImageWithText(
-                            //   onTap: () {
-                            //     likeduser(videos[_currentPage]);
-                            //   },
-                            //   width: 30,
-                            //   height: 30,
-                            //   color: Colors.white,
-                            //   imagePath: videos[_currentPage]['liked'] == "Yes"
-                            //       ? ImageAssets.createStory2
-                            //       : ImageAssets.createStory1,
-                            //   text: videos[_currentPage]['stats']['total_likes']
-                            //       .toString(),
-                            // ),
                             const SizedBox(
                               height: 10,
                             ),
@@ -303,46 +324,6 @@ class _StoryViewState extends State<StoryView> {
                             const SizedBox(
                               height: 10,
                             ),
-                            // GestureDetector(
-                            //     onTap: () {
-                            //       // handleButtonTap();
-                            //       likeduser(videos[_currentPage]);
-                            //     },
-                            //     child: Column(
-                            //       children: [
-                            //         Container(
-                            //           width: 35,
-                            //           height: 35,
-                            //           margin: const EdgeInsets.only(bottom: 3),
-                            //           padding: const EdgeInsets.all(5),
-                            //           decoration: BoxDecoration(
-                            //             borderRadius: BorderRadius.circular(25),
-                            //             color: videos[_currentPage]['liked'] ==
-                            //                     'Yes'
-                            //                 ? Colors.red
-                            //                 : AppColor.whiteColor,
-                            //           ),
-                            //           child: Center(
-                            //             child: SvgPicture.asset(
-                            //               ImageAssets.favorite,
-                            //               color: videos[_currentPage]
-                            //                           ['liked'] ==
-                            //                       'Yes'
-                            //                   ? AppColor.whiteColor
-                            //                   : AppColor.hintTextColor,
-                            //             ),
-                            //           ),
-                            //         ),
-                            //         MyText(
-                            //           text:
-                            //               videos[_currentPage]['liked'] == 'Yes'
-                            //                   ? "Liked"
-                            //                   : "Like",
-                            //           fontSize: 12,
-                            //           fontWeight: FontWeight.w500,
-                            //         )
-                            //       ],
-                            //     )),
                           ],
                         ),
                       ),
@@ -357,22 +338,14 @@ class _StoryViewState extends State<StoryView> {
                                     left: 5.0, bottom: 0, right: 5),
                                 child: CircleAvatar(
                                   backgroundImage: NetworkImage(
-                                    videos[_currentPage]['user_data']
-                                                    ['image'] !=
-                                                null &&
-                                            videos[_currentPage]['user_data']
-                                                    ['image']
-                                                .isNotEmpty
+                                    videos[_currentPage]['user_data']['image'] != null
+                                        && videos[_currentPage]['user_data']['image'].isNotEmpty
                                         ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
-                                        : videos[_currentPage]['user_data']
-                                                    ['genders_id'] ==
-                                                1
-                                            ? 'https://mio.eigix.net/uploads/male-placeholder.jpg' // URL for genderId == 1
-                                            : videos[_currentPage]['user_data']
-                                                        ['genders_id'] ==
-                                                    2
-                                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg' // URL for genderId == 2
-                                                : 'https://mio.eigix.net/uploads/placeholder.jpg', // URL for any other case or default image
+                                        : videos[_currentPage]['user_data']['genders_id'] == 1
+                                            ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                            : videos[_currentPage]['user_data']['genders_id'] == 2
+                                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
+                                                : 'https://mio.eigix.net/uploads/placeholder.jpg',
                                   ),
                                   radius: 18.5,
                                 ),
@@ -412,14 +385,12 @@ class _StoryViewState extends State<StoryView> {
                               itemBuilder: (BuildContext context, int index) {
                                 var story = videos[_currentPage]['user_data']['users_stories'][index];
                                 var videoPath = story;
+                                // debugPrint("story ${story['media']}");
                                 if (videoPath['media_type'] == 'Video') {
                                   return FutureBuilder<Uint8List?>(
-                                    future: generateThumbnail(
-                                        baseUrlImage + story['media']),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<Uint8List?> snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.done) {
+                                    future: generateThumbnail(baseUrlImage + story['media']),
+                                    builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.done) {
                                         if (snapshot.hasData) {
                                           return Padding(
                                             padding: const EdgeInsets.only(
@@ -433,23 +404,30 @@ class _StoryViewState extends State<StoryView> {
                                                   height: 60,
                                                   decoration: BoxDecoration(
                                                     color: Colors.transparent,
-                                                    border: Border.all(
-                                                      width: 2,
-                                                      color:
-                                                          AppColor.whiteColor,
+                                                    border: Border.all(width: 2, color: AppColor.whiteColor,
                                                     ),
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            30),
+                                                        BorderRadius.circular(30),
                                                   ),
                                                   child: ClipRRect(
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            30),
+                                                        BorderRadius.circular(30),
                                                     child: GestureDetector(
                                                       onTap: () {
-                                                        onThumbnailClicked(
-                                                            index);
+                                                        print('Thumbnail clicked');
+                                                        setState(() {
+                                                          isThumbnailClicked = true;
+                                                          selectedImageUrl = '';
+                                                          print("selectedImageUrl $selectedImageUrl");
+                                                        });
+                                                        _videoControllers[_currentPage].pause();
+                                                        print('New video controller created');
+                                                        _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
+                                                        _videoControllers[_currentPage].initialize().then((_) {
+                                                          print('Video controller initialized');
+                                                          _videoControllers[_currentPage].play();
+                                                        });
+                                                        // onThumbnailClicked(index);
                                                       },
                                                       child: Image.memory(
                                                         snapshot.data!,
@@ -479,24 +457,33 @@ class _StoryViewState extends State<StoryView> {
                                                 margin: const EdgeInsets.all(5),
                                               ),
                                           ),
-                                        ); // Loading indicator while the thumbnail is being generated
+                                        );
                                       }
                                     },
                                   );
                                 } else {
-                                  return Container(
-                                    width: 60,
-                                    height: 60,
-                                    margin: EdgeInsets.all(5),
-                                    decoration: ShapeDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                            'https://mio.eigix.net/${story['media']}'),
-                                        fit: BoxFit.fill,
-                                      ),
-                                      shape: const CircleBorder(
-                                        side: BorderSide(
-                                            width: 2, color: Colors.white),
+                                  return GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        isThumbnailClicked = true;
+                                        selectedImageUrl = 'https://mio.eigix.net/${story['media']}';
+                                        print("selectedImageUrl $selectedImageUrl");
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 60,
+                                      height: 60,
+                                      margin: const EdgeInsets.all(5),
+                                      decoration: ShapeDecoration(
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                              'https://mio.eigix.net/${story['media']}'),
+                                          fit: BoxFit.fill,
+                                        ),
+                                        shape: const CircleBorder(
+                                          side: BorderSide(
+                                              width: 2, color: Colors.white),
+                                        ),
                                       ),
                                     ),
                                   );
@@ -515,7 +502,6 @@ class _StoryViewState extends State<StoryView> {
               ],
             )
           : const Center(
-              // Display a placeholder or alternative content
               child: CircularProgressIndicator(),
             ),
     );
@@ -527,12 +513,12 @@ Future<Uint8List?> generateThumbnail(String videoUrl) async {
     final uint8list = await VideoThumbnail.thumbnailData(
       video: videoUrl,
       imageFormat: ImageFormat.JPEG,
-      maxWidth: 128, // specify the width of the thumbnail
+      maxWidth: 128,
       quality: 25,
     );
     return uint8list;
   } catch (e) {
-    print(e);
+    debugPrint(e.toString());
     return null;
   }
 }
@@ -583,12 +569,63 @@ class _VideoState extends State<Video> {
   }
 }
 
+class Video2 extends StatefulWidget {
+  final VideoPlayerController videoController;
+  // final Function(bool) onVideoPause;
+  final bool isPlaying;
+
+   const Video2(
+      {Key? key,
+        required this.videoController,
+        // required this.onVideoPause,
+        required this.isPlaying})
+      : super(key: key);
+
+  @override
+  _VideoState2 createState() => _VideoState2();
+}
+
+class _VideoState2 extends State<Video2> {
+  @override
+  Widget build(BuildContext context) {
+    // if (widget.videoController.value.isInitialized)
+    // {
+      return GestureDetector(
+        onTap: () {
+          if (widget.videoController.value.isPlaying) {
+            widget.videoController.pause();
+          } else {
+            widget.videoController.play();
+          }
+        },
+        child: AspectRatio(
+          aspectRatio: widget.videoController.value.aspectRatio,
+          child: VideoPlayer(widget.videoController),
+        ),
+      );
+    // }
+      // else if (widget.videoController.value.hasError) {
+    //   return Center(
+    //     child: Text(
+    //       'Error loading video: ${widget.videoController.value.errorDescription}',
+    //       style: TextStyle(color: Colors.red),
+    //     ),
+    //   );
+    // } else {
+    //   return Center(child: CircularProgressIndicator());
+    // }
+  }
+
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  // }
+}
+
 int calculateAge(String dateOfBirth) {
   DateTime today = DateTime.now();
   DateTime birthDate = DateTime.parse(dateOfBirth);
   int age = today.year - birthDate.year;
-
-  // Adjust age if the birthday hasn't occurred yet this year
   if (today.month < birthDate.month ||
       (today.month == birthDate.month && today.day < birthDate.day)) {
     age--;

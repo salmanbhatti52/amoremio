@@ -43,8 +43,8 @@ final TextStyle kTextFieldHintStyle = GoogleFonts.poppins(
   color: AppColor.hintTextColor,
 );
 final kDropDownMenuInputDecoration = InputDecorationTheme(
-  constraints: BoxConstraints(maxHeight: 46),
-  contentPadding: EdgeInsets.only(left: 14),
+  constraints: const BoxConstraints(maxHeight: 46),
+  contentPadding: const EdgeInsets.only(left: 14),
   // border: kRoundedWhiteBorderStyle,
   // enabledBorder: kRoundedWhiteBorderStyle,
   // focusedBorder: kRoundedActiveBorderStyle,
@@ -57,7 +57,7 @@ final kDropDownMenuStyle = MenuStyle(
   backgroundColor: MaterialStateProperty.all(Colors.white),
   shape: MaterialStatePropertyAll(
     RoundedRectangleBorder(
-        side: BorderSide(
+        side: const BorderSide(
           color: Colors.white,
           width: 1,
           style: BorderStyle.solid,

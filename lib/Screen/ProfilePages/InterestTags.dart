@@ -10,11 +10,10 @@ import 'package:amoremio/Resources/colors/colors.dart';
 import '../ExplorePages/ExploreBackgroundContainer.dart';
 import 'package:http/http.dart' as http;
 
-import 'ProfileScreen.dart';
 
 class InterestTags extends StatefulWidget {
   final List<dynamic> interestList;
-  InterestTags({super.key, required this.interestList});
+  const InterestTags({super.key, required this.interestList});
 
   @override
   State<InterestTags> createState() => _InterestTagsState();
@@ -174,7 +173,7 @@ class _InterestTagsState extends State<InterestTags> {
                                       isInterestSelected
                                   ? Colors
                                       .white // Change the background color for selected and common interests
-                                  : Color(0x54E2E2E2),
+                                  : const Color(0x54E2E2E2),
                               borderRadius: BorderRadius.circular(15)),
                           child: Center(
                             child: MyText(
@@ -182,9 +181,9 @@ class _InterestTagsState extends State<InterestTags> {
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
                               color: selectedList.contains(interestsData[index])
-                                  ? Color(0xFFEE4433)
+                                  ? const Color(0xFFEE4433)
                                   : (isInterestSelected
-                                      ? Color(0xFFEE4433)
+                                      ? const Color(0xFFEE4433)
                                       : Colors.white),
                             ),
                           ),

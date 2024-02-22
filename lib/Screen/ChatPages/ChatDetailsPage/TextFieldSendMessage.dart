@@ -4,8 +4,6 @@ import '../../../Resources/assets/assets.dart';
 import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'dart:io';
 
 // required void Function() onCameraIconClick
 Widget sendMessageTextFields(Key key, TextEditingController controller,
@@ -41,8 +39,8 @@ Widget sendMessageTextFields(Key key, TextEditingController controller,
                 textAlign: TextAlign.left,
                 controller: controller,
                 onEditingComplete: () {
-                  onSendMessage(controller?.text ?? "");
-                  controller?.clear();
+                  onSendMessage(controller.text ?? "");
+                  controller.clear();
                   FocusScope.of(context).unfocus();
                   // This function will be called when the keyboard submit button is pressed
 
@@ -77,10 +75,10 @@ Widget sendMessageTextFields(Key key, TextEditingController controller,
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(left: 5.0, right: 5),
+              padding: const EdgeInsets.only(left: 5.0, right: 5),
               child: GestureDetector(
                 onTap: onCameraIconClick,
-                child: Icon(
+                child: const Icon(
                   Icons.photo_camera,
                   color: Color(0xff706D6D),
                 ),

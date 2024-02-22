@@ -7,7 +7,6 @@ import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:amoremio/Screen/ExplorePages/Explore.dart';
 import 'package:amoremio/Screen/CreateStory/createstory.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
   final String? usersStoriesId;
@@ -39,11 +38,11 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
     super.initState();
     currentIndex = widget.initialIndex;
      pages = [
-      ExplorePage(),
+      const ExplorePage(),
       StoryView(usersStoriesId: widget.usersStoriesId, usersCustomersId: widget.usersCustomersId,),
       const CreateStory(),
-      ChatPage(),
-      ProfilePage(),
+      const ChatPage(),
+      const ProfilePage(),
     ];
   }
 
@@ -102,7 +101,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
                       ? SvgPicture.asset(ImageAssets.chat2)
                       : SvgPicture.asset(
                           ImageAssets.chat1,
-                          color: Color(0xFFCBCBCB),
+                          color: const Color(0xFFCBCBCB),
                           colorBlendMode: BlendMode.srcIn,
                           width: 24,
                           height: 24,

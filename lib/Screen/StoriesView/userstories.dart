@@ -24,7 +24,7 @@ class _userstoriesState extends State<userstories> {
     _pageController = PageController();
     _videoControllers = videos.map((url) {
       var controller = VideoPlayerController.network(url);
-      // print(
+      // debugPrint(
       //     "Initializing controller for $url: ${controller.value.isInitialized}");
       return controller;
     }).toList();
@@ -32,7 +32,7 @@ class _userstoriesState extends State<userstories> {
 
   @override
   void dispose() {
-    print("Disposing userstories widget");
+    debugPrint("Disposing userstories widget");
     _pageController.dispose();
     for (var controller in _videoControllers) {
       controller.dispose();
@@ -61,7 +61,7 @@ class _userstoriesState extends State<userstories> {
                         videoController: _videoControllers[index],
                       );
                     } else {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
                   },
                 );
@@ -76,10 +76,11 @@ class _userstoriesState extends State<userstories> {
 }
 
 class Video extends StatelessWidget {
+  @override
   final Key key;
   final VideoPlayerController videoController;
 
-  Video({required this.key, required this.videoController}) : super(key: key);
+  const Video({required this.key, required this.videoController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

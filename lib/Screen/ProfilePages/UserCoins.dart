@@ -136,7 +136,7 @@ class UserCoins extends StatelessWidget {
                   icon: ImageAssets.diamond,
                   onTap: () {
                     Get.to(
-                          () => UpgradeAccount(),
+                          () => const UpgradeAccount(),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );

@@ -353,7 +353,7 @@ class _SocialLoginPageState extends State<SocialLoginPage> {
                     text: "Login",
                     onTap: () {
                       Get.to(
-                            () => MyBottomNavigationBar(),
+                            () => const MyBottomNavigationBar(),
                         duration: const Duration(milliseconds: 350),
                         transition: Transition.rightToLeft,
                       );

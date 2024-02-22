@@ -8,7 +8,6 @@ import 'package:amoremio/Widgets/Text.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:amoremio/Screen/ExplorePages/BlockedUser.dart';
 import 'package:http/http.dart' as http;
@@ -16,13 +15,13 @@ import 'package:http/http.dart' as http;
 import '../../Utills/AppUrls.dart';
 
 // ignore: must_be_immutable
-typedef void SearchCallback(String searchText);
+typedef SearchCallback = void Function(String searchText);
 typedef GenderCallback = void Function(String? gender);
 
 class ExploreSearch extends StatefulWidget {
   final SearchCallback onSearch;
   final GenderCallback onGenderSelect;
-  ExploreSearch(
+  const ExploreSearch(
       {Key? key, required this.onSearch, required this.onGenderSelect})
       : super(key: key);
 
@@ -135,7 +134,7 @@ class _ExploreSearchState extends State<ExploreSearch> {
             ),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           width: 5,
         ),
         GestureDetector(
@@ -379,8 +378,8 @@ class _ExploreSearchState extends State<ExploreSearch> {
                           onTap: () {
                             Navigator.pop(context);
                             Get.to(
-                              () => BlockedUser(),
-                              duration: Duration(milliseconds: 300),
+                              () => const BlockedUser(),
+                              duration: const Duration(milliseconds: 300),
                               transition: Transition.leftToRight,
                             );
                           },

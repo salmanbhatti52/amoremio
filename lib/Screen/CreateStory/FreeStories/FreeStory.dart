@@ -101,6 +101,7 @@ class _FreeStoryState extends State<FreeStory> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: widget.height,
@@ -133,7 +134,7 @@ class _FreeStoryState extends State<FreeStory> {
                               context: context,
                               isScrollControlled: true,
                               builder: (BuildContext context) {
-                                return Container(
+                                return SizedBox(
                                   height: MediaQuery.of(context)
                                       .size
                                       .height, // Adjust the height as needed

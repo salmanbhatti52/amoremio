@@ -13,7 +13,7 @@ import '../../../Utills/AppUrls.dart';
 import 'package:http/http.dart' as http;
 
 class EmailVerify extends StatefulWidget {
-  EmailVerify({Key? key}) : super(key: key);
+  const EmailVerify({Key? key}) : super(key: key);
 
   @override
   State<EmailVerify> createState() => _EmailVerifyState();
@@ -75,7 +75,7 @@ class _EmailVerifyState extends State<EmailVerify> {
       if (data['status'] == 'success') {
         Navigator.of(context).pop();
         Get.to(
-          () => ResetPassword(),
+          () => const ResetPassword(),
           arguments: [
             {"email": email}
           ],
@@ -85,7 +85,7 @@ class _EmailVerifyState extends State<EmailVerify> {
       } else {
         print(data['status']);
         var errormsg = data['message'];
-        ScaffoldMessenger.of(context as BuildContext)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {

@@ -148,7 +148,7 @@ class _ReferralsPageState extends State<ReferralsPage> {
                          MyText(
                           text: referralLink,
                           fontSize: 14,
-                          color: Color(0xFF1877F2),
+                          color: const Color(0xFF1877F2),
                           fontWeight: FontWeight.w500,
                         ),
                         GestureDetector(
@@ -349,7 +349,7 @@ class _ReferralsPageState extends State<ReferralsPage> {
                       ),
                       GestureDetector(
                           onTap: (){},
-                          child: Icon(
+                          child: const Icon(
                             Icons.arrow_drop_down_rounded,
                             color: AppColor.brownColor,
                             size: 30,
@@ -427,7 +427,7 @@ class _ReferralsPageState extends State<ReferralsPage> {
                             //   isTrue = !isTrue;
                             // });
                           },
-                          child: Icon(
+                          child: const Icon(
                             Icons.arrow_drop_down_rounded,
                             color: AppColor.brownColor,
                             size: 30,

@@ -17,7 +17,7 @@ import '../../ExplorePages/ExploreBackgroundContainer.dart';
 import 'package:http/http.dart' as http;
 
 class AccountSettings extends StatefulWidget {
-  AccountSettings({super.key});
+  const AccountSettings({super.key});
 
   @override
   State<AccountSettings> createState() => _AccountSettingsState();
@@ -87,6 +87,7 @@ class _AccountSettingsState extends State<AccountSettings> {
   }
 
   /// deactivate ////
+  @override
   void deactivate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');

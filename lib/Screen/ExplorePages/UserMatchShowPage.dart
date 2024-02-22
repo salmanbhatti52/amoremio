@@ -7,7 +7,6 @@ import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:amoremio/Widgets/background_Image_container.dart';
 
 import '../ChatPages/ChatDetailsPage/ChatDetailsPage.dart';
-import '../ChatPages/ChatPage/ChatPage.dart';
 
 class UserMatchesPage extends StatelessWidget {
   final String userid;

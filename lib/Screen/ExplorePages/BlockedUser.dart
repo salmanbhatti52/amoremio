@@ -9,7 +9,6 @@ import '../../Utills/AppUrls.dart';
 import '../../Widgets/Text.dart';
 import 'BlockUserDetails.dart';
 import '../../Widgets/AppBar.dart';
-import 'ExploreVideoViewButton.dart';
 import 'package:flutter/material.dart';
 import 'ExploreBackgroundContainer.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -225,7 +224,7 @@ class _BlockedUserState extends State<BlockedUser> {
       appBar: Appbar(
         title2: "Blocked Users",
         onTap: () {
-          Get.to(() => MyBottomNavigationBar());
+          Get.to(() => const MyBottomNavigationBar());
         },
       ),
       body: ExploreContainer(
@@ -324,7 +323,7 @@ class _BlockedUserState extends State<BlockedUser> {
               //   },
               //   value: status,
               // ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               SizedBox(

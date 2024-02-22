@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../../Resources/colors/colors.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:amoremio/Screen/ExplorePages/ExploreBackgroundContainer.dart';
@@ -228,8 +227,8 @@ class _TrimvideoState extends State<Trimvideo>
         //   // Handle errors
         //   print("Error converting video to base64: $error");
         // });
-        final snackBar =
-            const SnackBar(content: Text('Video Saved successfully'));
+        const snackBar =
+            SnackBar(content: Text('Video Saved successfully'));
         ScaffoldMessenger.of(context).showSnackBar(
           snackBar,
         );

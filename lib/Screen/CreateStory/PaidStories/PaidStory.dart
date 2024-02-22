@@ -142,7 +142,7 @@ class _PaidStoryState extends State<PaidStory> {
                               context: context,
                               isScrollControlled: true,
                               builder: (BuildContext context) {
-                                return Container(
+                                return SizedBox(
                                   height: MediaQuery.of(context)
                                       .size
                                       .height, // Adjust the height as needed
@@ -276,7 +276,7 @@ class _PaidStoryState extends State<PaidStory> {
                           child: Container(
                             width: Get.width * 0.3,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
+                              borderRadius: const BorderRadius.only(
                                 bottomRight: Radius.circular(6.50),
                                 bottomLeft: Radius.circular(6.50),
                               ),

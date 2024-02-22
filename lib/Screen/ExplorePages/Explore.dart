@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -9,7 +8,6 @@ import '../../Utills/AppUrls.dart';
 import 'ExploreVideoView.dart';
 import '../../Widgets/AppBar.dart';
 import 'ExploreSearch&Filter.dart';
-import 'ExploreVideoViewButton.dart';
 import 'package:flutter/material.dart';
 import 'ExploreBackgroundContainer.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -22,7 +20,7 @@ import 'UserMatchShowPage.dart';
 
 // ignore: must_be_immutable
 class ExplorePage extends StatefulWidget {
-  ExplorePage({Key? key}) : super(key: key);
+  const ExplorePage({Key? key}) : super(key: key);
 
   @override
   State<ExplorePage> createState() => _ExplorePageState();

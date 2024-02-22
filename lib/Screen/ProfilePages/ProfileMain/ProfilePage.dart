@@ -25,7 +25,7 @@ import 'package:http/http.dart' as http;
 
 // ignore: must_be_immutable
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -109,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       image: DecorationImage(
                         fit: BoxFit.cover,
                         image: imgurl.isEmpty
-                            ? NetworkImage(ImageAssets.dummyImage)
+                            ? const NetworkImage(ImageAssets.dummyImage)
                                 as ImageProvider<Object>
                             : NetworkImage(imgurl),
                       ),
@@ -215,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: Get.height * 0.02,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: MyText(
                   text: bio,
                   fontSize: 14,
@@ -253,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: ImageAssets.yourProfile,
                   onTap: () {
                     Get.to(
-                      () => UserProfile(),
+                      () => const UserProfile(),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );
@@ -269,10 +269,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: ProfileContainer(
                   text: 'Your Coins',
                   icon: ImageAssets.buyCoins,
-                  imageColor: Color(0xffDDC911),
+                  imageColor: const Color(0xffDDC911),
                   onTap: () {
                     Get.to(
-                      () => UserCoins(),
+                      () => const UserCoins(),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );
@@ -290,7 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: ImageAssets.account,
                   onTap: () {
                     Get.to(
-                      () => AccountSettings(),
+                      () => const AccountSettings(),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );
@@ -306,10 +306,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: ProfileContainer(
                   text: 'Referrals ',
                   icon: ImageAssets.refrel,
-                  imageColor: Color(0xff04B4FF),
+                  imageColor: const Color(0xff04B4FF),
                   onTap: () {
                     Get.to(
-                      () => ReferralsPage(),
+                      () => const ReferralsPage(),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );
@@ -342,7 +342,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             children: [
                               SvgPicture.asset(
                                 ImageAssets.notificationAlarm,
-                                color: Color(0xff9CEE33),
+                                color: const Color(0xff9CEE33),
                               ),
                               SizedBox(
                                 width: Get.width * 0.02,
@@ -361,10 +361,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             toggleSize: 12.0,
                             value: status,
                             borderRadius: 11,
-                            inactiveColor: Color(0xFFC6C6C6),
+                            inactiveColor: const Color(0xFFC6C6C6),
                             activeColor: AppColor.secondaryColor,
                             activeToggleColor: AppColor.whiteColor,
-                            inactiveToggleColor: Color(0xFFD9D9D9),
+                            inactiveToggleColor: const Color(0xFFD9D9D9),
                             showOnOff: false,
                             onToggle: (val) {
                               toggleSwitch(val);
@@ -399,7 +399,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     // Remove data for the 'counter' key.
                     await prefs.remove('users_customers_id');
                     Get.to(
-                      () => LoginPage(),
+                      () => const LoginPage(),
                       duration: const Duration(milliseconds: 350),
                       transition: Transition.rightToLeft,
                     );

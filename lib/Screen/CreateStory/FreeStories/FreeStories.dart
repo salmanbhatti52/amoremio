@@ -10,7 +10,6 @@ import '../../../Widgets/large_Button.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../../Resources/colors/colors.dart';
-import '../PaidStories/PaidStoryController.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
 
 enum MediaSource { image, video }
@@ -18,7 +17,7 @@ enum MediaSource { image, video }
 enum Source { camera, gallery }
 
 class FreeStories extends StatelessWidget {
-  FreeStories({super.key});
+  const FreeStories({super.key});
 
   // final PaidStoryController controller = Get.put(PaidStoryController());
 
@@ -190,16 +189,16 @@ class FreeStories extends StatelessWidget {
   }
 
   Future<void> _pickMedia(MediaSource mediaSource, Source source) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
     XFile? pickedFile;
 
     if (mediaSource == MediaSource.image) {
-      pickedFile = await _picker.pickImage(
+      pickedFile = await picker.pickImage(
         source:
             source == Source.camera ? ImageSource.camera : ImageSource.gallery,
       );
     } else if (mediaSource == MediaSource.video) {
-      pickedFile = await _picker.pickVideo(
+      pickedFile = await picker.pickVideo(
         source:
             source == Source.camera ? ImageSource.camera : ImageSource.gallery,
       );
@@ -232,7 +231,7 @@ class FreeStories extends StatelessWidget {
         print("You selected a file: ${croppedFile.path}");
         Get.to(
           () => SelectVideoType(
-              fileType: File(croppedFile!.path), sourceType: 'Image'),
+              fileType: File(croppedFile.path), sourceType: 'Image'),
         );
       }
 

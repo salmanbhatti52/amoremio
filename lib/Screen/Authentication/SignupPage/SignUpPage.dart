@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -11,7 +10,6 @@ import '../../../Widgets/DividerandOR.dart';
 import '../../../Widgets/rounded_dropdown_menu.dart';
 import '../SocialLogin/SocialLoginPage.dart';
 import '../../../Widgets/TextFieldLabel.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:amoremio/Widgets/TextFields.dart';
 import 'package:amoremio/Widgets/large_Button.dart';
 import 'package:amoremio/Widgets/Social_Button.dart';
@@ -138,7 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
         await prefs.setString(
             'users_customers_id', data['data']['users_customers_id']);
         Get.to(
-          () => MyBottomNavigationBar(),
+          () => const MyBottomNavigationBar(),
           duration: const Duration(milliseconds: 350),
           transition: Transition.rightToLeft,
         );
@@ -599,7 +597,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       height: Get.height * 0.045,
                       onTap: () {
                         Get.to(
-                          () => SocialLoginPage(),
+                          () => const SocialLoginPage(),
                           duration: const Duration(milliseconds: 350),
                           transition: Transition.rightToLeft,
                         );
@@ -617,7 +615,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       height: Get.height * 0.045,
                       onTap: () {
                         Get.to(
-                          () => SocialLoginPage(),
+                          () => const SocialLoginPage(),
                           duration: const Duration(milliseconds: 350),
                           transition: Transition.rightToLeft,
                         );

@@ -7,7 +7,6 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../Utills/AppUrls.dart';
 import '../BottomNavigationBar/BottomNavigationBar.dart';
-import 'BlockedUser.dart';
 import 'package:get/get.dart';
 import 'ExploreUserAbout.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +15,8 @@ import 'package:amoremio/Widgets/Text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
-import '../../Widgets/background_Image_container.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class ExploreVideoView extends StatefulWidget {
   final String userid;
@@ -280,7 +277,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       setState(() {
         Get.to(
-          () => MyBottomNavigationBar(),
+          () => const MyBottomNavigationBar(),
           duration: const Duration(milliseconds: 300),
           transition: Transition.rightToLeft,
         );
@@ -392,7 +389,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                         });
                       }),
                 )
-              : SizedBox(),
+              : const SizedBox(),
           // Center(
           //         child: Container(
           //           child: CircularProgressIndicator(),
@@ -582,8 +579,8 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
             left: 0,
             right: 0,
             child: isLoading
-                ? Center(child: Padding(
-                  padding: const EdgeInsets.only(bottom: 32.0),
+                ? const Center(child: Padding(
+                  padding: EdgeInsets.only(bottom: 32.0),
                   child: CircularProgressIndicator(),
                 ))
                 : SizedBox(
@@ -673,7 +670,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                       'https://mio.eigix.net/${story['media']}'),
                                   fit: BoxFit.fill,
                                 ),
-                                shape: CircleBorder(
+                                shape: const CircleBorder(
                                   side: BorderSide(width: 2, color: Colors.white),
                                 ),
                               ),
@@ -836,7 +833,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                   onTap: () {
                     // Get.back();
                     Get.to(
-                      () => MyBottomNavigationBar(),
+                      () => const MyBottomNavigationBar(),
                       duration: const Duration(milliseconds: 300),
                       transition: Transition.rightToLeft,
                     );

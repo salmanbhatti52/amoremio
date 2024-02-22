@@ -1,6 +1,4 @@
 import 'dart:ui';
-import 'package:amoremio/Screen/ExplorePages/BlockedUser.dart';
-import 'package:amoremio/Screen/ProfilePages/ProfileMain/ProfilePage.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';

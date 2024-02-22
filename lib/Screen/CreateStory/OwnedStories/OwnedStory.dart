@@ -1,8 +1,5 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
-import '../../../Resources/assets/assets.dart';
-import '../../../Resources/colors/colors.dart';
 
 // ignore: must_be_immutable
 class OwnedStory extends StatelessWidget {

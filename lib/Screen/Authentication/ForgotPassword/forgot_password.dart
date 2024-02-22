@@ -44,7 +44,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       if (data['status'] == 'success') {
         Navigator.of(context).pop();
         Get.to(
-          () => EmailVerify(),
+          () => const EmailVerify(),
           arguments: [
             {"email": emailController.text.toString()},
           ],

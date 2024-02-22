@@ -85,11 +85,11 @@ class _CreateStoryState extends State<CreateStory>
             ),
             SizedBox(height: Get.height * 0.03),
             Expanded(
-              child: TabBarView(controller: _tabController, children: [
-                const OwnedStories(),
+              child: TabBarView(controller: _tabController, children: const [
+                OwnedStories(),
                 PaidStories(),
                 FreeStories(),
-                const StatusStories(),
+                StatusStories(),
               ]),
             )
           ],

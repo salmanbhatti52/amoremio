@@ -1,10 +1,7 @@
 import 'dart:convert';
 
-import 'package:amoremio/Screen/ExplorePages/Explore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Utills/AppUrls.dart';
 import '../../../Widgets/large_Button.dart';
@@ -13,7 +10,6 @@ import '../../../Resources/colors/colors.dart';
 import 'package:http/http.dart' as http;
 
 import '../../BottomNavigationBar/BottomNavigationBar.dart';
-import '../FreeStories/FreeStories.dart';
 import 'package:video_player/video_player.dart';
 
 class FreeVideo extends StatefulWidget {
@@ -108,7 +104,7 @@ class _FreeVideoState extends State<FreeVideo> {
         Navigator.of(context).pop();
         widget.onPauseVideo();
         Get.to(
-          () => MyBottomNavigationBar(),
+          () => const MyBottomNavigationBar(),
           duration: const Duration(milliseconds: 300),
           transition: Transition.rightToLeft,
         );

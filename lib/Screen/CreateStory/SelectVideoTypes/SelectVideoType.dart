@@ -12,13 +12,12 @@ import 'package:video_player/video_player.dart';
 import 'package:amoremio/Screen/CreateStory/SelectVideoTypes/FreeVideo.dart';
 import 'package:amoremio/Screen/CreateStory/SelectVideoTypes/PaidVideo.dart';
 import 'package:amoremio/Screen/ExplorePages/ExploreBackgroundContainer.dart';
-import 'package:video_trimmer/video_trimmer.dart';
 
 class SelectVideoType extends StatefulWidget {
   final File fileType;
   final String sourceType;
 
-  SelectVideoType(
+  const SelectVideoType(
       {super.key, required this.fileType, required this.sourceType});
 
   @override
@@ -97,7 +96,7 @@ class _SelectVideoTypeState extends State<SelectVideoType>
                       ? SizedBox(
                           height: Get.height * 0.5,
                           child: Image.file(widget.fileType))
-                      : SizedBox(),
+                      : const SizedBox(),
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(

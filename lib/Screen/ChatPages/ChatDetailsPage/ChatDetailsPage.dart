@@ -26,7 +26,7 @@ import 'package:path_provider/path_provider.dart';
 
 class ChatDetailsPage extends StatefulWidget {
   final String userId;
-  const ChatDetailsPage({Key? key, required String this.userId})
+  const ChatDetailsPage({Key? key, required this.userId})
       : super(key: key);
 
   @override
@@ -237,7 +237,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       if (userdetail['status'] == 'success') {
         setState(() {
           // chatmessages.add(data);
-          this.fetchMessages();
+          fetchMessages();
         });
       } else {
         print(userdetail['status']);
@@ -298,7 +298,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       if (userdetail['status'] == 'success') {
         setState(() {
           // chatmessages.add(data);
-          this.fetchMessages();
+          fetchMessages();
           Navigator.of(context).pop();
         });
       } else {
@@ -363,6 +363,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -401,7 +402,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                 image: DecorationImage(
                   fit: BoxFit.cover,
                   image: imgurl == null
-                      ? NetworkImage(ImageAssets.dummyImage)
+                      ? const NetworkImage(ImageAssets.dummyImage)
                           as ImageProvider<Object>
                       : NetworkImage(baseUrlImage + imgurl),
                 ),
@@ -1299,14 +1300,14 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                                 : Colors.white,
                                           ),
                                         )
-                                      : SizedBox(),
+                                      : const SizedBox(),
                                   message['attachment_type'] == 'image'
                                       ? Image.network(
                                           baseUrlImage + message['message'],
                                           width: 100,
                                           height: 100,
                                         )
-                                      : SizedBox(),
+                                      : const SizedBox(),
                                   message['attachment_type'] == 'pdf'
                                       ? GestureDetector(
                                           onTap: () {
@@ -1321,7 +1322,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                             height: 100,
                                           ),
                                         )
-                                      : SizedBox(),
+                                      : const SizedBox(),
                                   message['attachment_type'] == 'docx' ||
                                           message['attachment_type'] == 'docx'
                                       ? GestureDetector(
@@ -1337,10 +1338,10 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                             height: 100,
                                           ),
                                         )
-                                      : SizedBox(),
+                                      : const SizedBox(),
                                   message['attachment_type'] == 'voice'
                                       ? Container(
-                                          margin: EdgeInsets.symmetric(
+                                          margin: const EdgeInsets.symmetric(
                                               vertical: 4.0, horizontal: 8.0),
                                           width: MediaQuery.of(context)
                                                   .size
@@ -1351,14 +1352,14 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                                 message['message'],
                                           ),
                                         )
-                                      : SizedBox(),
+                                      : const SizedBox(),
                                   // const SizedBox(height: 4.0),
                                   Text(
                                     message['send_time'],
                                     style: TextStyle(
                                         fontSize: 12.0,
                                         color: isSentMessage
-                                            ? Color(0xFF9C9C9C)
+                                            ? const Color(0xFF9C9C9C)
                                             : Colors.white70),
                                   ),
                                 ],
@@ -1466,7 +1467,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                     horizontalSpacing: 0,
                     gridPadding: EdgeInsets.zero,
                     initCategory: Category.RECENT,
-                    bgColor: Color(0xFFF2F2F2),
+                    bgColor: const Color(0xFFF2F2F2),
                     indicatorColor: Colors.blue,
                     iconColor: Colors.grey,
                     iconColorSelected: Colors.blue,
@@ -1522,7 +1523,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
           chatmessages = data['data'];
           print(chatmessages);
           // Navigator.of(context).pop();
-          Future.delayed(Duration(milliseconds: 300), () {
+          Future.delayed(const Duration(milliseconds: 300), () {
             if (scrollController.hasClients) {
               scrollController.jumpTo(scrollController.position.maxScrollExtent);
             }
@@ -1561,8 +1562,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                           isRecording = true;
                         });
                       },
-                      icon: Icon(Icons.play_arrow),
-                      label: Text("Start"),
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text("Start"),
                     ),
                     // Stop Button
                     ElevatedButton.icon(
@@ -1572,14 +1573,14 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                           isRecording = false;
                         });
                       },
-                      icon: Icon(Icons.stop),
-                      label: Text("Stop"),
+                      icon: const Icon(Icons.stop),
+                      label: const Text("Stop"),
                     ),
                   ],
                 ),
                 // Display the message here when recording
                 if (isRecording)
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(top: 20),
                     child: Text("Recording is in process...."),
                   ),
