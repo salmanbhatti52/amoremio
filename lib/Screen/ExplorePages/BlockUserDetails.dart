@@ -326,7 +326,11 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
             left: 0,
             right: 0,
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: Padding(
+              padding: EdgeInsets.only(bottom: 32.0),
+              child: CircularProgressIndicator(),
+            ),
+            )
                 : SizedBox(
                     height: MediaQuery.of(context).size.height * 0.10,
                     width: MediaQuery.of(context).size.width,

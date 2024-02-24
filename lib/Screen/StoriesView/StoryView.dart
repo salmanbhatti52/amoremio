@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../Utills/AppUrls.dart';
@@ -32,7 +33,7 @@ class _StoryViewState extends State<StoryView> {
   List<dynamic> videos = [];
   bool isThumbnailClicked = false;
   String selectedImageUrl = '';
-
+  String selectedCategory = "discover";
 
   @override
   void initState() {
@@ -67,12 +68,10 @@ class _StoryViewState extends State<StoryView> {
 
           controller.initialize().then((_) {
             if (_videoControllers.indexOf(controller) == 0) {
-              // Check if it's the first video controller
-              controller.play(); // Play the first video
+              controller.play();
             }
-            setState(() {}); // This call to setState will rebuild the widget
+            setState(() {});
           });
-
           return controller;
         }).toList();
       } else {
@@ -87,22 +86,17 @@ class _StoryViewState extends State<StoryView> {
   }
 
   void onThumbnailClicked(dynamic index) {
-    // Change the current page of the PageView.builder
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
-
-    // Play the selected video
     for (var controller in _videoControllers) {
-      controller.pause(); // Pause all other videos
+      controller.pause();
     }
     if (videos[index]['media_type'] == 'Video') {
       _videoControllers[index].play(); // Play the selected video
     }
-
-    // Update the current page state
     setState(() {
       _currentPage = index;
     });
@@ -125,15 +119,12 @@ class _StoryViewState extends State<StoryView> {
     var storyid = usersstories['users_stories_id'];
     var Like = usersstories['liked'];
     debugPrint('likeeee $Like');
-    showDialog(
-        context: context,
-        builder: (context) {
+    showDialog(context: context, builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = usersstorieslikes;
-    // try {
     var showdata = {
       "users_stories_id": storyid,
       "likers_id": userId,
@@ -168,15 +159,10 @@ class _StoryViewState extends State<StoryView> {
         }
       });
     } else {
-      // debugPrint(userdetail['status']);
       var errormsg = userdetail['message'];
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errormsg)));
     }
-    // }
-    // catch (e) {
-    //   debugPrint('error123456:$e');
-    // }
   }
 
   @override
@@ -292,8 +278,7 @@ class _StoryViewState extends State<StoryView> {
                               ),
                             ),
                             Text(
-                              videos[_currentPage]['stats']['total_likes']
-                                  .toString(),
+                              videos[_currentPage]['stats']['total_likes'].toString(),
                               style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -314,12 +299,15 @@ class _StoryViewState extends State<StoryView> {
                             const SizedBox(
                               height: 10,
                             ),
-                            const ImageWithText(
+                            ImageWithText(
                               width: 25,
                               height: 25,
                               color: Colors.white,
                               imagePath: ImageAssets.share,
                               text: "Share",
+                              onTap: () async {
+                                await shareBook(videos[_currentPage]);
+                              },
                             ),
                             const SizedBox(
                               height: 10,
@@ -506,6 +494,16 @@ class _StoryViewState extends State<StoryView> {
             ),
     );
   }
+
+  Future<void> shareBook(Map<String, dynamic> videoData) async {
+    String videoUrl = 'https://mio.eigix.net/${videoData['media']}';
+    try {
+      await Share.share(videoUrl);
+    } catch (e) {
+      debugPrint('Error sharing file: $e');
+    }
+  }
+
 }
 
 Future<Uint8List?> generateThumbnail(String videoUrl) async {
@@ -525,13 +523,11 @@ Future<Uint8List?> generateThumbnail(String videoUrl) async {
 
 class Video extends StatefulWidget {
   final VideoPlayerController videoController;
-  // final Function(bool) onVideoPause;
   final bool isPlaying;
 
   const Video(
       {Key? key,
       required this.videoController,
-      // required this.onVideoPause,
       required this.isPlaying})
       : super(key: key);
 
@@ -547,10 +543,8 @@ class _VideoState extends State<Video> {
         onTap: () {
           if (widget.videoController.value.isPlaying) {
             widget.videoController.pause();
-            // widget.onVideoPause(true);
           } else {
             widget.videoController.play();
-            // widget.onVideoPause(false);
           }
         },
         child: AspectRatio(
@@ -571,13 +565,11 @@ class _VideoState extends State<Video> {
 
 class Video2 extends StatefulWidget {
   final VideoPlayerController videoController;
-  // final Function(bool) onVideoPause;
   final bool isPlaying;
 
    const Video2(
       {Key? key,
         required this.videoController,
-        // required this.onVideoPause,
         required this.isPlaying})
       : super(key: key);
 
@@ -588,8 +580,6 @@ class Video2 extends StatefulWidget {
 class _VideoState2 extends State<Video2> {
   @override
   Widget build(BuildContext context) {
-    // if (widget.videoController.value.isInitialized)
-    // {
       return GestureDetector(
         onTap: () {
           if (widget.videoController.value.isPlaying) {
@@ -603,23 +593,7 @@ class _VideoState2 extends State<Video2> {
           child: VideoPlayer(widget.videoController),
         ),
       );
-    // }
-      // else if (widget.videoController.value.hasError) {
-    //   return Center(
-    //     child: Text(
-    //       'Error loading video: ${widget.videoController.value.errorDescription}',
-    //       style: TextStyle(color: Colors.red),
-    //     ),
-    //   );
-    // } else {
-    //   return Center(child: CircularProgressIndicator());
-    // }
   }
-
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
 }
 
 int calculateAge(String dateOfBirth) {

@@ -23,17 +23,17 @@ class _InterestTagsState extends State<InterestTags> {
   bool isTrue = false;
   List interestsData = [];
   List selectedList = [];
+  List filteredList = [];
+  final TextEditingController controller = TextEditingController();
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getinterestTags();
-    print("Interest List in initState: ${widget.interestList}");
   }
 
   void selectItem(item) {
     setState(() {
-      // If the item is already selected, remove it; otherwise, add it to the selected list
       if (selectedList.contains(item)) {
         selectedList.remove(item);
       } else {
@@ -45,17 +45,15 @@ class _InterestTagsState extends State<InterestTags> {
 
   Future<List> getinterestTags() async {
     String apiUrl = getInterests;
-
     try {
       final response = await http.get(Uri.parse(apiUrl));
-
       final responseString = response.body;
       var data = jsonDecode(responseString);
       String status = data['status'];
       if (status == 'success') {
-        // print('$data[data]');
         setState(() {
           interestsData = data['data'];
+          filteredList = List.from(interestsData);
           print('list: $interestsData');
         });
       }
@@ -64,6 +62,15 @@ class _InterestTagsState extends State<InterestTags> {
       print('Failed to connect to the server.');
     }
     return [];
+  }
+
+  void filterList(String query) {
+    setState(() {
+      filteredList = interestsData
+          .where((interest) =>
+          interest['name'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
   }
 
   @override
@@ -99,6 +106,9 @@ class _InterestTagsState extends State<InterestTags> {
                   ),
                   child: Center(
                     child: TextField(
+                      onChanged: (query) {
+                        filterList(query);
+                      },
                       autofocus: false,
                       cursorColor: AppColor.hintTextColor,
                       style: GoogleFonts.poppins(
@@ -106,7 +116,7 @@ class _InterestTagsState extends State<InterestTags> {
                         color: AppColor.hintTextColor,
                         fontWeight: FontWeight.w400,
                       ),
-                      controller: TextEditingController(text: ""),
+                      controller: controller,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: Get.width * 0.03, vertical: 10),
@@ -151,16 +161,15 @@ class _InterestTagsState extends State<InterestTags> {
                     mainAxisSpacing: 0,
                     crossAxisSpacing: 0,
                   ),
-                  itemCount: interestsData.length,
+                  itemCount: filteredList.length,
                   itemBuilder: (BuildContext context, int index) {
-                    // Check if the current interest is in widget.interestList
                     bool isInterestSelected = widget.interestList.any(
-                        (selectedInterest) =>
-                            selectedInterest['interests_tags_id'] ==
-                            interestsData[index]['interests_tags_id']);
+                            (selectedInterest) =>
+                        selectedInterest['interests_tags_id'] ==
+                            filteredList[index]['interests_tags_id']);
                     return GestureDetector(
                       onTap: () {
-                        selectItem(interestsData.elementAt(index));
+                        selectItem(filteredList.elementAt(index));
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -169,22 +178,22 @@ class _InterestTagsState extends State<InterestTags> {
                           height: 30,
                           decoration: BoxDecoration(
                               color: selectedList
-                                          .contains(interestsData[index]) ||
-                                      isInterestSelected
-                                  ? Colors
-                                      .white // Change the background color for selected and common interests
+                                  .contains(filteredList[index]) ||
+                                  isInterestSelected
+                                  ? Colors.white
                                   : const Color(0x54E2E2E2),
                               borderRadius: BorderRadius.circular(15)),
                           child: Center(
                             child: MyText(
-                              text: interestsData[index]['name'],
+                              text: filteredList[index]['name'],
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
-                              color: selectedList.contains(interestsData[index])
+                              color: selectedList
+                                  .contains(filteredList[index])
                                   ? const Color(0xFFEE4433)
                                   : (isInterestSelected
-                                      ? const Color(0xFFEE4433)
-                                      : Colors.white),
+                                  ? const Color(0xFFEE4433)
+                                  : Colors.white),
                             ),
                           ),
                         ),

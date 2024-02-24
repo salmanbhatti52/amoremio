@@ -8,9 +8,16 @@ import 'package:amoremio/Widgets/large_Button.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
 
-class AccountVerification1 extends StatelessWidget {
-  const AccountVerification1({Key? key}) : super(key: key);
+class AccountVerification1 extends StatefulWidget {
+  final String imgUrl;
+  final String userName;
+   const AccountVerification1({Key? key, required this.imgUrl, required this.userName}) : super(key: key);
 
+  @override
+  State<AccountVerification1> createState() => _AccountVerification1State();
+}
+
+class _AccountVerification1State extends State<AccountVerification1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,13 +37,13 @@ class AccountVerification1 extends StatelessWidget {
               CircleAvatar(
                 backgroundColor: Colors.transparent,
                 radius: Get.height * 0.08,
-                backgroundImage: Image.asset(ImageAssets.mediumImage).image,
+                backgroundImage: Image.network(widget.imgUrl).image,
               ),
               SizedBox(
                 height: Get.height * 0.01,
               ),
-              const MyText(
-                text: "Lubana Antique",
+              MyText(
+                text: widget.userName,
                 fontSize: 22,
               ),
               SizedBox(

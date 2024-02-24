@@ -14,9 +14,15 @@ import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import '../ExplorePages/ExploreBackgroundContainer.dart';
 
-class UserCoins extends StatelessWidget {
-  const UserCoins({super.key});
+class UserCoins extends StatefulWidget {
+  final String? allowedCoins;
+  const UserCoins({super.key, required this.allowedCoins});
 
+  @override
+  State<UserCoins> createState() => _UserCoinsState();
+}
+
+class _UserCoinsState extends State<UserCoins> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,8 +65,8 @@ class UserCoins extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                           color: AppColor.hintTextColor,
                         ),
-                        const MyText(
-                          text: "10,000",
+                        MyText(
+                          text: "${widget.allowedCoins}",
                           fontSize: 58,
                           fontWeight: FontWeight.w600,
                           color: AppColor.secondaryColor,
@@ -69,7 +75,7 @@ class UserCoins extends StatelessWidget {
                           height: 5,
                         ),
                         LargeButton(
-                          text: "Save Changes",
+                          text: "Buy More Coins",
                           onTap: () {
                               Get.to(
                                     () => const CoinsShop(),

@@ -67,8 +67,7 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   Future pickimage() async {
-    final pickedImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedImage == null) return;
     setState(() {
       selectedIMage = File(pickedImage.path);
@@ -78,14 +77,6 @@ class _UserProfileState extends State<UserProfile> {
           base64.encode(_image as List<int>); //convert bytes to base64 string
       uploadprofile(base64string);
     });
-    // await ImagePicker()
-    //     .pickImage(source: ImageSource.gallery, imageQuality: 50)
-    //     .then((value) {
-    //   if (value != null) {
-    //     print(File(value.path));
-    //     // _cropImage(File(value.path));
-    //   }
-    // });
   }
 
   //upload avators///
@@ -443,11 +434,15 @@ class _UserProfileState extends State<UserProfile> {
                   const SizedBox(
                     width: 5,
                   ),
-                  MyText(
-                    textDecoration: TextDecoration.underline,
-                    text: address,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
+                  SizedBox(
+                    width: Get.width * 0.6,
+                    child: MyText(
+                      textDecoration: TextDecoration.underline,
+                      text: address,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      maxLines: 2,
+                    ),
                   ),
                 ],
               ),

@@ -36,6 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
   var username = '';
   dynamic imgurl = '';
   var bio = '';
+  String allowedCoins = '';
   void toggleSwitch(bool newValue) {
     setState(() {
       status = newValue;
@@ -68,6 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {});
       username = userdetail['data']['username'] ?? '';
       bio = userdetail['data']['summary'] ?? '';
+      allowedCoins = userdetail['data']['allowed_coins'] ?? '';
       imgurl = baseUrlImage + userdetail['data']['image'] ?? '';
     } else {
       print(userdetail['status']);
@@ -236,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 borderSize: 1.2,
                 onTap: () {
                   Get.to(
-                    () => const AccountVerification1(),
+                    () => AccountVerification1(imgUrl: imgurl, userName: username),
                     transition: Transition.rightToLeft,
                     duration: const Duration(milliseconds: 300),
                   );
@@ -272,7 +274,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   imageColor: const Color(0xffDDC911),
                   onTap: () {
                     Get.to(
-                      () => const UserCoins(),
+                      () => UserCoins(allowedCoins: allowedCoins),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );

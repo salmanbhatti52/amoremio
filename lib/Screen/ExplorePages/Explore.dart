@@ -33,28 +33,15 @@ class _ExplorePageState extends State<ExplorePage> {
   bool selectedIndex3 = false;
   bool selectedIndex4 = false;
 
-  bool isloading = false;
+  bool isLoading = false;
   final options = const LiveOptions(
-    // Start animation after (default zero)
     delay: Duration(seconds: 0),
-
-    // Show each item through (default 250)
     showItemInterval: Duration(milliseconds: 200),
-
-    // Animation duration (default 250)
     showItemDuration: Duration(milliseconds: 500),
     visibleFraction: 0.05,
     reAnimateOnVisibility: false,
   );
 
-  List<dynamic> mainImages = [
-    ImageAssets.exploreImage,
-    ImageAssets.image1,
-    ImageAssets.image2,
-    ImageAssets.image3,
-    ImageAssets.introImage,
-    // Add more image assets as needed
-  ];
   List<dynamic> originalUserDataList = [];
   List<dynamic> userDataList = [];
   List<dynamic> userDatasearch = [];
@@ -79,7 +66,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
   void fetchuserDiscover() async {
     originalUserDataList = [];
-    isloading = true;
+    isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
@@ -100,18 +87,18 @@ class _ExplorePageState extends State<ExplorePage> {
         setState(() {});
         originalUserDataList = data['data'];
         userDataList = originalUserDataList;
-        isloading = false;
+        isLoading = false;
         print('userDataList $userDataList');
         // images = baseUrlImage + data['data']['image'];
       } else {
-        isloading = false;
+        isLoading = false;
         print(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      isloading = false;
+      isLoading = false;
       print('error user discover $e');
     }
   }
@@ -266,30 +253,15 @@ class _ExplorePageState extends State<ExplorePage> {
               const ExploreAppbar(title: "LOGO", title2: "Explore"),
               SizedBox(height: Get.height * 0.02),
               ExploreSearch(onSearch: (searchText) {
-                // Handle the search text here
-                print('Received search text in ExplorePage: $searchText');
-
                 if (searchText.isEmpty) {
-                  // If empty, show the complete data or specific results
                   setState(() {
-                    userDataList =
-                        originalUserDataList; // Restore the original data
+                    userDataList = originalUserDataList;
                   });
-                } else {
-                  // If not empty, filter the original data based on the search text
-                  List searchResults = originalUserDataList
-                      .where((user) =>
-                          user['username'] != null &&
-                          user['username']
-                              .toLowerCase()
-                              .contains(searchText.toLowerCase()))
-                      .toList();
-
+                } else {List searchResults = originalUserDataList
+                      .where((user) => user['username'] != null && user['username'].toLowerCase().contains(searchText.toLowerCase())).toList();
                   setState(() {
                     userDataList = searchResults;
                   });
-                  // Print the search results
-                  print(searchResults);
                 }
               }, onGenderSelect: (gender) {
                 // Handle the selected gender here
@@ -476,8 +448,8 @@ class _ExplorePageState extends State<ExplorePage> {
               /////userdiscover////
               selectedIndex1 == true
                   ? SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.57,
-                      child: isloading == true
+                      height: MediaQuery.of(context).size.height * 0.61,
+                      child: isLoading == true
                           ? const Center(
                               child: CircularProgressIndicator(),
                             )
@@ -989,7 +961,7 @@ class _ExplorePageState extends State<ExplorePage> {
               //userlikedby/////
               selectedIndex4 == true
                   ? SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.57,
+                      height: MediaQuery.of(context).size.height * 0.61,
                       child: LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
