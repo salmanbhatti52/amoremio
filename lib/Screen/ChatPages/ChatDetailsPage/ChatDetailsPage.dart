@@ -61,14 +61,51 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     super.initState();
     loaddata();
     fetchMessages();
-    // WidgetsBinding.instance?.addPostFrameCallback((_) {
-      // Scroll to the end of the list after a short delay
-      // Future.delayed(Duration(milliseconds: 300), () {
-      //   _scrollToBottom();
-      // });
-    // });
+    getGifts();
     audioPlayer = AudioPlayer();
     audioRecord = Record();
+  }
+
+  bool isLoading = false;
+  List getGift = [];
+
+  getGifts() async {
+    setState(() {
+      isLoading = true;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = 'https://mio.eigix.net/apis/services/chat_gifts';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": userId,
+          },
+        ));
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['data'] != null &&
+              jsonResponse['data'] is List<dynamic>) {
+            getGift = jsonResponse['data'];
+            // parentMessage = jsonResponse['status'];
+            debugPrint("getGift: $getGift");
+            isLoading = false;
+          } else {
+            // parentMessage = jsonResponse['status'];
+            // debugPrint("parentMessage: $parentMessage");
+            isLoading = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoading = false;
+        }
+      });
+    }
   }
 
   void _scrollToBottom() {
@@ -356,6 +393,109 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     }
   }
 
+  Widget _buildGiftDialog(BuildContext context) {
+    return FadeInDown(
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        alignment: Alignment.center,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            Container(
+              // width: Get.width * 0.9,
+              height: Get.height * 0.42,
+              decoration: BoxDecoration(
+                color: const Color(0xff272727),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(),
+                        GestureDetector(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: const Icon(
+                            Icons.clear,
+                            color: AppColor.whiteColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    height: Get.height * 0.35,
+                    child: GridView.builder(
+                      // padding: const EdgeInsets.symmetric(horizontal: 5),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 0.0,
+                        mainAxisSpacing: 0.0,
+                        childAspectRatio: 1 / 1.2,
+                      ),
+                      itemCount: getGift.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            MyText(
+                              text: getGift[index]["name"],
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              margin: const EdgeInsets.symmetric(vertical : 5),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: getGift[index]["image"] == null
+                                      ? const NetworkImage(ImageAssets.dummyImage)
+                                  as ImageProvider<Object>
+                                      : NetworkImage(baseUrlImage + getGift[index]["image"]),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width : Get.width * 0.13,
+                              height : Get.height * 0.022,
+                              decoration:  BoxDecoration(
+                                color: const Color(0xff43aafd),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Center(
+                                child: MyText(text: "${getGift[index]["coins"]} Coins",
+                                fontSize: 8,
+                                ),
+                              ),
+                            )
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     audioPlayer.dispose();
@@ -601,150 +741,156 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
           // ),
           GestureDetector(
             onTap: () {
+              // showDialog(
+              //   context: context,
+              //   barrierColor: Colors.grey.withOpacity(0.9),
+              //   barrierDismissible: false,
+              //   builder: (BuildContext context) => FadeInDown(
+              //     child: Dialog(
+              //       backgroundColor: Colors.transparent,
+              //       alignment: Alignment.center,
+              //       child: Stack(
+              //         clipBehavior: Clip.none,
+              //         alignment: Alignment.topCenter,
+              //         children: [
+              //           Container(
+              //             width: Get.width * 0.8, //350,
+              //             height: Get.height * 0.50, // 321,
+              //             decoration: BoxDecoration(
+              //               color: Colors.white,
+              //               borderRadius: BorderRadius.circular(20),
+              //             ),
+              //             child: Column(
+              //               children: [
+              //                 const SizedBox(
+              //                   height: 10,
+              //                 ),
+              //                 Padding(
+              //                   padding: const EdgeInsets.symmetric(
+              //                       horizontal: 10.0),
+              //                   child: Row(
+              //                     mainAxisAlignment:
+              //                     MainAxisAlignment.spaceBetween,
+              //                     children: [
+              //                       const SizedBox(),
+              //                       GestureDetector(
+              //                         onTap: () {
+              //                           Get.back();
+              //                         },
+              //                         child: const Icon(
+              //                           Icons.clear,
+              //                           color: AppColor.blackColor,
+              //                         ),
+              //                       ),
+              //                     ],
+              //                   ),
+              //                 ),
+              //                 Image.asset(ImageAssets.gifts),
+              //                 SizedBox(
+              //                   height: Get.height * 0.02,
+              //                 ),
+              //                 const MyText(
+              //                   text: "Congratulations!",
+              //                   fontSize: 18,
+              //                   color: AppColor.secondaryColor,
+              //                 ),
+              //                 SizedBox(
+              //                   height: Get.height * 0.02,
+              //                 ),
+              //                 const Padding(
+              //                   padding:
+              //                   EdgeInsets.symmetric(horizontal: 15.0),
+              //                   child: MyText(
+              //                     text:
+              //                     "Your Call duration was just 2 Mints",
+              //                     fontWeight: FontWeight.w400,
+              //                     fontSize: 14,
+              //                     color: Color(0xFF727171),
+              //                   ),
+              //                 ),
+              //                 SizedBox(
+              //                   height: Get.height * 0.025,
+              //                 ),
+              //                 Row(
+              //                   mainAxisAlignment: MainAxisAlignment.center,
+              //                   crossAxisAlignment:
+              //                   CrossAxisAlignment.center,
+              //                   children: [
+              //                     SvgPicture.asset(ImageAssets.alarm),
+              //                     const MyText(
+              //                       text: " 1 Min",
+              //                       fontSize: 14,
+              //                       fontWeight: FontWeight.w500,
+              //                       color: AppColor.blackColor,
+              //                     ),
+              //                     const Padding(
+              //                       padding: EdgeInsets.symmetric(
+              //                           horizontal: 8.0),
+              //                       child: Icon(
+              //                         CupertinoIcons.equal,
+              //                         color: AppColor.blackColor,
+              //                       ),
+              //                     ),
+              //                     SvgPicture.asset(ImageAssets.healthicons),
+              //                     const MyText(
+              //                       text: " 10 Coins ",
+              //                       fontSize: 14,
+              //                       fontWeight: FontWeight.w500,
+              //                       color: AppColor.blackColor,
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 SizedBox(
+              //                   height: Get.height * 0.025,
+              //                 ),
+              //                 Container(
+              //                   width: Get.width * 0.64,
+              //                   height: Get.height * 0.065,
+              //                   clipBehavior: Clip.antiAlias,
+              //                   decoration: BoxDecoration(
+              //                     borderRadius: BorderRadius.circular(30),
+              //                     gradient: const LinearGradient(
+              //                       colors: [
+              //                         AppColor.primaryColor,
+              //                         AppColor.secondaryColor,
+              //                       ],
+              //                       begin: Alignment(0.20, -0.98),
+              //                       end: Alignment(-0.2, 0.98),
+              //                     ),
+              //                   ),
+              //                   child: Row(
+              //                     mainAxisAlignment:
+              //                     MainAxisAlignment.center,
+              //                     children: [
+              //                       SvgPicture.asset(
+              //                         ImageAssets.healthicons,
+              //                         width: 30,
+              //                         height: 30,
+              //                         color: AppColor.whiteColor,
+              //                       ),
+              //                       const SizedBox(
+              //                         width: 15,
+              //                       ),
+              //                       const MyText(
+              //                         text: "Send 20 Coins",
+              //                         fontSize: 18,
+              //                       ),
+              //                     ],
+              //                   ),
+              //                 ),
+              //               ],
+              //             ),
+              //           )
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+              // );
               showDialog(
                 context: context,
                 barrierColor: Colors.grey.withOpacity(0.9),
                 barrierDismissible: false,
-                builder: (BuildContext context) => FadeInDown(
-                  child: Dialog(
-                    backgroundColor: Colors.transparent,
-                    alignment: Alignment.center,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.topCenter,
-                      children: [
-                        Container(
-                          width: Get.width * 0.8, //350,
-                          height: Get.height * 0.50, // 321,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const SizedBox(),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.back();
-                                      },
-                                      child: const Icon(
-                                        Icons.clear,
-                                        color: AppColor.blackColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Image.asset(ImageAssets.gifts),
-                              SizedBox(
-                                height: Get.height * 0.02,
-                              ),
-                              const MyText(
-                                text: "Congratulations!",
-                                fontSize: 18,
-                                color: AppColor.secondaryColor,
-                              ),
-                              SizedBox(
-                                height: Get.height * 0.02,
-                              ),
-                              const Padding(
-                                padding:
-                                EdgeInsets.symmetric(horizontal: 15.0),
-                                child: MyText(
-                                  text:
-                                  "Your Call duration was just 2 Mints",
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14,
-                                  color: Color(0xFF727171),
-                                ),
-                              ),
-                              SizedBox(
-                                height: Get.height * 0.025,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment:
-                                CrossAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(ImageAssets.alarm),
-                                  const MyText(
-                                    text: " 1 Min",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColor.blackColor,
-                                  ),
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Icon(
-                                      CupertinoIcons.equal,
-                                      color: AppColor.blackColor,
-                                    ),
-                                  ),
-                                  SvgPicture.asset(ImageAssets.healthicons),
-                                  const MyText(
-                                    text: " 10 Coins ",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColor.blackColor,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: Get.height * 0.025,
-                              ),
-                              Container(
-                                width: Get.width * 0.64,
-                                height: Get.height * 0.065,
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      AppColor.primaryColor,
-                                      AppColor.secondaryColor,
-                                    ],
-                                    begin: Alignment(0.20, -0.98),
-                                    end: Alignment(-0.2, 0.98),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      ImageAssets.healthicons,
-                                      width: 30,
-                                      height: 30,
-                                      color: AppColor.whiteColor,
-                                    ),
-                                    const SizedBox(
-                                      width: 15,
-                                    ),
-                                    const MyText(
-                                      text: "Send 20 Coins",
-                                      fontSize: 18,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
+                builder: (BuildContext context) => _buildGiftDialog(context),
               );
             },
             child: Container(

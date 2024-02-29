@@ -35,6 +35,7 @@ class _AccountSettingsState extends State<AccountSettings> {
   currentPasswordTap() {
     setState(() {
       isCurrentPasswordVisible = !isCurrentPasswordVisible;
+      print("object");
     });
   }
 

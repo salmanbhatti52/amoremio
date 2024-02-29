@@ -156,9 +156,17 @@ class _SelectVideoTypeState extends State<SelectVideoType>
                       sourceType: widget.sourceType,
                       onPauseVideo: () {
                         playerController
-                            ?.pause(); // Or playerController?.dispose();
+                            ?.pause();
                       }),
-                  PaidVideo(height: Get.height * 0.3),
+                  PaidVideo(
+                      height: Get.height * 0.3,
+                      base64Image: base64string,
+                      sourceType: widget.sourceType,
+                      onPauseVideo: () {
+                        playerController
+                            ?.pause();
+                      }
+                  ),
                 ]),
               )
             ],

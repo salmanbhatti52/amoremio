@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../Widgets/AppBar.dart';
@@ -5,11 +7,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import '../../../Resources/assets/assets.dart';
 import 'package:amoremio/Widgets/Text.dart';
+import 'package:http/http.dart' as http;
 import 'package:amoremio/Resources/colors/colors.dart';
 import '../../ExplorePages/ExploreBackgroundContainer.dart';
 
 class ReferralsPage extends StatefulWidget {
-   const ReferralsPage({super.key});
+  final String userName;
+   const ReferralsPage({super.key, required this.userName});
 
   @override
   State<ReferralsPage> createState() => _ReferralsPageState();
@@ -17,13 +21,57 @@ class ReferralsPage extends StatefulWidget {
 
 class _ReferralsPageState extends State<ReferralsPage> {
 
-  String referralLink = "https://appname.com/@referral_9099";
+  String referralLink = "";
   bool isTrue = false;
 
-  listShow(){
+  listShow() {
     setState(() {
       isTrue = !isTrue;
     });
+  }
+
+  Future<void> postData() async {
+    const String apiUrl = "https://mio.eigix.net/apis/services/referral_link";
+    final Map<String, dynamic> data = {
+      "username": widget.userName,
+    };
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        String status = jsonResponse['status'];
+        String responseData = jsonResponse['data'];
+
+        if (status == "success") {
+          print("API call successful");
+          print("Response Data: $responseData");
+         setState(() {
+           referralLink = responseData;
+         });
+        } else {
+          print("API call failed with status: $status");
+        }
+      } else {
+        print("Failed to make API call. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(widget.userName);
+    postData();
   }
 
   @override
@@ -145,12 +193,16 @@ class _ReferralsPageState extends State<ReferralsPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         MyText(
-                          text: referralLink,
-                          fontSize: 14,
-                          color: const Color(0xFF1877F2),
-                          fontWeight: FontWeight.w500,
-                        ),
+                         SizedBox(
+                           width: Get.width * 0.7,
+                           child: MyText(
+                             text: referralLink,
+                             maxLines: 1,
+                             fontSize: 14,
+                             color: const Color(0xFF1877F2),
+                             fontWeight: FontWeight.w500,
+                           ),
+                         ),
                         GestureDetector(
                           onTap: (){
                             Clipboard.setData(ClipboardData(text: referralLink)).then((_){

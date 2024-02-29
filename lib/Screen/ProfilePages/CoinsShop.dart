@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'CardAdd.dart';
 import 'package:get/get.dart';
 import 'package:amoremio/Widgets/Text.dart';
+import 'package:http/http.dart' as http;
 import '../../Widgets/AppBar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +11,54 @@ import '../../Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import '../ExplorePages/ExploreBackgroundContainer.dart';
 
-class CoinsShop extends StatelessWidget {
+class CoinsShop extends StatefulWidget {
   const CoinsShop({super.key});
+
+  @override
+  State<CoinsShop> createState() => _CoinsShopState();
+}
+
+class _CoinsShopState extends State<CoinsShop> {
+
+  bool isLoading = false;
+  String message = "";
+  List getPackages = [];
+
+  getPackage() async {
+    setState(() {
+      isLoading = true;
+    });
+    const apiUrl = 'https://mio.eigix.net/apis/services/packages';
+    http.Response response = await http.post(Uri.parse(apiUrl),);
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['data'] != null &&
+              jsonResponse['data'] is List<dynamic>) {
+            getPackages = jsonResponse['data'];
+            // parentMessage = jsonResponse['status'];
+            debugPrint("getPDiaries: $getPackages");
+            isLoading = false;
+          } else {
+            message = jsonResponse['status'];
+            debugPrint("parentMessage: $message");
+            isLoading = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoading = false;
+        }
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getPackage();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +116,15 @@ class CoinsShop extends StatelessWidget {
                     ),
                     SizedBox(
                       height: Get.height * 0.45,
-                      child: GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
+                      child: isLoading
+                          ? Center(child: CircularProgressIndicator()) : message != "success"
+                          ? GridView.builder(
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             mainAxisSpacing: 0,
                             crossAxisSpacing: 0,
                           ),
-                          itemCount: 4,
+                          itemCount: getPackages.length,
                           itemBuilder: (BuildContext context, int index) {
                             return GestureDetector(
                               onTap: () {
@@ -108,15 +157,15 @@ class CoinsShop extends StatelessWidget {
                                                 borderRadius:
                                                     BorderRadius.circular(5),
                                               ),
-                                              child: const MyText(
-                                                text: "+150",
+                                              child:  MyText(
+                                                text: getPackages[index]["extra_coins"] ?? "0",
                                                 fontSize: 8,
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const MyText(
-                                          text: "Big 750",
+                                         MyText(
+                                          text: getPackages[index]["name"],
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                           color: AppColor.secondaryColor,
@@ -127,17 +176,17 @@ class CoinsShop extends StatelessWidget {
                                           width: 50,
                                           height: 50,
                                         ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8.0),
                                           child: MyText(
-                                            text: "300 Coins",
+                                            text: "${getPackages[index]["coins"]} Coins",
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             color: AppColor.blackColor,
                                           ),
                                         ),
                                         LargeButton(
-                                          text: "\$ 10.999",
+                                          text: "\$ ${getPackages[index]["price"]}",
                                           onTap: () {},
                                           width: Get.width * 0.34,
                                           height: Get.height * 0.03,
@@ -149,7 +198,8 @@ class CoinsShop extends StatelessWidget {
                               ),
                             );
                           },
-                      ),
+                      )
+                          : Center(child: MyText(text: "No Coins Packages", color: AppColor.blackColor,)),
                     ),
                   ],
                 ),

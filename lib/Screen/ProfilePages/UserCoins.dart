@@ -23,6 +23,13 @@ class UserCoins extends StatefulWidget {
 }
 
 class _UserCoinsState extends State<UserCoins> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    debugPrint("coins ${widget.allowedCoins}");
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

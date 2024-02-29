@@ -36,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
   var username = '';
   dynamic imgurl = '';
   var bio = '';
-  String allowedCoins = '';
+  String allowedCoins = "";
   void toggleSwitch(bool newValue) {
     setState(() {
       status = newValue;
@@ -69,8 +69,9 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {});
       username = userdetail['data']['username'] ?? '';
       bio = userdetail['data']['summary'] ?? '';
-      allowedCoins = userdetail['data']['allowed_coins'] ?? '';
+      allowedCoins = userdetail['data']['allowed_coins'] ?? "0";
       imgurl = baseUrlImage + userdetail['data']['image'] ?? '';
+      print("allowedCoins $allowedCoins");
     } else {
       print(userdetail['status']);
       var errormsg = userdetail['message'];
@@ -273,8 +274,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: ImageAssets.buyCoins,
                   imageColor: const Color(0xffDDC911),
                   onTap: () {
+                    print("allowedCoins $allowedCoins");
                     Get.to(
-                      () => UserCoins(allowedCoins: allowedCoins),
+                      () => UserCoins(allowedCoins: allowedCoins.toString()),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );
@@ -311,7 +313,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   imageColor: const Color(0xff04B4FF),
                   onTap: () {
                     Get.to(
-                      () => const ReferralsPage(),
+                      () => ReferralsPage(userName: username.toString()),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );
