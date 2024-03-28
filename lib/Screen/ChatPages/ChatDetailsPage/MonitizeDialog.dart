@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:amoremio/Widgets/Text.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Resources/assets/assets.dart';
 import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +20,12 @@ class MonitizeDialog extends StatefulWidget {
 
 class _MonitizeDialogState extends State<MonitizeDialog> {
 
-  List<String> genderType = ["2 coin per message", "4 coin per message", "6 coin per message"];
+  List<String> genderType = [
+    "2 coin per message",
+    "4 coin per message",
+    "6 coin per message"
+  ];
+
   String? selectedGender;
   int selectedIndex = -1;
 
@@ -25,6 +33,54 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
     setState(() {
       selectedIndex = index;
     });
+  }
+
+  bool isLoading = false;
+
+  addMonetization() async {
+    setState(() {
+      isLoading = true;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = 'https://mio.eigix.net/apis/services/chat_gifts';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": userId,
+            "monetization_type": "chat",
+            "coins": selectedGender,
+            "duration": selectedIndex == 0 ? "24h" : selectedIndex == 1 ? "48h" : selectedIndex == 2 ? "7d" : selectedIndex == 3 ? "Permanent" : "",
+            "name": "Chatting"
+          },
+        ));
+    debugPrint("users_customers_id: $userId");
+    debugPrint("coins: $selectedGender");
+    debugPrint("duration: $selectedIndex");
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['status'] == "success") {
+            String message = jsonResponse['status'];
+            debugPrint("message: $message");
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Package activated successfully!")));
+            isLoading = false;
+            Get.back();
+          } else {
+            String message = jsonResponse['message'];
+            debugPrint("message: $message");
+            isLoading = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoading = false;
+        }
+      });
+    }
   }
 
   @override
@@ -104,164 +160,162 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                           fontSize: 14,
                           color: Color(0xFF242222),
                         ),
-                        SizedBox(
-                          height: Get.height * 0.013
-                        ),
+                        SizedBox(height: Get.height * 0.013),
                         Row(
                           children: [
                             SizedBox(
                               width: Get.width * 0.015,
                             ),
                             GestureDetector(
-                                onTap: () {
-                                  selectContainer(0);
-                                },
-                                child: Container(
-                                  width: Get.width * 0.13,
-                                  height: Get.height * 0.045,
-                                  // width: 51,
-                                  // height: 38,
-                                  decoration: ShapeDecoration(
+                              onTap: () {
+                                selectContainer(0);
+                              },
+                              child: Container(
+                                width: Get.width * 0.13,
+                                height: Get.height * 0.045,
+                                // width: 51,
+                                // height: 38,
+                                decoration: ShapeDecoration(
+                                  color: selectedIndex == 0
+                                      ? AppColor.secondaryColor
+                                      : AppColor.whiteColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(9),
+                                  ),
+                                  shadows: const [
+                                    BoxShadow(
+                                      color: Color(0x19000000),
+                                      blurRadius: 24,
+                                      offset: Offset(0, 0),
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: MyText(
+                                    text: "24d",
                                     color: selectedIndex == 0
-                                        ? AppColor.secondaryColor
-                                        : AppColor.whiteColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(9),
-                                    ),
-                                    shadows: const [
-                                      BoxShadow(
-                                        color: Color(0x19000000),
-                                        blurRadius: 24,
-                                        offset: Offset(0, 0),
-                                        spreadRadius: 0,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: MyText(
-                                      text: "24d",
-                                      color: selectedIndex == 0
-                                          ? AppColor.whiteColor
-                                          : const Color(0xFF727171),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
+                                        ? AppColor.whiteColor
+                                        : const Color(0xFF727171),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
+                            ),
                             SizedBox(
                               width: Get.width * 0.02,
                             ),
                             GestureDetector(
-                                onTap: () {
-                                  selectContainer(1);
-                                },
-                                child: Container(
-                                  width: Get.width * 0.13,
-                                  height: Get.height * 0.045,
-                                  decoration: ShapeDecoration(
+                              onTap: () {
+                                selectContainer(1);
+                              },
+                              child: Container(
+                                width: Get.width * 0.13,
+                                height: Get.height * 0.045,
+                                decoration: ShapeDecoration(
+                                  color: selectedIndex == 1
+                                      ? AppColor.secondaryColor
+                                      : AppColor.whiteColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(9),
+                                  ),
+                                  shadows: const [
+                                    BoxShadow(
+                                      color: Color(0x19000000),
+                                      blurRadius: 24,
+                                      offset: Offset(0, 0),
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: MyText(
+                                    text: "48d",
                                     color: selectedIndex == 1
-                                        ? AppColor.secondaryColor
-                                        : AppColor.whiteColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(9),
-                                    ),
-                                    shadows: const [
-                                      BoxShadow(
-                                        color: Color(0x19000000),
-                                        blurRadius: 24,
-                                        offset: Offset(0, 0),
-                                        spreadRadius: 0,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: MyText(
-                                      text: "48d",
-                                      color: selectedIndex == 1
-                                          ? AppColor.whiteColor
-                                          : const Color(0xFF727171),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
+                                        ? AppColor.whiteColor
+                                        : const Color(0xFF727171),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
+                            ),
                             SizedBox(
                               width: Get.width * 0.02,
                             ),
                             GestureDetector(
-                                onTap: () {
-                                  selectContainer(2);
-                                },
-                                child: Container(
-                                  width: Get.width * 0.13,
-                                  height: Get.height * 0.045,
-                                  decoration: ShapeDecoration(
+                              onTap: () {
+                                selectContainer(2);
+                              },
+                              child: Container(
+                                width: Get.width * 0.13,
+                                height: Get.height * 0.045,
+                                decoration: ShapeDecoration(
+                                  color: selectedIndex == 2
+                                      ? AppColor.secondaryColor
+                                      : AppColor.whiteColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(9),
+                                  ),
+                                  shadows: const [
+                                    BoxShadow(
+                                      color: Color(0x19000000),
+                                      blurRadius: 24,
+                                      offset: Offset(0, 0),
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: MyText(
+                                    text: "7d",
                                     color: selectedIndex == 2
-                                        ? AppColor.secondaryColor
-                                        : AppColor.whiteColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(9),
-                                    ),
-                                    shadows: const [
-                                      BoxShadow(
-                                        color: Color(0x19000000),
-                                        blurRadius: 24,
-                                        offset: Offset(0, 0),
-                                        spreadRadius: 0,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: MyText(
-                                      text: "7d",
-                                      color: selectedIndex == 2
-                                          ? AppColor.whiteColor
-                                          : const Color(0xFF727171),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
+                                        ? AppColor.whiteColor
+                                        : const Color(0xFF727171),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
+                            ),
                             SizedBox(
                               width: Get.width * 0.02,
                             ),
                             GestureDetector(
-                                onTap: () {
-                                  selectContainer(3);
-                                },
-                                child: Container(
-                                  width: Get.width * 0.25,
-                                  height: Get.height * 0.045,
-                                  decoration: ShapeDecoration(
+                              onTap: () {
+                                selectContainer(3);
+                              },
+                              child: Container(
+                                width: Get.width * 0.25,
+                                height: Get.height * 0.045,
+                                decoration: ShapeDecoration(
+                                  color: selectedIndex == 3
+                                      ? AppColor.secondaryColor
+                                      : AppColor.whiteColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(9)),
+                                  shadows: const [
+                                    BoxShadow(
+                                      color: Color(0x19000000),
+                                      blurRadius: 24,
+                                      offset: Offset(0, 0),
+                                      spreadRadius: 0,
+                                    )
+                                  ],
+                                ),
+                                child: Center(
+                                  child: MyText(
+                                    text: "Permanent",
                                     color: selectedIndex == 3
-                                        ? AppColor.secondaryColor
-                                        : AppColor.whiteColor,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(9)),
-                                    shadows: const [
-                                      BoxShadow(
-                                        color: Color(0x19000000),
-                                        blurRadius: 24,
-                                        offset: Offset(0, 0),
-                                        spreadRadius: 0,
-                                      )
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: MyText(
-                                      text: "Permanent",
-                                      color: selectedIndex == 3
-                                          ? AppColor.whiteColor
-                                          : const Color(0xFF727171),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
+                                        ? AppColor.whiteColor
+                                        : const Color(0xFF727171),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
+                            ),
                           ],
                         ),
                       ],
@@ -279,9 +333,7 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                         fontSize: 14,
                         color: Color(0xFF242222),
                       ),
-                      SizedBox(
-                          height: Get.height * 0.013
-                      ),
+                      SizedBox(height: Get.height * 0.013),
                       Container(
                         width: Get.width * 0.7,
                         height: Get.height * 0.06,
@@ -304,7 +356,10 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                           alignedDropdown: true,
                           child: DropdownButtonHideUnderline(
                             child: DropdownButtonFormField(
-                              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColor.hintTextColor,),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: AppColor.hintTextColor,
+                              ),
                               decoration: InputDecoration(
                                 prefixIcon: IconButton(
                                   onPressed: () {},
@@ -359,24 +414,25 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                               items: genderType
                                   .map(
                                     (item) => DropdownMenuItem<String>(
-                                  value: item,
-                                  onTap: selectedGender = null,
-                                  child: Text(
-                                    item,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      color: selectedGender != null
-                                          ? AppColor.hintTextColor
-                                          : AppColor.blackColor,
-                                      fontWeight: FontWeight.w400,
+                                      value: item,
+                                      // onTap: selectedGender = null,
+                                      child: Text(
+                                        item,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          color: selectedGender != null
+                                              ? AppColor.hintTextColor
+                                              : AppColor.blackColor,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              )
+                                  )
                                   .toList(),
                               value: selectedGender,
                               onChanged: (value) {
                                 selectedGender = value;
+                                debugPrint("selectedGender: $selectedGender");
                               },
                             ),
                           ),
@@ -384,107 +440,120 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                       ),
                     ],
                   ),
-                  SizedBox(height: Get.height * 0.045,),
+                  SizedBox(
+                    height: Get.height * 0.045,
+                  ),
                   GestureDetector(
-                    onTap: (){
-                      Get.back();
-                      showDialog(
-                          context: context,
-                        barrierColor: Colors.grey.withOpacity(0.9),
-                          barrierDismissible: false,
-                          builder: (BuildContext context) =>
-                              Dialog(
-                                backgroundColor: Colors.transparent,
-                                alignment: Alignment.center,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: Get.width * 0.8, //350,
-                                      height: Get.height * 0.38, // 321,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                const SizedBox(),
-                                                const MyText(
-                                                  text: "Monetize",
-                                                  fontSize: 18,
-                                                  color: AppColor.secondaryColor,
-                                                ),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    Get.back();
-                                                  },
-                                                  child: const Icon(
-                                                    Icons.clear,
-                                                    color: AppColor.blackColor,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: Get.height * 0.025,
-                                          ),
-                                          SvgPicture.asset(ImageAssets.coins),
-                                          SizedBox(
-                                            height: Get.height * 0.025,
-                                          ),
-                                          const Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                                            child: MyText(
-                                              text: "You can charge users for messages, and they'll need to buy coins if they don't have any to send messages.",
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 14,
-                                              color: Color(0xFF727171),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: Get.height * 0.025,
-                                          ),
-                                          GestureDetector(
-                                            onTap: (){},
-                                            child: Container(
-                                              width: Get.width * 0.6,
-                                              height: Get.height * 0.065,
-                                              clipBehavior: Clip.antiAlias,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(30),
-                                                gradient: const LinearGradient(
-                                                  colors: [
-                                                    AppColor.primaryColor,
-                                                    AppColor.secondaryColor,
-                                                  ],
-                                                  begin: Alignment(0.20, -0.98),
-                                                  end: Alignment(-0.2, 0.98),
-                                                ),
-                                              ),
-                                              child: const Center(
-                                                child: MyText(
-                                                  text: "Ok",
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                      );
+                    // onTap: () {
+                    //   Get.back();
+                    //   showDialog(
+                    //     context: context,
+                    //     barrierColor: Colors.grey.withOpacity(0.9),
+                    //     barrierDismissible: false,
+                    //     builder: (BuildContext context) => Dialog(
+                    //       backgroundColor: Colors.transparent,
+                    //       alignment: Alignment.center,
+                    //       child: Column(
+                    //         mainAxisSize: MainAxisSize.min,
+                    //         children: [
+                    //           Container(
+                    //             width: Get.width * 0.8, //350,
+                    //             height: Get.height * 0.38, // 321,
+                    //             decoration: BoxDecoration(
+                    //               color: Colors.white,
+                    //               borderRadius: BorderRadius.circular(20),
+                    //             ),
+                    //             child: Column(
+                    //               children: [
+                    //                 const SizedBox(
+                    //                   height: 10,
+                    //                 ),
+                    //                 Padding(
+                    //                   padding: const EdgeInsets.symmetric(
+                    //                       horizontal: 10.0),
+                    //                   child: Row(
+                    //                     mainAxisAlignment:
+                    //                         MainAxisAlignment.spaceBetween,
+                    //                     children: [
+                    //                       const SizedBox(),
+                    //                       const MyText(
+                    //                         text: "Monetize",
+                    //                         fontSize: 18,
+                    //                         color: AppColor.secondaryColor,
+                    //                       ),
+                    //                       GestureDetector(
+                    //                         onTap: () {
+                    //                           Get.back();
+                    //                         },
+                    //                         child: const Icon(
+                    //                           Icons.clear,
+                    //                           color: AppColor.blackColor,
+                    //                         ),
+                    //                       ),
+                    //                     ],
+                    //                   ),
+                    //                 ),
+                    //                 SizedBox(
+                    //                   height: Get.height * 0.025,
+                    //                 ),
+                    //                 SvgPicture.asset(ImageAssets.coins),
+                    //                 SizedBox(
+                    //                   height: Get.height * 0.025,
+                    //                 ),
+                    //                 const Padding(
+                    //                   padding: EdgeInsets.symmetric(
+                    //                       horizontal: 12.0),
+                    //                   child: MyText(
+                    //                     text:
+                    //                         "You can charge users for messages, and they'll need to buy coins if they don't have any to send messages.",
+                    //                     fontWeight: FontWeight.w400,
+                    //                     fontSize: 14,
+                    //                     color: Color(0xFF727171),
+                    //                   ),
+                    //                 ),
+                    //                 SizedBox(
+                    //                   height: Get.height * 0.025,
+                    //                 ),
+                    //                 GestureDetector(
+                    //                   onTap: () {},
+                    //                   child: Container(
+                    //                     width: Get.width * 0.6,
+                    //                     height: Get.height * 0.065,
+                    //                     clipBehavior: Clip.antiAlias,
+                    //                     decoration: BoxDecoration(
+                    //                       borderRadius:
+                    //                           BorderRadius.circular(30),
+                    //                       gradient: const LinearGradient(
+                    //                         colors: [
+                    //                           AppColor.primaryColor,
+                    //                           AppColor.secondaryColor,
+                    //                         ],
+                    //                         begin: Alignment(0.20, -0.98),
+                    //                         end: Alignment(-0.2, 0.98),
+                    //                       ),
+                    //                     ),
+                    //                     child: const Center(
+                    //                       child: MyText(
+                    //                         text: "Ok",
+                    //                         fontSize: 18,
+                    //                       ),
+                    //                     ),
+                    //                   ),
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   );
+                    // },
+                    onTap: () {
+                      if(selectedGender != null && selectedIndex != 0){
+                        addMonetization();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select all fields")));
+                      }
                     },
                     child: Container(
                       width: Get.width * 0.6,

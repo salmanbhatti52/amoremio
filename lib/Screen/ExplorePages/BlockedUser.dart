@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:auto_animated/auto_animated.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -145,13 +146,8 @@ class _BlockedUserState extends State<BlockedUser> {
   bool status = false;
 
   final options = const LiveOptions(
-    // Start animation after (default zero)
     delay: Duration(seconds: 0),
-
-    // Show each item through (default 250)
     showItemInterval: Duration(milliseconds: 200),
-
-    // Animation duration (default 250)
     showItemDuration: Duration(milliseconds: 500),
     visibleFraction: 0.05,
     reAnimateOnVisibility: false,
@@ -166,17 +162,9 @@ class _BlockedUserState extends State<BlockedUser> {
   List<dynamic> originalUserDataList = [];
   List<dynamic> userDataList = [];
   List<dynamic> userDatasearch = [];
-
-  List<dynamic> mainImages = [
-    ImageAssets.exploreImage,
-    ImageAssets.image1,
-    ImageAssets.image2,
-    ImageAssets.image3,
-    ImageAssets.introImage,
-    // Add more image assets as needed
-  ];
-
   String searchText = '';
+  bool isLoading = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -185,6 +173,9 @@ class _BlockedUserState extends State<BlockedUser> {
   }
 
   void fetchuserBlocked() async {
+    setState(() {
+      isLoading = true;
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
@@ -202,18 +193,26 @@ class _BlockedUserState extends State<BlockedUser> {
       // print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        setState(() {});
+        setState(() {
+          isLoading = false;
+        });
         originalUserDataList = data['data']['data'];
         userDataList = originalUserDataList;
         print(userDataList);
         // images = baseUrlImage + data['data']['image'];
       } else {
+        setState(() {
+          isLoading = false;
+        });
         print(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       print('error:: $e');
     }
   }
@@ -328,7 +327,15 @@ class _BlockedUserState extends State<BlockedUser> {
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.78,
-                child: LiveGrid.options(
+                child: isLoading == true
+                    ?   const Center(
+                  child: SpinKitPouringHourGlassRefined(
+                    color: AppColor.whiteColor,
+                    size: 80,
+                    strokeWidth: 3,
+                    duration: Duration(seconds: 1),
+                  ),
+                ) : LiveGrid.options(
                   options: options,
                   itemCount: userDataList.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

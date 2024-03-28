@@ -214,7 +214,7 @@ class ChatIconWithBadge extends StatelessWidget {
               padding: const EdgeInsets.all(5),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red, // You can customize the color
+                color: Colors.red,
               ),
               child: Text(
                 unreadMessageCount.toString(),

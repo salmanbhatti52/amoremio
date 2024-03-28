@@ -172,16 +172,13 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   }
 
   void onSendMessage(String text) async {
-    // Get the current time
     DateTime now = DateTime.now();
-
-    // Format the time as a string
     String formattedTime = DateFormat('h:mm a').format(now);
-
     print('Current time: $formattedTime');
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
+    print("userId $userId");
+    print("others_users_customers_id ${widget.userId}");
     String apiUrl = sendChatmessages;
     var data = {
       "sender_id": userId,
@@ -195,8 +192,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
         },
         body: jsonEncode(
           {
-            "users_customers_id": userId, // sender_id
-            "others_users_customers_id": widget.userId, //receiver_id
+            "users_customers_id": userId,
+            "others_users_customers_id": widget.userId,
             "message": text,
             "message_type": "text"
           },
@@ -447,42 +444,51 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                       ),
                       itemCount: getGift.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            MyText(
-                              text: getGift[index]["name"],
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            Container(
-                              width: 40,
-                              height: 40,
-                              margin: const EdgeInsets.symmetric(vertical : 5),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: getGift[index]["image"] == null
-                                      ? const NetworkImage(ImageAssets.dummyImage)
-                                  as ImageProvider<Object>
-                                      : NetworkImage(baseUrlImage + getGift[index]["image"]),
+
+                        return GestureDetector(
+                          onTap: (){
+                            setState(() {
+                              String selectedGiftId = getGift[index]["gifts_id"];
+                              sendChatGifts(selectedGiftId);
+                            });
+                          },
+                          child: Column(
+                            children: [
+                              MyText(
+                                text: getGift[index]["name"],
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              Container(
+                                width: 40,
+                                height: 40,
+                                margin: const EdgeInsets.symmetric(vertical : 5),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: getGift[index]["image"] == null
+                                        ? const NetworkImage(ImageAssets.dummyImage)
+                                    as ImageProvider<Object>
+                                        : NetworkImage(baseUrlImage + getGift[index]["image"]),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Container(
-                              width : Get.width * 0.13,
-                              height : Get.height * 0.022,
-                              decoration:  BoxDecoration(
-                                color: const Color(0xff43aafd),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Center(
-                                child: MyText(text: "${getGift[index]["coins"]} Coins",
-                                fontSize: 8,
+                              Container(
+                                width : Get.width * 0.13,
+                                height : Get.height * 0.022,
+                                decoration:  BoxDecoration(
+                                  color: const Color(0xff43aafd),
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
-                              ),
-                            )
-                          ],
+                                child: Center(
+                                  child: MyText(text: "${getGift[index]["coins"]} Coins",
+                                  fontSize: 8,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -494,6 +500,45 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> sendChatGifts(String giftsId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = 'https://mio.eigix.net/apis/services/send_chat_gifts';
+    try {
+      var data1 = {
+        "users_customers_id":userId,
+        "others_users_customers_id":widget.userId,
+        "gifts_id":giftsId,
+      };
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(data1));
+      var userdetail = jsonDecode(response.body);
+      print(userdetail);
+      if (userdetail['status'] == 'successr') {
+        setState(() {
+          fetchMessages();
+        });
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      } else {
+        Navigator.of(context).pop();
+        print(userdetail['status']);
+        var errormsg = userdetail['message'];
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error123456 $e');
+    }
   }
 
   @override
@@ -510,8 +555,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
         toolbarHeight: 100,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(22), // Adjust the value as needed
-            bottomRight: Radius.circular(22), // Adjust the value as needed
+            bottomLeft: Radius.circular(22),
+            bottomRight: Radius.circular(22),
           ),
         ),
         backgroundColor: AppColor.primaryColor,
@@ -1532,8 +1577,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                       onSendMessage: onSendMessage,
                       onCameraIconClick: pickimage,
                       scrollController: scrollController,
-                      isEmojiVisible:
-                          isEmojiVisible, // Step 3: Pass the visibility state
+                      isEmojiVisible: isEmojiVisible,
                       toggleEmojiPicker: toggleEmojiPicker,
                       closekeyboard: closekeyboard,
                       pickWordOrPdfFile: pickWordOrPdfFile,

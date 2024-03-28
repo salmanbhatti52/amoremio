@@ -127,7 +127,7 @@ class _PaidVideoState extends State<PaidVideo> {
                       .map(
                         (item) => DropdownMenuItem<String>(
                       value: item,
-                      onTap: setPrice = null,
+                      // onTap: setPrice = null,
                       child: Text(
                         item,
                         style: GoogleFonts.poppins(
@@ -143,7 +143,9 @@ class _PaidVideoState extends State<PaidVideo> {
                       .toList(),
                   value: setPrice,
                   onChanged: (value) {
-                    setPrice = value;
+                    setState(() {
+                      setPrice = value;
+                    });
                     print("setPrice $setPrice");
                   },
                 ),
@@ -192,6 +194,8 @@ class _PaidVideoState extends State<PaidVideo> {
         "media_type": "Video",
         "media": base64Image
       };
+      print("showdata $showdata");
+      print("showdata2 $showdata2");
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',

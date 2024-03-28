@@ -5,17 +5,16 @@ import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
-// required void Function() onCameraIconClick
 Widget sendMessageTextFields(Key key, TextEditingController controller,
     {required void Function(String text) onSendMessage,
-    required void Function() closekeyboard,
+    void Function()? closekeyboard,
     required BuildContext context,
-    required ScrollController scrollController,
-    required void Function() onCameraIconClick,
-    required GlobalKey<AnimatedListState> listKey,
-    required bool isEmojiVisible,
-    required void Function() toggleEmojiPicker,
-    required void Function() pickWordOrPdfFile}) {
+    ScrollController? scrollController,
+    void Function()? onCameraIconClick,
+    GlobalKey<AnimatedListState>? listKey,
+    bool? isEmojiVisible,
+    void Function()? toggleEmojiPicker,
+    void Function()? pickWordOrPdfFile}) {
   return Form(
     key: key,
     child: Expanded(
@@ -45,7 +44,7 @@ Widget sendMessageTextFields(Key key, TextEditingController controller,
                   // This function will be called when the keyboard submit button is pressed
 
                   // Scroll to the bottom
-                  scrollController.animateTo(
+                  scrollController?.animateTo(
                     scrollController.position.maxScrollExtent,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,

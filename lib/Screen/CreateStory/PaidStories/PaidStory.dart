@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:amoremio/Screen/BottomNavigationBar/BottomNavigationBar.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Resources/assets/assets.dart';
 import '../../../Resources/colors/colors.dart';
@@ -13,6 +16,7 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../Utills/AppUrls.dart';
+import '../../../Widgets/large_Button.dart';
 
 class PaidStory extends StatefulWidget {
   final double height;
@@ -33,6 +37,7 @@ class _PaidStoryState extends State<PaidStory> {
 
   bool ishown = false;
   String errormsg = '';
+
   @override
   void initState() {
     // TODO: implement initState
@@ -61,9 +66,8 @@ class _PaidStoryState extends State<PaidStory> {
         setState(() {
           ishown = true;
           userstories = data['data'];
-          // Initialize the video controller
-          _controller =
-              VideoPlayerController.network(""); // Provide an initial empty URL
+          print("Userstory $userstories");
+          _controller = VideoPlayerController.network("");
           _initializeVideoController();
         });
       } else {
@@ -72,9 +76,6 @@ class _PaidStoryState extends State<PaidStory> {
           print(data['status']);
           errormsg = data['message'];
         });
-
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
       print('error123456');
@@ -91,7 +92,7 @@ class _PaidStoryState extends State<PaidStory> {
       final uint8list = await VideoThumbnail.thumbnailData(
         video: videoUrl,
         imageFormat: ImageFormat.JPEG,
-        maxWidth: 128, // specify the width of the thumbnail
+        maxWidth: 64,
         quality: 25,
       );
       return uint8list;
@@ -106,6 +107,116 @@ class _PaidStoryState extends State<PaidStory> {
     // Dispose of your video controller
     _controller?.dispose();
     super.dispose();
+  }
+
+  Widget deleteDg(String? userStoriesId){
+    return FadeInLeftBig(
+      delay: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: Get.width * 0.8,
+              height: Get.height * 0.4,
+              // width: 342,
+              // height: 315,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.back();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 15.0, top: 15),
+                        child: Icon(
+                          Icons.clear,
+                          color: AppColor.blackColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SvgPicture.asset(ImageAssets.delete),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5.0, bottom: 5),
+                    child: Text(
+                      "Are You Sure ?",
+                      style: GoogleFonts.poppins(
+                        color: AppColor.secondaryColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Text(
+                      "Are you sure about deleting this story? Retrieval won't be possible once it's gone.",
+                      style: GoogleFonts.poppins(
+                        color: AppColor.brownColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  LargeButton(text: "Yes", onTap: (){
+                    deleteStory(userStoriesId.toString());
+                  }, width: Get.width * 0.7,),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String? userStoriesId;
+  Future<void> deleteStory(String storyId) async {
+    try {
+      String deleteStoryApiUrl = 'https://mio.eigix.net/apis/services/delete_story';
+
+      http.Response response = await http.post(
+        Uri.parse(deleteStoryApiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+        body: jsonEncode(
+          {"users_stories_id": storyId},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Get.to(
+              () => const MyBottomNavigationBar(initialIndex: 2),
+          duration: const Duration(milliseconds: 300),
+          transition: Transition.rightToLeft,
+        );
+        print("Story deleted successfully");
+        print("Response Body: ${response.body}");
+      } else {
+        print("Error deleting story. Response Body: ${response.body}");
+      }
+    } catch (error) {
+      print("Error: $error");
+    }
   }
 
   @override
@@ -131,13 +242,17 @@ class _PaidStoryState extends State<PaidStory> {
               itemCount: userstories.length,
               itemBuilder: (BuildContext context, int index) {
                 Map<String, dynamic> Userstory = userstories[index];
-
+                print("Userstory ${userstories[index]["users_stories_id"]}");
                 return Column(
                   children: [
                     Stack(
                       children: [
                         GestureDetector(
                           onTap: () {
+                            setState(() {
+                              userStoriesId = userstories[index]["users_stories_id"];
+                              print("Userstory $userStoriesId");
+                            });
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
@@ -150,15 +265,52 @@ class _PaidStoryState extends State<PaidStory> {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 20),
+                                            horizontal : 20, vertical: 30),
                                         child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
+                                            GestureDetector(
+                                              onTap: (){
+                                                showDialog(
+                                                    context: context,
+                                                    barrierColor: Colors.white60,
+                                                    barrierDismissible: true,
+                                                    builder: (BuildContext context) =>
+                                                        deleteDg(userStoriesId)
+                                                );
+                                              },
+                                              child: Container(
+                                                // width: Get.width * 0.27,
+                                                // height: Get.height * 0.17,
+                                                width: 112,
+                                                height: 30,
+                                                padding: const EdgeInsets.only(top: 6, left: 3, right: 6, bottom: 6),
+                                                color: AppColor.whiteColor,
+                                                child: Row(
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                      ImageAssets.delete,
+                                                      width: 25,
+                                                      height: 25,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 3,
+                                                    ),
+                                                    const MyText(
+                                                      text: "Delete",
+                                                      color: AppColor.blackColor,
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
                                             Material(
                                               color: Colors.transparent,
                                               child: IconButton(
                                                 splashColor: Colors.transparent,
-                                                highlightColor:
-                                                    Colors.transparent,
+                                                highlightColor: Colors.transparent,
                                                 icon: const Icon(Icons.close),
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
@@ -197,15 +349,11 @@ class _PaidStoryState extends State<PaidStory> {
                               ? FutureBuilder<Uint8List?>(
                                   future: generateThumbnail(
                                       baseUrlImage + Userstory['media']),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<Uint8List?> snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      if (snapshot.hasData &&
-                                          snapshot.data != null) {
+                                  builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done) {
+                                      if (snapshot.hasData && snapshot.data != null) {
                                         return ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(7.9),
+                                          borderRadius: BorderRadius.circular(7.9),
                                           child: Image.memory(
                                             snapshot.data!,
                                             width: 108,
@@ -215,13 +363,13 @@ class _PaidStoryState extends State<PaidStory> {
                                         );
                                       } else {
                                         return Image.asset(
-                                          'path/to/default/image', // Default image path
+                                          'path/to/default/image',
                                           width: 108,
                                           height: 136,
                                         );
                                       }
                                     } else {
-                                      return const SizedBox(); // Loading indicator
+                                      return const SizedBox();
                                     }
                                   },
                                 )

@@ -34,9 +34,10 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool status = false;
   var username = '';
-  dynamic imgurl = '';
+  dynamic imgUrl = '';
   var bio = '';
   String allowedCoins = "";
+
   void toggleSwitch(bool newValue) {
     setState(() {
       status = newValue;
@@ -47,15 +48,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    loaddata();
+    loadData();
   }
 
   @override
-  void loaddata() async {
+  void loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = getusersProfile;
-    // try {
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -63,18 +63,18 @@ class _ProfilePageState extends State<ProfilePage> {
         body: jsonEncode(
           {"users_customers_id": userId},
         ));
-    var userdetail = jsonDecode(response.body);
-    if (userdetail['status'] == 'success') {
-      print(userdetail);
+    var userDetail = jsonDecode(response.body);
+    if (userDetail['status'] == 'success') {
+      print(userDetail);
       setState(() {});
-      username = userdetail['data']['username'] ?? '';
-      bio = userdetail['data']['summary'] ?? '';
-      allowedCoins = userdetail['data']['allowed_coins'] ?? "0";
-      imgurl = baseUrlImage + userdetail['data']['image'] ?? '';
+      username = userDetail['data']['username'] ?? '';
+      bio = userDetail['data']['summary'] ?? '';
+      allowedCoins = userDetail['data']['allowed_coins'] ?? "0";
+      imgUrl = baseUrlImage + userDetail['data']['image'] ?? '';
       print("allowedCoins $allowedCoins");
     } else {
-      print(userdetail['status']);
-      var errormsg = userdetail['message'];
+      print(userDetail['status']);
+      var errormsg = userDetail['message'];
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errormsg)));
     }
@@ -111,10 +111,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: imgurl.isEmpty
+                        image: imgUrl.isEmpty
                             ? const NetworkImage(ImageAssets.dummyImage)
                                 as ImageProvider<Object>
-                            : NetworkImage(imgurl),
+                            : NetworkImage(imgUrl),
                       ),
                     ),
                   ),
@@ -239,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 borderSize: 1.2,
                 onTap: () {
                   Get.to(
-                    () => AccountVerification1(imgUrl: imgurl, userName: username),
+                    () => AccountVerification1(imgUrl: imgUrl, userName: username),
                     transition: Transition.rightToLeft,
                     duration: const Duration(milliseconds: 300),
                   );

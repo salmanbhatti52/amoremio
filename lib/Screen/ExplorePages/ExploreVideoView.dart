@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:amoremio/Screen/ExplorePages/ExploreVideoViewDetails.dart';
+import 'package:amoremio/Screen/StoriesView/StoryBuyDialouge.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -52,13 +53,6 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     _animateController.dispose();
   }
 
-  // final List<String> imgList = [
-  //   ImageAssets.exploreImage,
-  //   ImageAssets.image1,
-  //   ImageAssets.image2,
-  //   ImageAssets.image3,
-  //   ImageAssets.introImage,
-  // ];
   List<dynamic> imgListavators = [];
   List<dynamic> userDataList = [];
   List<dynamic> uservideos = [];
@@ -163,6 +157,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
 
   userstories() async {
     String apiUrl = getuserallstories;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print("userID $userId");
+    print("otherUserID ${widget.userid}");
     try {
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
@@ -170,7 +168,8 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
           },
           body: jsonEncode(
             {
-              "users_customers_id": widget.userid,
+              "users_customers_id": userId,
+              "others_users_customers_id": widget.userid,
             },
           ));
 
@@ -195,6 +194,41 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       print('errorfound $e');
     }
   }
+
+  // userstories() async {
+  //   String apiUrl = getuserallstories;
+  //   try {
+  //     final response = await http.post(Uri.parse(apiUrl),
+  //         headers: <String, String>{
+  //           'Content-Type': 'application/json; charset=UTF-8',
+  //         },
+  //         body: jsonEncode(
+  //           {
+  //             "users_customers_id": widget.userid,
+  //           },
+  //         ));
+  //
+  //     var data = jsonDecode(response.body);
+  //     if (data['status'] == 'success') {
+  //       print('user stories::::: ${response.body}');
+  //       // imgurl = baseUrlImage + data['data']['image'];
+  //       uservideos = data['data'];
+  //       await generateAllThumbnails(uservideos);
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     } else {
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     print('errorfound $e');
+  //   }
+  // }
 
   Future<void> generateAllThumbnails(List<dynamic> videos) async {
     bool shouldUpdate = false;
@@ -593,6 +627,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                       itemBuilder: (BuildContext context, int index) {
                         var story = uservideos[index];
                         var videoPath = story;
+                        var storyId = videoPath['users_stories_id'];
+                        var storyType = videoPath['story_type'];
+                        var coinsView = videoPath['coins_per_view'];
+                        var owned = videoPath['stats']["owned"];
                         if (videoPath['media_type'] == 'Video' &&
                             thumbnails.containsKey(story['media'])) {
                           return Padding(
@@ -616,19 +654,28 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                     borderRadius: BorderRadius.circular(30),
                                     child: GestureDetector(
                                       onTap: () {
-                                        print('users_stories_id ::::: ${story["users_stories_id"]}');
-                                        print('users_customers_id ::::: ${story["users_customers_id"]}');
-                                        setState(() {
-                                          userStoriesID = story["users_stories_id"];
-                                          usersCustomersId = story["users_customers_id"];
-                                          print('userStoriesID $userStoriesID');
-                                          print('users_customers_id $usersCustomersId');
-                                        });
-                                        Get.to(
-                                              () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
-                                          duration: const Duration(seconds: 1),
-                                          transition: Transition.native,
-                                        );
+                                        if(storyType == "Paid" && owned == "No"){
+                                          showDialog(
+                                            context: context,
+                                            barrierColor: Colors.grey.withOpacity(0.9),
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: storyId),
+                                          );
+                                        } else {
+                                          print('users_stories_id ::::: ${story["users_stories_id"]}');
+                                          print('users_customers_id ::::: ${story["users_customers_id"]}');
+                                          setState(() {
+                                            userStoriesID = story["users_stories_id"];
+                                            usersCustomersId = story["users_customers_id"];
+                                            print('userStoriesID $userStoriesID');
+                                            print('users_customers_id $usersCustomersId');
+                                          });
+                                          Get.to(
+                                                () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
+                                            duration: const Duration(seconds: 1),
+                                            transition: Transition.native,
+                                          );
+                                        }
                                       },
                                       child: Image.memory(
                                         thumbnails[story['media']]!,
@@ -643,19 +690,19 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                         } else {
                           return GestureDetector(
                             onTap: (){
-                              print('users_stories_id ::::: ${story["users_stories_id"]}');
-                              print('users_customers_id ::::: ${story["users_customers_id"]}');
-                              setState(() {
-                                userStoriesID = story["users_stories_id"];
-                                usersCustomersId = story["users_customers_id"];
-                                print('userStoriesID $userStoriesID');
-                                print('users_customers_id $usersCustomersId');
-                              });
-                              Get.to(
-                                    () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
-                                duration: const Duration(seconds: 1),
-                                transition: Transition.native,
-                              );
+                              // print('users_stories_id ::::: ${story["users_stories_id"]}');
+                              // print('users_customers_id ::::: ${story["users_customers_id"]}');
+                              // setState(() {
+                              //   userStoriesID = story["users_stories_id"];
+                              //   usersCustomersId = story["users_customers_id"];
+                              //   print('userStoriesID $userStoriesID');
+                              //   print('users_customers_id $usersCustomersId');
+                              // });
+                              // Get.to(
+                              //       () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
+                              //   duration: const Duration(seconds: 1),
+                              //   transition: Transition.native,
+                              // );
                             },
                             child: Container(
                               margin: const EdgeInsets.only(
@@ -879,15 +926,11 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
 
   int calculateAge(String? dateOfBirth) {
     if (dateOfBirth == null) {
-      // Handle the case when dateOfBirth is null
-      return 0; // or any default value
+      return 0;
     }
-
     DateTime today = DateTime.now();
     DateTime birthDate = DateTime.parse(dateOfBirth);
     int age = today.year - birthDate.year;
-
-    // Adjust age if the birthday hasn't occurred yet this year
     if (today.month < birthDate.month ||
         (today.month == birthDate.month && today.day < birthDate.day)) {
       age--;
@@ -898,15 +941,16 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
 
   Future<Uint8List?> generateThumbnail(String videoUrl) async {
     try {
-      final uint8list = await VideoThumbnail.thumbnailData(
+      final unit8list = await VideoThumbnail.thumbnailData(
         video: videoUrl,
-        imageFormat: ImageFormat.JPEG,
-        maxWidth: 128, // specify the width of the thumbnail
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 64,
         quality: 25,
+        timeMs: 1
       );
-      return uint8list;
+      return unit8list;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       return null;
     }
   }

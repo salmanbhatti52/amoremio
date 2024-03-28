@@ -1,12 +1,57 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:amoremio/Resources/assets/assets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class BuyStoryDialog extends StatelessWidget {
-  const BuyStoryDialog({Key? key}) : super(key: key);
+import '../BottomNavigationBar/BottomNavigationBar.dart';
+
+class BuyStoryDialog extends StatefulWidget {
+  final String coinView;
+  final String storyId;
+  const BuyStoryDialog({Key? key, required this.coinView, required this.storyId}) : super(key: key);
+
+  @override
+  State<BuyStoryDialog> createState() => _BuyStoryDialogState();
+}
+
+class _BuyStoryDialogState extends State<BuyStoryDialog> {
+
+  void buyStories() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+
+    try {
+      String apiUrl = "https://mio.eigix.net/apis/services/buy_users_stories";
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+              "users_stories_id": widget.storyId
+            },
+          ));
+      var data = jsonDecode(response.body);
+      print(data);
+      if (data['status'] == 'success') {
+        Get.to(
+              () => const MyBottomNavigationBar(initialIndex: 2),
+          duration: const Duration(milliseconds: 300),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        print(data['status']);
+      }
+    } catch (e) {
+      print('error123456');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +80,15 @@ class BuyStoryDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            const MyText(
+            MyText(
               align: TextAlign.center,
-              text: "20 Coins to Unlock Anna's Exclusive \n Story & Support",
+              text: "${widget.coinView} Coins to Unlock Exclusive \n Story & Support",
               fontSize: 18,
             ),
             const SizedBox(height: 30),
             GestureDetector(
               onTap: () {
-                // Get.back();
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const BlockedUser()),
-                // );
+                buyStories();
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.6,

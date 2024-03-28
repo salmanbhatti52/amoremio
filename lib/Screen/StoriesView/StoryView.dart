@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:amoremio/Screen/StoriesView/StoryBuyDialouge.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,8 @@ import 'package:amoremio/Widgets/ImagewithText.dart';
 import 'package:amoremio/Screen/StoriesView/StoryDiscover.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
+
+import '../CreateStory/PaidStories/PaidCommentSheet.dart';
 
 class StoryView extends StatefulWidget {
   final String? usersStoriesId;
@@ -295,6 +298,13 @@ class _StoryViewState extends State<StoryView> {
                               text: videos[_currentPage]['stats']
                                       ['total_comments']
                                   .toString(),
+                              onTap: (){
+                                Get.bottomSheet(
+                                   CommentSheet(storyId: videos[_currentPage]["users_stories_id"]),
+                                  barrierColor: Colors.black.withOpacity(0.5),
+                                  backgroundColor: Colors.transparent,
+                                );
+                              },
                             ),
                             const SizedBox(
                               height: 10,
@@ -340,7 +350,9 @@ class _StoryViewState extends State<StoryView> {
                               ),
                               MyText(
                                 text:
-                                    "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}",
+                              videos[_currentPage]['user_data'] != null
+                                  ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
+                                  : "UserName",
                                 fontWeight: FontWeight.w500,
                                 fontSize: 14,
                               ),
@@ -373,7 +385,9 @@ class _StoryViewState extends State<StoryView> {
                               itemBuilder: (BuildContext context, int index) {
                                 var story = videos[_currentPage]['user_data']['users_stories'][index];
                                 var videoPath = story;
-                                // debugPrint("story ${story['media']}");
+                                var userStoriesId = story["users_stories_id"];
+                                var storyType = story["story_type"];
+                                var coinsView = story["coins_per_view"];
                                 if (videoPath['media_type'] == 'Video') {
                                   return FutureBuilder<Uint8List?>(
                                     future: generateThumbnail(baseUrlImage + story['media']),
@@ -381,41 +395,46 @@ class _StoryViewState extends State<StoryView> {
                                       if (snapshot.connectionState == ConnectionState.done) {
                                         if (snapshot.hasData) {
                                           return Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 0.0),
+                                            padding: const EdgeInsets.only(right: 0.0),
                                             child: Column(
                                               children: [
                                                 Container(
-                                                  margin: const EdgeInsets.only(
-                                                      top: 10, left: 14),
+                                                  margin: const EdgeInsets.only(top: 10, left: 14),
                                                   width: 60,
                                                   height: 60,
                                                   decoration: BoxDecoration(
                                                     color: Colors.transparent,
                                                     border: Border.all(width: 2, color: AppColor.whiteColor,
                                                     ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(30),
+                                                    borderRadius: BorderRadius.circular(30),
                                                   ),
                                                   child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(30),
+                                                    borderRadius: BorderRadius.circular(30),
                                                     child: GestureDetector(
                                                       onTap: () {
-                                                        print('Thumbnail clicked');
-                                                        setState(() {
-                                                          isThumbnailClicked = true;
-                                                          selectedImageUrl = '';
-                                                          print("selectedImageUrl $selectedImageUrl");
-                                                        });
-                                                        _videoControllers[_currentPage].pause();
-                                                        print('New video controller created');
-                                                        _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
-                                                        _videoControllers[_currentPage].initialize().then((_) {
-                                                          print('Video controller initialized');
-                                                          _videoControllers[_currentPage].play();
-                                                        });
-                                                        // onThumbnailClicked(index);
+                                                        if(storyType == "Paid"){
+                                                          showDialog(
+                                                            context: context,
+                                                            barrierColor: Colors.grey.withOpacity(0.9),
+                                                            barrierDismissible: false,
+                                                            builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: userStoriesId),
+                                                          );
+                                                        } else {
+                                                          print('Thumbnail clicked');
+                                                          setState(() {
+                                                            isThumbnailClicked = true;
+                                                            selectedImageUrl = '';
+                                                            print("selectedImageUrl $selectedImageUrl");
+                                                          });
+                                                          _videoControllers[_currentPage].pause();
+                                                          print('New video controller created');
+                                                          _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
+                                                          _videoControllers[_currentPage].initialize().then((_) {
+                                                            print('Video controller initialized');
+                                                            _videoControllers[_currentPage].play();
+                                                          });
+                                                          // onThumbnailClicked(index);
+                                                        }
                                                       },
                                                       child: Image.memory(
                                                         snapshot.data!,
@@ -511,7 +530,7 @@ Future<Uint8List?> generateThumbnail(String videoUrl) async {
     final uint8list = await VideoThumbnail.thumbnailData(
       video: videoUrl,
       imageFormat: ImageFormat.JPEG,
-      maxWidth: 128,
+      maxWidth: 64,
       quality: 25,
     );
     return uint8list;

@@ -532,7 +532,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
       final uint8list = await VideoThumbnail.thumbnailData(
         video: videoUrl,
         imageFormat: ImageFormat.JPEG,
-        maxWidth: 128, // specify the width of the thumbnail
+        maxWidth: 64, // specify the width of the thumbnail
         quality: 25,
       );
       return uint8list;

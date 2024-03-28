@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'CardAdd.dart';
 import 'package:get/get.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -58,6 +60,42 @@ class _CoinsShopState extends State<CoinsShop> {
     // TODO: implement initState
     super.initState();
     getPackage();
+  }
+
+  Future<void> buyPackages(String packageId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    String apiUrl = "https://mio.eigix.net/apis/services/buy_packages";
+    try {
+      var data1 = {
+        "users_customers_id": userId,
+        "packages_id": packageId
+      };
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(data1));
+      var userdetail = jsonDecode(response.body);
+      print(userdetail);
+      if (userdetail['status'] == 'success') {
+        setState(() {
+          Navigator.of(context).pop();
+        });
+      } else {
+        Navigator.of(context).pop();
+        print(userdetail['status']);
+        var errormsg = userdetail['message'];
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
+      }
+    } catch (e) {
+      print('error123456 $e');
+    }
   }
 
   @override
@@ -128,11 +166,16 @@ class _CoinsShopState extends State<CoinsShop> {
                           itemBuilder: (BuildContext context, int index) {
                             return GestureDetector(
                               onTap: () {
-                                Get.to(
-                                      () => const CardAdd(),
-                                  transition: Transition.rightToLeft,
-                                  duration: const Duration(milliseconds: 300),
-                                );
+                                // Get.to(
+                                //       () => const CardAdd(),
+                                //   transition: Transition.rightToLeft,
+                                //   duration: const Duration(milliseconds: 300),
+                                // );
+                                setState(() {
+                                  String packageId = getPackages[index]["packages_id"];
+                                  print(packageId);
+                                  buyPackages(packageId);
+                                });
                               },
                               child: Column(
                                 children: [

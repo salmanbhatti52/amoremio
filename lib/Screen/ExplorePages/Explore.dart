@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,7 +45,6 @@ class _ExplorePageState extends State<ExplorePage> {
   List<dynamic> originalUserDataList = [];
   List<dynamic> userDataList = [];
   List<dynamic> userDatasearch = [];
-
   List<dynamic> imgListavators = [];
 
   String searchTerm = '';
@@ -105,6 +104,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
   /// liked users/////
   void fetchuserliked() async {
+    isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
@@ -125,14 +125,15 @@ class _ExplorePageState extends State<ExplorePage> {
         setState(() {});
         originalUserDataList = data['data'];
         userDataList = originalUserDataList;
-
+        isLoading = false;
         // images = baseUrlImage + data['data']['image'];
       } else {
+        isLoading = false;
         var errormsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
+      isLoading = false;
       print('error :$e');
     }
   }
@@ -141,6 +142,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
   /// Matches/////
   fetchusermatches() async {
+    isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = getusermatch;
@@ -160,14 +162,16 @@ class _ExplorePageState extends State<ExplorePage> {
         setState(() {});
         originalUserDataList = data['data'];
         userDataList = originalUserDataList;
-
+        isLoading = false;
         // images = baseUrlImage + data['data']['image'];
       } else {
+        isLoading = false;
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
+      isLoading = false;
       print('error :$e');
     }
   }
@@ -176,6 +180,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
   /// liked users/////
   void fetchuserlikedme() async {
+    isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
@@ -196,18 +201,22 @@ class _ExplorePageState extends State<ExplorePage> {
         setState(() {
           originalUserDataList = data['data'];
           userDataList = originalUserDataList;
+          isLoading = false;
         });
       } else {
+        isLoading = false;
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
+      isLoading = false;
       print('error :$e');
     }
   }
 
   filteruser(genderId) async {
+    isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
@@ -228,15 +237,18 @@ class _ExplorePageState extends State<ExplorePage> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {
+          isLoading = false;
           originalUserDataList = data['data'];
           userDataList = originalUserDataList;
         });
       } else {
+        isLoading = false;
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
+      isLoading = false;
       print('error :$e');
     }
   }
@@ -252,7 +264,8 @@ class _ExplorePageState extends State<ExplorePage> {
             children: [
               const ExploreAppbar(title: "LOGO", title2: "Explore"),
               SizedBox(height: Get.height * 0.02),
-              ExploreSearch(onSearch: (searchText) {
+              ExploreSearch(
+                  onSearch: (searchText) {
                 if (searchText.isEmpty) {
                   setState(() {
                     userDataList = originalUserDataList;
@@ -264,14 +277,12 @@ class _ExplorePageState extends State<ExplorePage> {
                   });
                 }
               }, onGenderSelect: (gender) {
-                // Handle the selected gender here
                 print('Selected gender: $gender');
                 setState(() {
                   userDataList = [];
                   filteruser(gender);
                 });
               }),
-
               Padding(
                 padding: EdgeInsets.only(
                   left: Get.width * 0.04,
@@ -352,6 +363,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         fetchuserDiscover();
                         setState(() {
                           category = 'discover';
+                          print("category $category");
                         });
                         // showDialog(
                         //     context: context,
@@ -385,6 +397,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         fetchusermatches();
                         setState(() {
                           category = 'matches';
+                          print("category $category");
                         });
                         // Get.to(
                         //   () => const UserMatchesPage(),
@@ -409,6 +422,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         fetchuserliked();
                         setState(() {
                           category = 'liked';
+                          print("category $category");
                         });
                       },
                     ),
@@ -428,6 +442,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         fetchuserlikedme();
                         setState(() {
                           category = 'like you';
+                          print("category $category");
                         });
                       },
                     ),
@@ -450,8 +465,13 @@ class _ExplorePageState extends State<ExplorePage> {
                   ? SizedBox(
                       height: MediaQuery.of(context).size.height * 0.61,
                       child: isLoading == true
-                          ? const Center(
-                              child: CircularProgressIndicator(),
+                          ?   const Center(
+                              child: SpinKitPouringHourGlassRefined(
+                                color: AppColor.whiteColor,
+                                size: 80,
+                                strokeWidth: 3,
+                                duration: Duration(seconds: 1),
+                              ),
                             )
                           : LiveGrid.options(
                               options: options,
@@ -623,7 +643,16 @@ class _ExplorePageState extends State<ExplorePage> {
               selectedIndex2 == true
                   ? SizedBox(
                       height: MediaQuery.of(context).size.height * 0.61,
-                      child: LiveGrid.options(
+                      child: isLoading == true
+                          ?   const Center(
+                        child: SpinKitPouringHourGlassRefined(
+                          color: AppColor.whiteColor,
+                          size: 80,
+                          strokeWidth: 3,
+                          duration: Duration(seconds: 1),
+                        ),
+                      )
+                          : LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
                         gridDelegate:
@@ -796,7 +825,16 @@ class _ExplorePageState extends State<ExplorePage> {
               selectedIndex3 == true
                   ? SizedBox(
                       height: MediaQuery.of(context).size.height * 0.61,
-                      child: LiveGrid.options(
+                      child: isLoading == true
+                          ?   const Center(
+                        child: SpinKitPouringHourGlassRefined(
+                          color: AppColor.whiteColor,
+                          size: 80,
+                          strokeWidth: 3,
+                          duration: Duration(seconds: 1),
+                        ),
+                      )
+                          : LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
                         gridDelegate:
@@ -962,7 +1000,16 @@ class _ExplorePageState extends State<ExplorePage> {
               selectedIndex4 == true
                   ? SizedBox(
                       height: MediaQuery.of(context).size.height * 0.61,
-                      child: LiveGrid.options(
+                      child: isLoading == true
+                          ?   const Center(
+                        child: SpinKitPouringHourGlassRefined(
+                          color: AppColor.whiteColor,
+                          size: 80,
+                          strokeWidth: 3,
+                          duration: Duration(seconds: 1),
+                        ),
+                      )
+                          : LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
                         gridDelegate:

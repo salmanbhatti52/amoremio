@@ -4,11 +4,14 @@ class ImageAssets {
 
   static const String dummyImage =
       'https://mio.eigix.net/uploads/male-placeholder.jpg';
+
   static const String dummyImage1 =
       'https://mio.eigix.net/uploads/female-placeholder.jpg';
+
   static const String dummyImage2 =
       'https://mio.eigix.net/uploads/placeholder.jpg';
-  static const String dummystory = 'assets/images/placeholder.jpg';
+
+  static const String dummyStory = 'assets/images/placeholder.jpg';
 
   static const String image1 = 'assets/images/image1.png';
 
@@ -39,6 +42,7 @@ class ImageAssets {
   static const String mediumImage = 'assets/images/mediumImage.png';
 
   static const String gifts = 'assets/images/gifts.png';
+
   static const String gifts1 = 'assets/images/gifts1.svg';
 
   static const String logo = 'assets/images/applogo.svg';

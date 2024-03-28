@@ -162,11 +162,11 @@ class _PaidStoryDetailsState extends State<PaidStoryDetails> {
                   imagePath: ImageAssets.chat1,
                   text: "113",
                   onTap: (){
-                    Get.bottomSheet(
-                      const CommentSheet(),
-                      barrierColor: Colors.black.withOpacity(0.5),
-                      backgroundColor: Colors.transparent,
-                    );
+                    // Get.bottomSheet(
+                    //   const CommentSheet(),
+                    //   barrierColor: Colors.black.withOpacity(0.5),
+                    //   backgroundColor: Colors.transparent,
+                    // );
                   },
                 ),
                 const SizedBox(

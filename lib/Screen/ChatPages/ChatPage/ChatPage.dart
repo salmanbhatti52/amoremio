@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:get/get.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Utills/AppUrls.dart';
 import '../../../Widgets/AppBar.dart';
@@ -193,16 +191,16 @@ class _ChatPageState extends State<ChatPage> {
                                     image: DecorationImage(
                                       image: user['image'] == null
                                           ? user['genders_id'] == "1"
-                                              ? const NetworkImage(ImageAssets
-                                                  .dummyImage,
-                                      )
+                                              ? const NetworkImage(
+                                                  ImageAssets.dummyImage,
+                                                )
                                               : user['genders_id'] == "2"
-                                                  ? const NetworkImage(ImageAssets
-                                                      .dummyImage1,
-                                      )
+                                                  ? const NetworkImage(
+                                                      ImageAssets.dummyImage1,
+                                                    )
                                                   : const NetworkImage(
                                                       ImageAssets.dummyImage2,
-                                      )
+                                                    )
                                           : NetworkImage(
                                               'https://mio.eigix.net/${user['image']}',
                                             ),
@@ -306,14 +304,9 @@ class _ChatPageState extends State<ChatPage> {
                                                   image: DecorationImage(
                                                     image: image
                                                         ? const NetworkImage(
-                                                                ImageAssets
-                                                                    .dummyImage)
-                                                            as ImageProvider<
-                                                                Object>
+                                                                ImageAssets.dummyImage) as ImageProvider<Object>
                                                         : NetworkImage(
-                                                            baseUrlImage +
-                                                                chats['user_data']
-                                                                    ['image']),
+                                                            baseUrlImage + chats['user_data']['image']),
                                                     fit: BoxFit.fill,
                                                   ),
                                                   shape: const OvalBorder(),
@@ -323,53 +316,36 @@ class _ChatPageState extends State<ChatPage> {
                                                 width: Get.width * 0.02,
                                               ),
                                               Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   MyText(
-                                                    text: chats['user_data']
-                                                        ['username'],
+                                                    text: chats['user_data']['username'],
                                                     color: AppColor.blackColor,
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w500,
                                                   ),
-                                                  if (chats['user_data']
-                                                              ['last_message']
-                                                          ['attachment_type'] ==
-                                                      null)
+                                                  if (chats['user_data']['last_message']['attachment_type'] == null)
                                                     MyText(
-                                                      text: chats['user_data']
-                                                              ['last_message']
-                                                          ['message'],
+                                                      text: chats['user_data']['last_message']['message'],
                                                       color: const Color(0xFF727171),
                                                       fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w400,
+                                                      fontWeight: FontWeight.w400,
                                                     ),
-                                                  if (chats['user_data']
-                                                              ['last_message']
-                                                          ['attachment_type'] ==
-                                                      'voice')
+                                                  if (chats['user_data']['last_message']['attachment_type'] == 'voice')
                                                     const MyText(
                                                         text: 'voice',
-                                                        color:
-                                                            Color(0xFF727171),
+                                                        color: Color(0xFF727171),
                                                         fontSize: 10,
-                                                        fontWeight:
-                                                            FontWeight.w400),
-                                                  if (chats['user_data']
-                                                              ['last_message']
-                                                          ['attachment_type'] ==
-                                                      'image')
+                                                        fontWeight: FontWeight.w400,
+                                                    ),
+                                                  if (chats['user_data']['last_message']['attachment_type'] == 'image')
                                                     const MyText(
                                                         text: 'image',
-                                                        color:
-                                                            Color(0xFF727171),
+                                                        color: Color(0xFF727171),
                                                         fontSize: 10,
-                                                        fontWeight:
-                                                            FontWeight.w400)
+                                                        fontWeight: FontWeight.w400,
+                                                    ),
                                                 ],
                                               ),
                                             ],
@@ -391,10 +367,8 @@ class _ChatPageState extends State<ChatPage> {
                                                 width: 8,
                                                 height: 8,
                                                 decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFF48FF08),
-                                                  borderRadius:
-                                                      BorderRadius.circular(30),
+                                                  color: const Color(0xFF48FF08),
+                                                  borderRadius: BorderRadius.circular(30),
                                                 ),
                                               ),
                                             ],

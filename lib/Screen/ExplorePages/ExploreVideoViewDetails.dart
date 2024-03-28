@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Utills/AppUrls.dart';
 import 'package:amoremio/Widgets/ImagewithText.dart';
@@ -149,8 +148,6 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
     // }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -288,14 +285,12 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
   }
 }
 
-
-
 Future<Uint8List?> generateThumbnail(String videoUrl) async {
   try {
     final uint8list = await VideoThumbnail.thumbnailData(
       video: videoUrl,
       imageFormat: ImageFormat.JPEG,
-      maxWidth: 128, // specify the width of the thumbnail
+      maxWidth: 64, // specify the width of the thumbnail
       quality: 25,
     );
     return uint8list;

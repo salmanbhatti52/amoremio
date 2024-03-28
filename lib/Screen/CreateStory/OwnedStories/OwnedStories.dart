@@ -15,7 +15,7 @@ class OwnedStories extends StatelessWidget {
         child: Column(
           children: [
             OwnedStory(
-              height: MediaQuery.of(context).size.height * 0.65,
+              height: MediaQuery.of(context).size.height * 0.7,
               onTap: () {
                 Get.to(
                   () => const PaidStoryDetails(),
