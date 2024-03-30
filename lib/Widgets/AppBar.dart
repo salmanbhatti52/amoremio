@@ -40,7 +40,7 @@ class ExploreAppbar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class CreateStoryAppbar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final String? icon1;
   final String title2;
   final String title3;
   final String icon;
@@ -48,7 +48,7 @@ class CreateStoryAppbar extends StatelessWidget implements PreferredSizeWidget {
       {Key? key,
       required this.icon,
       this.title3 = "",
-      this.title = "",
+      this.icon1,
       this.title2 = ""})
       : super(key: key);
 
@@ -68,11 +68,8 @@ class CreateStoryAppbar extends StatelessWidget implements PreferredSizeWidget {
           statusBarBrightness: Brightness.light,
         ),
         leading: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: MyText(
-            text: title,
-            fontSize: 23,
-          ),
+          padding: const EdgeInsets.only(bottom: 5),
+          child: SvgPicture.asset(ImageAssets.logo),
         ),
         leadingWidth: 110,
         title: MyText(

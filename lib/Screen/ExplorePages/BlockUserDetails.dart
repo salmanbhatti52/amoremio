@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +25,6 @@ class BlockUserDetails extends StatefulWidget {
 }
 
 class _BlockUserDetailsState extends State<BlockUserDetails> {
-  final List<String> imgList = [
-    ImageAssets.exploreImage,
-    ImageAssets.image1,
-    ImageAssets.image2,
-    ImageAssets.image3,
-    ImageAssets.introImage,
-  ];
 
   String address = '';
   var username = '';
@@ -38,7 +32,8 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
   int _current = 0;
   List<dynamic> imgListavators = [];
   List<dynamic> uservideos = [];
-  bool isLoading = true;
+  bool isLoading = false;
+  bool isStoryLoading = false;
   final CarouselController _controller = CarouselController();
   Map<String, Uint8List?> thumbnails = {};
 
@@ -46,10 +41,11 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    print(' widget.userid ${ widget.userid}');
     loaddata();
   }
 
-  void loaddata() async {
+  loaddata() async {
     String apiUrl = getusersProfile;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -61,58 +57,61 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
           ));
       var userdetail = jsonDecode(response.body);
       if (userdetail['status'] == 'success') {
-        // print(userdetail);
+        print("userdetail $userdetail");
         getavators();
-        userstories();
-        setState(() {});
-        username = userdetail['data']['username'];
-        dateofbirth = userdetail['data']['date_of_birth'];
-        address = userdetail['data']['location'];
+        setState(() {
+          if (userdetail['data'] != null) {
+            username = userdetail['data']['username'] ?? ''; // Assign default value if username is null
+            dateofbirth = userdetail['data']['date_of_birth'] ?? ''; // Assign default value if date_of_birth is null
+            address = userdetail['data']['location'] ?? ''; // Assign default value if location is null
+           }
+        });
       } else {
-        print(userdetail['status']);
         var errormsg = userdetail['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
       print('error123456: $e');
     }
   }
 
-  userstories() async {
-    String apiUrl = getuserallstories;
-    try {
-      final response = await http.post(Uri.parse(apiUrl),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(
-            {
-              "users_customers_id": widget.userid,
-            },
-          ));
-
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'success') {
-        print('user stories::::: ${response.body}');
-        // imgurl = baseUrlImage + data['data']['image'];
-        uservideos = data['data'];
-        await generateAllThumbnails(uservideos);
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('errorfound $e');
-    }
-  }
+  // userstories() async {
+  //   setState(() {
+  //     isStoryLoading = true;
+  //   });
+  //   String apiUrl = getuserallstories;
+  //   try {
+  //     final response = await http.post(Uri.parse(apiUrl),
+  //         headers: <String, String>{
+  //           'Content-Type': 'application/json; charset=UTF-8',
+  //         },
+  //         body: jsonEncode(
+  //           {
+  //             "users_customers_id": widget.userid,
+  //           },
+  //         ));
+  //
+  //     var data = jsonDecode(response.body);
+  //     if (data['status'] == 'success') {
+  //       print('user stories::::: ${response.body}');
+  //       // imgurl = baseUrlImage + data['data']['image'];
+  //       uservideos = data['data'];
+  //       await generateAllThumbnails(uservideos);
+  //       setState(() {
+  //         isStoryLoading = false;
+  //       });
+  //     } else {
+  //       setState(() {
+  //         isStoryLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       isStoryLoading = false;
+  //     });
+  //     print('errorfound $e');
+  //   }
+  // }
 
   Future<void> generateAllThumbnails(List<dynamic> videos) async {
     bool shouldUpdate = false;
@@ -132,11 +131,9 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
   }
 
   getavators() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(child: CircularProgressIndicator());
-        });
+    setState(() {
+      isLoading = true;
+    });
     String apiUrl = getusersavatars;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -151,13 +148,13 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
 
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        print('avatoes::::: ${response.body}');
-        // imgurl = baseUrlImage + data['data']['image'];
         imgListavators = data['data'];
+        // userstories();
         setState(() {
-          Navigator.of(context).pop();
+          isLoading = false;
         });
       } else {
+        print('errorfoundgetavatarssssss');
         setState(() {
           isLoading = false;
         });
@@ -166,7 +163,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
       setState(() {
         isLoading = false;
       });
-      print('errorfound $e');
+      print('errorfoundgetavatar $e');
     }
   }
 
@@ -219,15 +216,6 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
 
   @override
   Widget build(BuildContext context) {
-    // List<Widget> imageSliders = [];
-    // for (int index = 0; index < imgList.length; index++) {
-    //   imageSliders.add(
-    //     ImageContainer(
-    //       imagePath: imgList[index],
-    //       child: SizedBox(),
-    //     ),
-    //   );
-    // }
     List<Widget> imageSliders = [];
     for (int index = 0; index < imgListavators.length; index++) {
       imageSliders.add(Image.network(
@@ -240,10 +228,14 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
     return Scaffold(
       body: Stack(
         children: [
-          // ImageContainer(
-          //   child: Image.asset(image1 ? image2 ? ImageAssets.image2 : ImageAssets.introImage : ImageAssets.introImage),
-          // ),
-          imgListavators.isNotEmpty
+         isLoading ? const Center(
+            child: SpinKitPouringHourGlassRefined(
+              color: AppColor.primaryColor,
+              size: 80,
+              strokeWidth: 3,
+              duration: Duration(seconds: 1),
+            ),
+          ) : imgListavators.isNotEmpty
               ? CarouselSlider(
                   items: imageSliders,
                   carouselController: _controller,
@@ -263,7 +255,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                         });
                       }),
                 )
-              : const SizedBox(),
+              : Container(color: Colors.grey),
           // : ImageContainer(
           //     child: Image.network(
           //       ImageAssets.dummyImage,
@@ -271,7 +263,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
           //     ),
           //   ),
           Positioned(
-            bottom: Get.height * 0.325,
+            bottom: Get.height * 0.25,
             // left: Get.width * 0.355,
             child: Align(
               alignment: Alignment.center,
@@ -321,83 +313,83 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
           //     icon: ImageAssets.mediumImage,
           //   ),
           // ),
-          Positioned(
-            bottom: 160,
-            left: 0,
-            right: 0,
-            child: isLoading
-                ? const Center(child: Padding(
-              padding: EdgeInsets.only(bottom: 32.0),
-              child: CircularProgressIndicator(),
-            ),
-            )
-                : SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.10,
-                    width: MediaQuery.of(context).size.width,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: uservideos.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var story = uservideos[index];
-                        var videoPath = story;
-                        if (videoPath['media_type'] == 'Video' &&
-                            thumbnails.containsKey(story['media'])) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 0.0),
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.only(
-                                      top: 1, left: 13, right: 1),
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    border: Border.all(
-                                      width: 2,
-                                      color: AppColor.whiteColor,
-                                    ),
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(30),
-                                    child: GestureDetector(
-                                      onTap: () {},
-                                      child: Image.memory(
-                                        thumbnails[story['media']]!,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          return Container(
-                            margin: const EdgeInsets.only(
-                              bottom: 12,
-                              left: 10,
-                            ),
-                            width: 60,
-                            height: 60,
-                            decoration: ShapeDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(
-                                    'https://mio.eigix.net/${story['media']}'),
-                                fit: BoxFit.fill,
-                              ),
-                              shape: const CircleBorder(
-                                side: BorderSide(width: 2, color: Colors.white),
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-          ),
+          // Positioned(
+          //   bottom: 160,
+          //   left: 0,
+          //   right: 0,
+          //   child: isStoryLoading
+          //       ? const Center(child: Padding(
+          //     padding: EdgeInsets.only(bottom: 32.0),
+          //     child: CircularProgressIndicator(),
+          //   ),
+          //   )
+          //       : SizedBox(
+          //           height: MediaQuery.of(context).size.height * 0.10,
+          //           width: MediaQuery.of(context).size.width,
+          //           child: ListView.builder(
+          //             shrinkWrap: true,
+          //             scrollDirection: Axis.horizontal,
+          //             itemCount: uservideos.length,
+          //             itemBuilder: (BuildContext context, int index) {
+          //               var story = uservideos[index];
+          //               var videoPath = story;
+          //               if (videoPath['media_type'] == 'Video' &&
+          //                   thumbnails.containsKey(story['media'])) {
+          //                 return Padding(
+          //                   padding: const EdgeInsets.only(right: 0.0),
+          //                   child: Column(
+          //                     children: [
+          //                       Container(
+          //                         margin: const EdgeInsets.only(
+          //                             top: 1, left: 13, right: 1),
+          //                         width: 60,
+          //                         height: 60,
+          //                         decoration: BoxDecoration(
+          //                           color: Colors.transparent,
+          //                           border: Border.all(
+          //                             width: 2,
+          //                             color: AppColor.whiteColor,
+          //                           ),
+          //                           borderRadius: BorderRadius.circular(30),
+          //                         ),
+          //                         child: ClipRRect(
+          //                           borderRadius: BorderRadius.circular(30),
+          //                           child: GestureDetector(
+          //                             onTap: () {},
+          //                             child: Image.memory(
+          //                               thumbnails[story['media']]!,
+          //                               fit: BoxFit.cover,
+          //                             ),
+          //                           ),
+          //                         ),
+          //                       ),
+          //                     ],
+          //                   ),
+          //                 );
+          //               } else {
+          //                 return Container(
+          //                   margin: const EdgeInsets.only(
+          //                     bottom: 12,
+          //                     left: 10,
+          //                   ),
+          //                   width: 60,
+          //                   height: 60,
+          //                   decoration: ShapeDecoration(
+          //                     image: DecorationImage(
+          //                       image: NetworkImage(
+          //                           'https://mio.eigix.net/${story['media']}'),
+          //                       fit: BoxFit.fill,
+          //                     ),
+          //                     shape: const CircleBorder(
+          //                       side: BorderSide(width: 2, color: Colors.white),
+          //                     ),
+          //                   ),
+          //                 );
+          //               }
+          //             },
+          //           ),
+          //         ),
+          // ),
 
           Positioned(
             bottom: 0,

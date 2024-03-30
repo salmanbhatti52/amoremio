@@ -1482,7 +1482,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  message['attachment_type'] == null
+                                  message['attachment_type'] == null && message['message_type'] != "gift"
                                       ? Text(
                                           message['message'],
                                           style: TextStyle(
@@ -1491,6 +1491,49 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                                 : Colors.white,
                                           ),
                                         )
+                                      : const SizedBox(),
+                                  message['attachment_type'] == null && message['message_type'] == "gift"
+                                      ? Row(
+                                    children: [
+                                      Image.network(
+                                        baseUrlImage + message['gift_icon'],
+                                        width: 40,
+                                        height: 40,
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent? loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          } else {
+                                            return Center(
+                                              child: SizedBox(
+                                                width: 5,
+                                                height: 5,
+                                                child: CircularProgressIndicator(
+                                                  value:
+                                                  loadingProgress.expectedTotalBytes !=
+                                                      null
+                                                      ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes!
+                                                      : null,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                      Text(
+                                        message['message'],
+                                        style: TextStyle(
+                                          color: isSentMessage
+                                              ? Colors.black
+                                              : Colors.white,
+                                        ),
+                                      )
+                                    ],
+                                  )
                                       : const SizedBox(),
                                   message['attachment_type'] == 'image'
                                       ? Image.network(
@@ -1531,18 +1574,10 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                         )
                                       : const SizedBox(),
                                   message['attachment_type'] == 'voice'
-                                      ? Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              vertical: 4.0, horizontal: 8.0),
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.8,
-                                          child: VoiceNotePlayer(
-                                            audioUrl: baseUrlImage +
-                                                message['message'],
-                                          ),
-                                        )
+                                      ? VoiceNotePlayer(
+                                        audioUrl: baseUrlImage +
+                                            message['message'],
+                                      )
                                       : const SizedBox(),
                                   // const SizedBox(height: 4.0),
                                   Text(
@@ -1917,25 +1952,32 @@ class _VoiceNotePlayerState extends State<VoiceNotePlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          icon: Icon(
-            isPlaying ? Icons.pause : Icons.play_arrow,
+    return SizedBox(
+      width: Get.width * 0.55,
+      height: Get.height * 0.04,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: togglePlayPause,
+            child: Icon(
+                isPlaying ? Icons.pause : Icons.play_arrow,
+              ),
           ),
-          onPressed: togglePlayPause,
-        ),
-        Slider(
-          value: position.inSeconds.toDouble(),
-          max: duration.inSeconds.toDouble(),
-          onChanged: (value) {
-            seek(Duration(seconds: value.toInt()));
-          },
-        ),
-        Text(isPlaying ? formatDuration(position) : formatDuration(duration)),
-        // Text(
-        //     '${position.toString().split('.').first} / ${duration.toString().split('.').first}'),
-      ],
+          SizedBox(
+            width: Get.width * 0.38,
+            child: Slider(
+              value: position.inSeconds.toDouble(),
+              max: duration.inSeconds.toDouble(),
+              onChanged: (value) {
+                seek(Duration(seconds: value.toInt()));
+              },
+            ),
+          ),
+          Text(isPlaying ? formatDuration(position) : formatDuration(duration)),
+          // Text(
+          //     '${position.toString().split('.').first} / ${duration.toString().split('.').first}'),
+        ],
+      ),
     );
   }
 }

@@ -253,86 +253,89 @@ class _PaidStoryState extends State<PaidStory> {
                               userStoriesId = userstories[index]["users_stories_id"];
                               print("Userstory $userStoriesId");
                             });
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (BuildContext context) {
-                                return SizedBox(
-                                  height: MediaQuery.of(context)
-                                      .size
-                                      .height, // Adjust the height as needed
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal : 20, vertical: 30),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            GestureDetector(
-                                              onTap: (){
-                                                showDialog(
-                                                    context: context,
-                                                    barrierColor: Colors.white60,
-                                                    barrierDismissible: true,
-                                                    builder: (BuildContext context) =>
-                                                        deleteDg(userStoriesId)
-                                                );
-                                              },
-                                              child: Container(
-                                                // width: Get.width * 0.27,
-                                                // height: Get.height * 0.17,
-                                                width: 112,
-                                                height: 30,
-                                                padding: const EdgeInsets.only(top: 6, left: 3, right: 6, bottom: 6),
-                                                color: AppColor.whiteColor,
-                                                child: Row(
-                                                  children: [
-                                                    SvgPicture.asset(
-                                                      ImageAssets.delete,
-                                                      width: 25,
-                                                      height: 25,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 3,
-                                                    ),
-                                                    const MyText(
-                                                      text: "Delete",
-                                                      color: AppColor.blackColor,
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.w500,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Material(
-                                              color: Colors.transparent,
-                                              child: IconButton(
-                                                splashColor: Colors.transparent,
-                                                highlightColor: Colors.transparent,
-                                                icon: const Icon(Icons.close),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                  _controller?.pause();
-                                                  _controller?.dispose();
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                          child:
-                                              Userstory['media_type'] == 'Video'
-                                                  ? VideoPlayer(_controller!)
-                                                  : Image.network(baseUrlImage +
-                                                      Userstory['media'])),
-                                    ],
-                                  ),
-                                );
-                              },
+                            Get.to(
+                                  () =>  StoryView(userStoriesId: userStoriesId.toString(), controller: _controller, userStory: Userstory),
                             );
+                            // showModalBottomSheet(
+                            //   context: context,
+                            //   isScrollControlled: true,
+                            //   builder: (BuildContext context) {
+                            //     return SizedBox(
+                            //       height: MediaQuery.of(context)
+                            //           .size
+                            //           .height, // Adjust the height as needed
+                            //       child: Column(
+                            //         children: [
+                            //           Padding(
+                            //             padding: const EdgeInsets.symmetric(
+                            //                 horizontal : 20, vertical: 30),
+                            //             child: Row(
+                            //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //               children: [
+                            //                 GestureDetector(
+                            //                   onTap: (){
+                            //                     showDialog(
+                            //                         context: context,
+                            //                         barrierColor: Colors.white60,
+                            //                         barrierDismissible: true,
+                            //                         builder: (BuildContext context) =>
+                            //                             deleteDg(userStoriesId)
+                            //                     );
+                            //                   },
+                            //                   child: Container(
+                            //                     // width: Get.width * 0.27,
+                            //                     // height: Get.height * 0.17,
+                            //                     width: 112,
+                            //                     height: 30,
+                            //                     padding: const EdgeInsets.only(top: 6, left: 3, right: 6, bottom: 6),
+                            //                     color: AppColor.whiteColor,
+                            //                     child: Row(
+                            //                       children: [
+                            //                         SvgPicture.asset(
+                            //                           ImageAssets.delete,
+                            //                           width: 25,
+                            //                           height: 25,
+                            //                         ),
+                            //                         const SizedBox(
+                            //                           width: 3,
+                            //                         ),
+                            //                         const MyText(
+                            //                           text: "Delete",
+                            //                           color: AppColor.blackColor,
+                            //                           fontSize: 12,
+                            //                           fontWeight: FontWeight.w500,
+                            //                         ),
+                            //                       ],
+                            //                     ),
+                            //                   ),
+                            //                 ),
+                            //                 Material(
+                            //                   color: Colors.transparent,
+                            //                   child: IconButton(
+                            //                     splashColor: Colors.transparent,
+                            //                     highlightColor: Colors.transparent,
+                            //                     icon: const Icon(Icons.close),
+                            //                     onPressed: () {
+                            //                       Navigator.of(context).pop();
+                            //                       _controller?.pause();
+                            //                       _controller?.dispose();
+                            //                     },
+                            //                   ),
+                            //                 ),
+                            //               ],
+                            //             ),
+                            //           ),
+                            //           Expanded(
+                            //               child:
+                            //                   Userstory['media_type'] == 'Video'
+                            //                       ? VideoPlayer(_controller!)
+                            //                       : Image.network(baseUrlImage +
+                            //                           Userstory['media'])),
+                            //         ],
+                            //       ),
+                            //     );
+                            //   },
+                            // );
                             if (Userstory['media_type'] == 'Video') {
                               _controller?.pause();
                               _controller = VideoPlayerController.network(
@@ -509,6 +512,228 @@ class _PaidStoryState extends State<PaidStory> {
                 );
               },
             ),
+    );
+  }
+}
+
+class StoryView extends StatefulWidget {
+  final String userStoriesId;
+  final VideoPlayerController? controller;
+  final Map<String, dynamic> userStory;
+  const StoryView({super.key, required this.userStory, required this.userStoriesId, this.controller});
+
+  @override
+  State<StoryView> createState() => _StoryViewState();
+}
+
+class _StoryViewState extends State<StoryView> {
+
+  Widget deleteDg(String? userStoriesId) {
+    return FadeInLeftBig(
+      delay: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: Get.width * 0.8,
+              height: Get.height * 0.4,
+              // width: 342,
+              // height: 315,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.back();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 15.0, top: 15),
+                        child: Icon(
+                          Icons.clear,
+                          color: AppColor.blackColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SvgPicture.asset(ImageAssets.delete),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5.0, bottom: 5),
+                    child: Text(
+                      "Are You Sure ?",
+                      style: GoogleFonts.poppins(
+                        color: AppColor.secondaryColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Text(
+                      "Are you sure about deleting this story? Retrieval won't be possible once it's gone.",
+                      style: GoogleFonts.poppins(
+                        color: AppColor.brownColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  LargeButton(
+                    text: "Yes",
+                    onTap: () {
+                      deleteStory(userStoriesId.toString());
+                    },
+                    width: Get.width * 0.7,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> deleteStory(String storyId) async {
+    try {
+      String deleteStoryApiUrl =
+          'https://mio.eigix.net/apis/services/delete_story';
+
+      http.Response response = await http.post(
+        Uri.parse(deleteStoryApiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {"users_stories_id": storyId},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Get.to(
+              () => const MyBottomNavigationBar(initialIndex: 2),
+          duration: const Duration(milliseconds: 300),
+          transition: Transition.rightToLeft,
+        );
+        print("Story deleted successfully");
+        print("Response Body: ${response.body}");
+      } else {
+        print("Error deleting story. Response Body: ${response.body}");
+      }
+    } catch (error) {
+      print("Error: $error");
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    widget.controller?.pause();
+    widget.controller?.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          widget.userStory['media_type'] == 'Video'
+              ? VideoPlayer(widget.controller!)
+              : Image.network(
+            baseUrlImage + widget.userStory['media'],
+            fit: BoxFit.contain,
+            width: Get.width,
+            height: Get.height,
+          ),
+          Positioned(
+            top: 20,
+            left: 0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.white60,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) =>
+                            deleteDg(widget.userStoriesId),
+                      );
+                    },
+                    child: Container(
+                      width: 112,
+                      height: 30,
+                      padding: const EdgeInsets.only(
+                        top: 6,
+                        left: 3,
+                        right: 6,
+                        bottom: 6,
+                      ),
+                      color: AppColor.whiteColor,
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                            ImageAssets.delete,
+                            width: 25,
+                            height: 25,
+                          ),
+                          const SizedBox(
+                            width: 3,
+                          ),
+                          const MyText(
+                            text: "Delete",
+                            color: AppColor.blackColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 0,
+            child: Material(
+              color: Colors.transparent,
+              child: IconButton(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.controller?.pause();
+                  widget.controller?.dispose();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

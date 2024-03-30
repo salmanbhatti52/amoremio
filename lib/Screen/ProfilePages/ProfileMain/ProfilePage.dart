@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:amoremio/Screen/ProfilePages/Monetizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Utills/AppUrls.dart';
@@ -34,8 +35,10 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool status = false;
   var username = '';
+  var verified = '';
   dynamic imgUrl = '';
   var bio = '';
+  var dollars = '';
   String allowedCoins = "";
 
   void toggleSwitch(bool newValue) {
@@ -69,7 +72,9 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {});
       username = userDetail['data']['username'] ?? '';
       bio = userDetail['data']['summary'] ?? '';
+      verified = userDetail['data']['verified'] ?? '';
       allowedCoins = userDetail['data']['allowed_coins'] ?? "0";
+      dollars = userDetail['data']['dollars'] ?? "0";
       imgUrl = baseUrlImage + userDetail['data']['image'] ?? '';
       print("allowedCoins $allowedCoins");
     } else {
@@ -119,10 +124,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Positioned(
-                    bottom: Get.height * 0.024,
-                    left: Get.width * 0.080,
-                    child: const MyText(
-                      text: "NOT VERIFIED",
+                    bottom: verified == "Yes" ? Get.height * 0.01 : Get.height * 0.02,
+                    left:  verified == "Yes" ? Get.width * 0.12 : Get.width * 0.080,
+                    child: MyText(
+                      text:  verified == "Yes" ? "VERIFIED" : "NOT VERIFIED",
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: AppColor.secondaryColor,
@@ -194,8 +199,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ImageAssets.healthicons,
                       color: AppColor.whiteColor,
                     ),
-                    const MyText(
-                      text: " 78676",
+                     MyText(
+                      text: allowedCoins,
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                     ),
@@ -206,8 +211,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Icons.attach_money_rounded,
                       color: AppColor.whiteColor,
                     ),
-                    const MyText(
-                      text: "135,70",
+                     MyText(
+                      text: dollars,
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                     ),
@@ -290,6 +295,26 @@ class _ProfilePageState extends State<ProfilePage> {
                 delay: const Duration(milliseconds: 500),
                 duration: const Duration(milliseconds: 600),
                 child: ProfileContainer(
+                  text: 'Monetizations',
+                  icon: ImageAssets.buyCoins,
+                  imageColor: const Color(0xffDDC911),
+                  onTap: () {
+                    // print("allowedCoins $allowedCoins");
+                    Get.to(
+                      () => const Monetize(),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: Get.height * 0.01,
+              ),
+              FadeInLeft(
+                delay: const Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 700),
+                child: ProfileContainer(
                   text: 'Account Settings',
                   icon: ImageAssets.account,
                   onTap: () {
@@ -305,8 +330,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: Get.height * 0.01,
               ),
               FadeInLeft(
-                delay: const Duration(milliseconds: 600),
-                duration: const Duration(milliseconds: 700),
+                delay: const Duration(milliseconds: 700),
+                duration: const Duration(milliseconds: 800),
                 child: ProfileContainer(
                   text: 'Referrals ',
                   icon: ImageAssets.refrel,
@@ -324,8 +349,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: Get.height * 0.01,
               ),
               FadeInLeft(
-                delay: const Duration(milliseconds: 700),
-                duration: const Duration(milliseconds: 800),
+                delay: const Duration(milliseconds: 800),
+                duration: const Duration(milliseconds: 900),
                 child: GestureDetector(
                   onTap: () {},
                   child: Container(
@@ -392,8 +417,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: Get.height * 0.01,
               ),
               FadeInLeft(
-                delay: const Duration(milliseconds: 800),
-                duration: const Duration(milliseconds: 900),
+                delay: const Duration(milliseconds: 900),
+                duration: const Duration(milliseconds: 1000),
                 child: ProfileContainer(
                   text: 'Logout ',
                   icon: ImageAssets.logout,

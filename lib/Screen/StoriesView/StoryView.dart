@@ -270,12 +270,14 @@ class _StoryViewState extends State<StoryView> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                likeduser(videos[_currentPage]);
+                                videos[_currentPage]["stats"]['liked'] != "Yes"
+                                    ? likeduser(videos[_currentPage])
+                                    : "";
                               },
                               child: SvgPicture.asset(
                                 width: 30,
                                 height: 30,
-                                videos[_currentPage]['liked'] == "Yes"
+                                videos[_currentPage]["stats"]['liked'] == "Yes"
                                     ? ImageAssets.createStory2
                                     : ImageAssets.createStory1,
                               ),
@@ -310,8 +312,8 @@ class _StoryViewState extends State<StoryView> {
                               height: 10,
                             ),
                             ImageWithText(
-                              width: 25,
-                              height: 25,
+                              width: 15,
+                              height: 15,
                               color: Colors.white,
                               imagePath: ImageAssets.share,
                               text: "Share",

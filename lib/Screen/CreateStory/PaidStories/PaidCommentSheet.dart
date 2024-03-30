@@ -101,7 +101,7 @@ class _CommentSheetState extends State<CommentSheet> {
         width: double.infinity,
         height: Get.height * 0.9,
         decoration:  BoxDecoration(
-          color: Colors.white.withOpacity(0.9 ),
+          color: Colors.white,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
@@ -261,6 +261,14 @@ Widget sendMessageTextFields({
     decoration: BoxDecoration(
       color: AppColor.whiteColor,
       borderRadius: BorderRadius.circular(31),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 24,
+          offset: Offset(0, 0),
+          spreadRadius: 0,
+        ),
+      ],
     ),
     child: TextField(
       onTap: closekeyboard,

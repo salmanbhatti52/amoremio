@@ -83,21 +83,25 @@ class _ExplorePageState extends State<ExplorePage> {
       print(response.body);
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        setState(() {});
-        originalUserDataList = data['data'];
-        userDataList = originalUserDataList;
-        isLoading = false;
+        setState(() {
+          originalUserDataList = data['data'];
+          userDataList = originalUserDataList;
+          isLoading = false;
+        });
         print('userDataList $userDataList');
-        // images = baseUrlImage + data['data']['image'];
       } else {
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
         print(data['status']);
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
       print('error user discover $e');
     }
   }
@@ -128,12 +132,16 @@ class _ExplorePageState extends State<ExplorePage> {
         isLoading = false;
         // images = baseUrlImage + data['data']['image'];
       } else {
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
         var errormsg = data['message'];
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
       print('error :$e');
     }
   }
@@ -165,13 +173,17 @@ class _ExplorePageState extends State<ExplorePage> {
         isLoading = false;
         // images = baseUrlImage + data['data']['image'];
       } else {
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
       print('error :$e');
     }
   }
@@ -204,13 +216,17 @@ class _ExplorePageState extends State<ExplorePage> {
           isLoading = false;
         });
       } else {
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      isLoading = false;
+     setState(() {
+       isLoading = false;
+     });
       print('error :$e');
     }
   }
@@ -242,13 +258,17 @@ class _ExplorePageState extends State<ExplorePage> {
           userDataList = originalUserDataList;
         });
       } else {
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
         var errormsg = data['message'];
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
+      });
       print('error :$e');
     }
   }
@@ -483,15 +503,9 @@ class _ExplorePageState extends State<ExplorePage> {
                                 mainAxisSpacing: 0,
                                 crossAxisSpacing: 0,
                               ),
-                              itemBuilder: (
-                                BuildContext context,
-                                int index,
-                                Animation<double> animation,
+                              itemBuilder: (BuildContext context, int index, Animation<double> animation,
                               ) {
-                                // String randomMainImage =
-                                //     mainImages[Random().nextInt(mainImages.length)];
-                                Map<String, dynamic> currentUserData =
-                                    userDataList[index];
+                                Map<String, dynamic> currentUserData = userDataList[index];
                                 return FadeTransition(
                                   opacity: Tween<double>(
                                     begin: 0,
@@ -523,36 +537,82 @@ class _ExplorePageState extends State<ExplorePage> {
                                                 width: 160,
                                                 height: 160,
                                                 decoration: ShapeDecoration(
-                                                  image: DecorationImage(
-                                                    image: (currentUserData[
-                                                                    'avatars'] ==
-                                                                null ||
-                                                            currentUserData[
-                                                                    'avatars']
-                                                                .isEmpty)
-                                                        ? currentUserData[
-                                                                    'genders_id'] ==
-                                                                "1"
-                                                            ? const NetworkImage(
-                                                                ImageAssets
-                                                                    .dummyImage) // First image for genderId == 1
-                                                            : currentUserData[
-                                                                        'genders_id'] ==
-                                                                    "2"
-                                                                ? const NetworkImage(
-                                                                    ImageAssets
-                                                                        .dummyImage1) // Second image for genderId == 2
-                                                                : const NetworkImage(
-                                                                    ImageAssets
-                                                                        .dummyImage2) // Third image for any other case
-                                                        : NetworkImage(
-                                                            'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
-                                                    fit: BoxFit.cover,
-                                                  ),
                                                   shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  child: currentUserData['avatars'] == null || currentUserData['avatars'].isEmpty
+                                                      ? currentUserData['genders_id'] == "1"
+                                                      ? Image.network(
+                                                    ImageAssets.dummyImage,
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                      if (loadingProgress == null) {
+                                                        return child;
+                                                      } else {
+                                                        return Center(
+                                                          child: CircularProgressIndicator(
+                                                            value: loadingProgress.expectedTotalBytes != null
+                                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                                : null,
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                                  )
+                                                      : currentUserData['genders_id'] == "2"
+                                                      ? Image.network(
+                                                    ImageAssets.dummyImage1,
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                      if (loadingProgress == null) {
+                                                        return child;
+                                                      } else {
+                                                        return Center(
+                                                          child: CircularProgressIndicator(
+                                                            value: loadingProgress.expectedTotalBytes != null
+                                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                                : null,
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                                  )
+                                                      : Image.network(
+                                                    ImageAssets.dummyImage2,
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                      if (loadingProgress == null) {
+                                                        return child;
+                                                      } else {
+                                                        return Center(
+                                                          child: CircularProgressIndicator(
+                                                            value: loadingProgress.expectedTotalBytes != null
+                                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                                : null,
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
+                                                  )
+                                                      : Image.network(
+                                                    'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                      if (loadingProgress == null) {
+                                                        return child;
+                                                      } else {
+                                                        return Center(
+                                                          child: CircularProgressIndicator(
+                                                            value: loadingProgress.expectedTotalBytes != null
+                                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                                : null,
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
                                                   ),
                                                 ),
                                               ),

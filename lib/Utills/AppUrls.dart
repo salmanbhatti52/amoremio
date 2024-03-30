@@ -36,4 +36,4 @@ String getuserallstories = '${baseUrl}get_users_stories';
 String getPaidstories = '${baseUrl}get_paid_users_stories';
 String createStories = '${baseUrl}create_stories';
 String usersFilter = '${baseUrl}users_filter';
-String userExploreStories = '${baseUrl}user_explore_stories';
+String userExploreStories = '${baseUrl}get_user_stories_except';

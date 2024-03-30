@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:amoremio/Screen/ExplorePages/ExploreVideoViewDetails.dart';
 import 'package:amoremio/Screen/StoriesView/StoryBuyDialouge.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -35,18 +36,6 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       duration: const Duration(milliseconds: 200), vsync: this, value: 1.0);
   bool isButtonClicked = false;
 
-  void handleButtonTap() {
-    setState(() {
-      isButtonClicked = !isButtonClicked;
-    });
-  }
-
-  void handleRoundedButtonTap() {
-    setState(() {
-      isButtonClicked = !isButtonClicked;
-    });
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -63,22 +52,24 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   var summary = '';
   var dateofbirth;
   int _current = 0;
-  bool isLoading = true;
+  bool isLoading = false;
+  bool isStoryLoading = false;
   String userStoriesID = "";
   String usersCustomersId = "";
 
   final CarouselController _controller = CarouselController();
-  // Define sheetTopPosition here
   double sheetTopPosition = 0;
   Map<String, Uint8List?> thumbnails = {};
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     loaddata();
+    fetchuserliked();
   }
 
-  void loaddata() async {
+  loaddata() async {
     String apiUrl = getusersProfile;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -92,19 +83,19 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       if (userdetail['status'] == 'success') {
         print(userdetail);
         getavators();
-        setState(() {});
-        userImage = userdetail['data']['image'];
-        username = userdetail['data']['username'];
-        dateofbirth = userdetail['data']['date_of_birth'];
-        address = userdetail['data']['location'];
-        summary = userdetail['data']['summary'];
+        setState(() {
+          if (userdetail['data'] != null) {
+            userImage = userdetail['data']['image'] ?? ''; // Assign default value if image is null
+            username = userdetail['data']['username'] ?? ''; // Assign default value if username is null
+            dateofbirth = userdetail['data']['date_of_birth'] ?? ''; // Assign default value if date_of_birth is null
+            address = userdetail['data']['location'] ?? ''; // Assign default value if location is null
+            summary = userdetail['data']['summary'] ?? ''; // Assign default value if summary is null
+          }
+        });
         print("userImage ${baseUrlImage + userImage}");
-        fetchuserliked();
       } else {
-        // print(userdetail['status']);
         var errormsg = userdetail['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
       print('error123456: $e');
@@ -112,15 +103,9 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   }
 
   getavators() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(child: CircularProgressIndicator());
-        });
-    // setState(() {
-    //   isLoading = true; // Show loader
-    // });
-
+    setState(() {
+      isLoading = true;
+    });
     String apiUrl = getusersavatars;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -135,12 +120,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
 
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
-        // print('avatoes::::: ${response.body}');
-        // imgurl = baseUrlImage + data['data']['image'];
         imgListavators = data['data'];
         userstories();
         setState(() {
-          Navigator.of(context).pop();
+          isLoading = false;
         });
       } else {
         setState(() {
@@ -156,6 +139,9 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   }
 
   userstories() async {
+    setState(() {
+      isStoryLoading = true;
+    });
     String apiUrl = getuserallstories;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
@@ -180,55 +166,20 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         uservideos = data['data'];
         await generateAllThumbnails(uservideos);
         setState(() {
-          isLoading = false;
+          isStoryLoading = false;
         });
       } else {
         setState(() {
-          isLoading = false;
+          isStoryLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        isLoading = false;
+        isStoryLoading = false;
       });
       print('errorfound $e');
     }
   }
-
-  // userstories() async {
-  //   String apiUrl = getuserallstories;
-  //   try {
-  //     final response = await http.post(Uri.parse(apiUrl),
-  //         headers: <String, String>{
-  //           'Content-Type': 'application/json; charset=UTF-8',
-  //         },
-  //         body: jsonEncode(
-  //           {
-  //             "users_customers_id": widget.userid,
-  //           },
-  //         ));
-  //
-  //     var data = jsonDecode(response.body);
-  //     if (data['status'] == 'success') {
-  //       print('user stories::::: ${response.body}');
-  //       // imgurl = baseUrlImage + data['data']['image'];
-  //       uservideos = data['data'];
-  //       await generateAllThumbnails(uservideos);
-  //       setState(() {
-  //         isLoading = false;
-  //       });
-  //     } else {
-  //       setState(() {
-  //         isLoading = false;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //     print('errorfound $e');
-  //   }
-  // }
 
   Future<void> generateAllThumbnails(List<dynamic> videos) async {
     bool shouldUpdate = false;
@@ -385,25 +336,34 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         width: MediaQuery.sizeOf(context).width,
         height: MediaQuery.sizeOf(context).height,
         fit: BoxFit.cover,
+        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          } else {
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          }
+        },
       )
-          // ImageContainer(
-          //   imagePath: imgList[index],
-          //   child: const SizedBox(),
-          // ),
           );
     }
 
     return Scaffold(
       body: Stack(
         children: [
-          // if (isLoading)
-          //   Center(
-          //     child: CircularProgressIndicator(),
-          //   ),
-          // ImageContainer(
-          //   child: Image.asset(image1 ? image2 ? ImageAssets.image2 : ImageAssets.introImage : ImageAssets.introImage),
-          // ),
-          imgListavators.isNotEmpty
+          isLoading ? const Center(
+            child: SpinKitPouringHourGlassRefined(
+              color: AppColor.primaryColor,
+              size: 80,
+              strokeWidth: 3,
+              duration: Duration(seconds: 1),
+            ),
+          ) : imgListavators.isNotEmpty
               ? CarouselSlider(
                   items: imageSliders,
                   carouselController: _controller,
@@ -609,10 +569,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
           //   ),
           // ),
           Positioned(
-            bottom: 160,
+            bottom: 175,
             left: 0,
             right: 0,
-            child: isLoading
+            child: isStoryLoading
                 ? const Center(child: Padding(
                   padding: EdgeInsets.only(bottom: 32.0),
                   child: CircularProgressIndicator(),
@@ -869,7 +829,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
             ),
           ),
           Positioned(
-            bottom: 3,
+            bottom: 15,
             left: 0,
             right: 0,
             child: Row(

@@ -34,7 +34,6 @@ class _CreateStoryState extends State<CreateStory>
         child: Column(
           children: [
             const CreateStoryAppbar(
-              title: "LOGO",
               title2: "Stories",
               title3: "Sort By",
               icon: ImageAssets.sort,
