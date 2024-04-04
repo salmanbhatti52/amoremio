@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
@@ -488,7 +489,12 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                         },
                         width: Get.width * 0.65,
                       ),
-                      SvgPicture.asset(ImageAssets.share),
+                      GestureDetector(
+                        onTap: (){
+                          shareUserProfile();
+                        },
+                        child: SvgPicture.asset(ImageAssets.share),
+                      ),
                     ],
                   ),
                 ],
@@ -498,6 +504,52 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
         ],
       ),
     );
+  }
+
+  bool isLoadings = false;
+  Map<String, dynamic> shareProfile = {};
+
+  shareUserProfile() async {
+    setState(() {
+      isLoadings = true;
+    });
+    String apiUrl = 'https://mio.eigix.net/apis/services/users_profile_shares';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": widget.userid,
+          },
+        ));
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['status'] == "success") {
+            shareProfile = jsonResponse['data'];
+            debugPrint("shareProfile: $shareProfile");
+            debugPrint("shareProfile ${jsonResponse["data"]}");
+            Clipboard.setData(ClipboardData(text: shareProfile["data"])).then((_){
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
+                text: "Linked copied successfully!",
+                color: AppColor.primaryColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ), backgroundColor: AppColor.whiteColor,),);
+            });
+            isLoadings = false;
+          } else {
+            debugPrint("parentMessage");
+            isLoadings = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoadings = false;
+        }
+      });
+    }
   }
 
   int calculateAge(String? dateOfBirth) {

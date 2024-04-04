@@ -6,6 +6,7 @@ import 'package:amoremio/Widgets/Text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -16,14 +17,19 @@ class ExploreVideoViewDetails extends StatefulWidget {
   final String? usersCustomersId;
   final String? userName;
   final String? usersImage;
-  const ExploreVideoViewDetails({super.key, this.usersStoriesId, this.usersCustomersId, this.userName, this.usersImage});
+  const ExploreVideoViewDetails(
+      {super.key,
+      this.usersStoriesId,
+      this.usersCustomersId,
+      this.userName,
+      this.usersImage});
 
   @override
-  State<ExploreVideoViewDetails> createState() => _ExploreVideoViewDetailsState();
+  State<ExploreVideoViewDetails> createState() =>
+      _ExploreVideoViewDetailsState();
 }
 
 class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
-
   List<dynamic> videos = [];
   int _currentPage = 0;
   late PageController _pageController;
@@ -38,8 +44,8 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
           },
           body: jsonEncode(
             {
-              "users_customers_id" : widget.usersCustomersId,
-              "users_stories_id" : widget.usersStoriesId,
+              "users_customers_id": widget.usersCustomersId,
+              "users_stories_id": widget.usersStoriesId,
             },
           ));
       debugPrint(response.body);
@@ -62,7 +68,8 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
       } else {
         debugPrint(data['status']);
         var errorMsg = data['message'];
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMsg)));
       }
     } catch (e) {
       debugPrint('error user discover $e');
@@ -154,132 +161,206 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
       body: Scaffold(
         body: videos.isNotEmpty
             ? Stack(
-          children: [
-            PageView.builder(
-              controller: _pageController,
-              scrollDirection: Axis.vertical,
-              itemCount: videos.length,
-              onPageChanged: (index) {
-                for (var controller in _videoControllers) {
-                  controller.pause(); // Pause all other videos
-                }
-                if (videos[index]['media_type'] == 'Video') {
-                  _videoControllers[index]
-                      .play(); // Play the video of the current page
-                }
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemBuilder: (BuildContext context, int index) {
-                if (videos[index]['media_type'] == 'Video') {
-                  // Show Video widget
-                  return Video(
-                    videoController: _videoControllers[index],
-                    isPlaying: index == _currentPage,
-                  );
-                } else {
-                  // Show Image widget
-                  return Image.network(
-                    'https://mio.eigix.net/${videos[index]['media']}', // Adjust based on your URL
-                    fit: BoxFit.cover,
-                  );
-                }
-              },
-            ),
-            Positioned(
-              bottom: 50,
-              right: 10,
-              child: Column(
                 children: [
-                  Padding(
-                    padding:
-                    const EdgeInsets.only(right: 8.0, bottom: 40.0),
+                  PageView.builder(
+                    controller: _pageController,
+                    scrollDirection: Axis.vertical,
+                    itemCount: videos.length,
+                    onPageChanged: (index) {
+                      for (var controller in _videoControllers) {
+                        controller.pause(); // Pause all other videos
+                      }
+                      if (videos[index]['media_type'] == 'Video') {
+                        _videoControllers[index]
+                            .play(); // Play the video of the current page
+                      }
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemBuilder: (BuildContext context, int index) {
+                      if (videos[index]['media_type'] == 'Video') {
+                        // Show Video widget
+                        return Video(
+                          videoController: _videoControllers[index],
+                          isPlaying: index == _currentPage,
+                        );
+                      } else {
+                        // Show Image widget
+                        return Image.network(
+                          'https://mio.eigix.net/${videos[index]['media']}', // Adjust based on your URL
+                          fit: BoxFit.cover,
+                        );
+                      }
+                    },
+                  ),
+                  Positioned(
+                    top: 50,
+                    left: 10,
+                    child: GestureDetector(
+                        onTap: () {
+                          // _pageController.dispose();
+                          Get.back();
+                          },
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 50,
+                    right: 10,
                     child: Column(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            likedUser(videos[_currentPage]);
-                          },
-                          child: SvgPicture.asset(
-                            width: 30,
-                            height: 30,
-                            videos[_currentPage]['liked'] == "Yes"
-                                ? ImageAssets.createStory2
-                                : ImageAssets.createStory1,
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(right: 8.0, bottom: 40.0),
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  likedUser(videos[_currentPage]);
+                                },
+                                child: SvgPicture.asset(
+                                  width: 30,
+                                  height: 30,
+                                  videos[_currentPage]['liked'] == "Yes"
+                                      ? ImageAssets.createStory2
+                                      : ImageAssets.createStory1,
+                                ),
+                              ),
+                              Text(
+                                videos[_currentPage]['stats']['total_likes']
+                                    .toString(),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ImageWithText(
+                                width: 30,
+                                height: 30,
+                                color: Colors.white,
+                                imagePath: ImageAssets.chat1,
+                                text: videos[_currentPage]['stats']
+                                        ['total_comments']
+                                    .toString(),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              const ImageWithText(
+                                width: 25,
+                                height: 25,
+                                color: Colors.white,
+                                imagePath: ImageAssets.share,
+                                text: "Share",
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          videos[_currentPage]['stats']['total_likes']
-                              .toString(),
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 50,
+                    right: 10,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(right: 8.0, bottom: 40.0),
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  likedUser(videos[_currentPage]);
+                                },
+                                child: SvgPicture.asset(
+                                  width: 30,
+                                  height: 30,
+                                  videos[_currentPage]['liked'] == "Yes"
+                                      ? ImageAssets.createStory2
+                                      : ImageAssets.createStory1,
+                                ),
+                              ),
+                              Text(
+                                videos[_currentPage]['stats']['total_likes']
+                                    .toString(),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ImageWithText(
+                                width: 30,
+                                height: 30,
+                                color: Colors.white,
+                                imagePath: ImageAssets.chat1,
+                                text: videos[_currentPage]['stats']
+                                        ['total_comments']
+                                    .toString(),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              const ImageWithText(
+                                width: 25,
+                                height: 25,
+                                color: Colors.white,
+                                imagePath: ImageAssets.share,
+                                text: "Share",
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(
-                          height: 10,
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 50,
+                    left: 10,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 5.0, bottom: 0, right: 5),
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(widget.usersImage !=
+                                        null &&
+                                    widget.usersImage!.isNotEmpty
+                                ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                : widget.usersImage.toString()),
+                            radius: 18.5,
+                          ),
                         ),
-                        ImageWithText(
-                          width: 30,
-                          height: 30,
-                          color: Colors.white,
-                          imagePath: ImageAssets.chat1,
-                          text: videos[_currentPage]['stats']
-                          ['total_comments']
-                              .toString(),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const ImageWithText(
-                          width: 25,
-                          height: 25,
-                          color: Colors.white,
-                          imagePath: ImageAssets.share,
-                          text: "Share",
-                        ),
-                        const SizedBox(
-                          height: 10,
+                        MyText(
+                          text: "${widget.userName}, ${25}",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
                         ),
                       ],
                     ),
                   ),
                 ],
-              ),
-            ),
-            Positioned(
-              bottom: 50,
-              left: 10,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 5.0, bottom: 0, right: 5),
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          widget.usersImage != null && widget.usersImage!.isNotEmpty
-                              ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
-                              : widget.usersImage.toString()
-                      ),
-                      radius: 18.5,
-                    ),
-                  ),
-                  MyText(
-                    text:
-                    "${widget.userName}, ${25}",
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        )
+              )
             : const Center(
-          child: CircularProgressIndicator(),
-        ),
+                child: CircularProgressIndicator(),
+              ),
       ),
     );
   }
@@ -307,9 +388,9 @@ class Video extends StatefulWidget {
 
   const Video(
       {Key? key,
-        required this.videoController,
-        // required this.onVideoPause,
-        required this.isPlaying})
+      required this.videoController,
+      // required this.onVideoPause,
+      required this.isPlaying})
       : super(key: key);
 
   @override

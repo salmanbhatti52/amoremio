@@ -60,6 +60,7 @@ class _ExplorePageState extends State<ExplorePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    category = 'discover';
     fetchuserDiscover();
   }
 

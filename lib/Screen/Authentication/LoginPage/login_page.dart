@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString(
             'users_customers_id', data['data']['users_customers_id']);
         if (formKey.currentState!.validate()) {
-          Get.to(
+          Get.offAll(
             () => const MyBottomNavigationBar(),
             duration: const Duration(milliseconds: 300),
             transition: Transition.rightToLeft,

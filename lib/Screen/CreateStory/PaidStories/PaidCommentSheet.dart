@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +10,7 @@ import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class CommentSheet extends StatefulWidget {
   final String storyId;
@@ -46,6 +48,9 @@ class _CommentSheetState extends State<CommentSheet> {
     if (userdetail['status'] == 'success') {
       print(userdetail);
       setState(() {
+        if (isEmojiVisible == true) {
+          isEmojiVisible = false;
+        }
         getComments();
         sendMessageController.clear();
         // Close the keyboard
@@ -97,156 +102,219 @@ class _CommentSheetState extends State<CommentSheet> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Container(
-        width: double.infinity,
-        height: Get.height * 0.9,
-        decoration:  BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        child: Column(
-          children: [
-            const Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 20.0, top: 15, bottom: 12),
-                  child: MyText(
-                    text: "Comments",
-                    color: AppColor.blackColor,
-                    fontSize: 18,
-                  ),
-                ),
+      child: GestureDetector(
+        onTap: (){
+          FocusScope.of(context).unfocus();
+          if (isEmojiVisible == true) {
+            isEmojiVisible = false;
+          }
+        },
+        child: Container(
+          width: double.infinity,
+          height: Get.height * 0.8,
+          decoration:  BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
             ),
-            SizedBox(
-            height: Get.height * 0.4,
-            child: ListView.builder(
-            itemCount: comments.length,
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.zero,
-            itemBuilder: (context, index) {
-              var comment = comments[index];
-              var commenterData = comment['commenter_data'];
-              return SizedBox(
-                height: Get.height * 0.1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(width: 22,),
-                        // Image.asset(ImageAssets.mediumImage, width: 30, height: 30,),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5.0, bottom: 0, right: 5),
-                          child: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              (commenterData != null && commenterData['image'] != null && commenterData['image'].isNotEmpty)
-                                  ? 'https://mio.eigix.net/${commenterData['image']}'
-                                  : 'https://mio.eigix.net/uploads/placeholder.jpg',
+          ),
+          child: Column(
+            children: [
+              const Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 20.0, top: 15, bottom: 12),
+                    child: MyText(
+                      text: "Comments",
+                      color: AppColor.blackColor,
+                      fontSize: 18,
+                    ),
+                  ),
+              ),
+              SizedBox(
+              height: Get.height * 0.4,
+              child: ListView.builder(
+              itemCount: comments.length,
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemBuilder: (context, index) {
+                var comment = comments[index];
+                var commenterData = comment['commenter_data'];
+                return SizedBox(
+                  height: Get.height * 0.1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 22,),
+                          // Image.asset(ImageAssets.mediumImage, width: 30, height: 30,),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 5.0, bottom: 0, right: 5),
+                            child: CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                (commenterData != null && commenterData['image'] != null && commenterData['image'].isNotEmpty)
+                                    ? 'https://mio.eigix.net/${commenterData['image']}'
+                                    : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                              ),
+                              radius: 14,
                             ),
-                            radius: 14,
+                          ),
+                          const SizedBox(width: 15,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MyText(
+                                text: commenterData != null && commenterData['username'] != null && commenterData['username'].isNotEmpty
+                                    ? commenterData['username']
+                                    : "Username",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppColor.blackColor,
+                              ),
+                              MyText(
+                                text: comment != null && comment['comments'] != null && comment['comments'].isNotEmpty
+                                    ? comment["comments"]
+                                    : "Comment",
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColor.hintTextColor,
+                              ),
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.start,
+                              //   crossAxisAlignment: CrossAxisAlignment.center,
+                              //   children: [
+                              SvgPicture.asset(ImageAssets.favorite,width: 25, height: 25 , color: AppColor.hintTextColor,),
+                              // const SizedBox(width: 15,),
+                              // const Icon(Icons.reply, color: AppColor.hintTextColor, size: 20,),
+                              // ],
+                              // )
+                            ],
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 18.0),
+                        child: MyText(
+                          text: comment != null && comment['date_added'] != null && comment['date_added'].isNotEmpty
+                              ? formatTimestamp(comment['date_added'])
+                              : "Comment",
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                          color: AppColor.hintTextColor,
+                        ),
+                      ),
+                    ],
+                  )
+                );
+              },
+            ),
+          ),
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  padding: const EdgeInsets.only(left: 10, top: 20),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: sendMessageTextFields(
+                          key: sendMessageFormKey,
+                          controller: sendMessageController,
+                          onSendMessage: sendComment,
+                          isEmojiVisible: isEmojiVisible,
+                          toggleEmojiPicker: toggleEmojiPicker,
+                          closekeyboard: closekeyboard,
+                          context: context,
+                          scrollController: null,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: AppColor.whiteColor,
+                          borderRadius: BorderRadius.circular(31),
+                        ),
+                        child: FloatingActionButton(
+                          onPressed: () async {
+                            sendComment(sendMessageController.text);
+                          },
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          child: const Icon(
+                            Icons.send,
+                            size: 25,
+                            color: AppColor.secondaryColor,
                           ),
                         ),
-                        const SizedBox(width: 15,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            MyText(
-                              text: commenterData != null && commenterData['username'] != null && commenterData['username'].isNotEmpty
-                                  ? commenterData['username']
-                                  : "Username",
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.blackColor,
-                            ),
-                            MyText(
-                              text: comment != null && comment['comments'] != null && comment['comments'].isNotEmpty
-                                  ? comment["comments"]
-                                  : "Comment",
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.hintTextColor,
-                            ),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.start,
-                            //   crossAxisAlignment: CrossAxisAlignment.center,
-                            //   children: [
-                            SvgPicture.asset(ImageAssets.favorite,width: 25, height: 25 , color: AppColor.hintTextColor,),
-                            // const SizedBox(width: 15,),
-                            // const Icon(Icons.reply, color: AppColor.hintTextColor, size: 20,),
-                            // ],
-                            // )
-                          ],
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 18.0),
-                      child: MyText(
-                        text: comment != null && comment['date_added'] != null && comment['date_added'].isNotEmpty
-                            ? formatTimestamp(comment['date_added'])
-                            : "Comment",
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: AppColor.hintTextColor,
                       ),
-                    ),
-                  ],
-                )
-              );
-            },
-          ),
-        ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Container(
-                padding: const EdgeInsets.only(left: 10, top: 20),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: sendMessageTextFields(
-                        key: sendMessageFormKey,
-                        controller: sendMessageController,
-                        onSendMessage: sendComment,
-                        closekeyboard: () {},
-                        context: context,
-                        scrollController: null,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: AppColor.whiteColor,
-                        borderRadius: BorderRadius.circular(31),
-                      ),
-                      child: FloatingActionButton(
-                        onPressed: () async {
-                          sendComment(sendMessageController.text);
-                        },
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        child: const Icon(
-                          Icons.send,
-                          size: 25,
-                          color: AppColor.secondaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              if (isEmojiVisible)
+                SizedBox(
+                  height: 200,
+                  child: EmojiPicker(
+                    textEditingController: sendMessageController,
+                    config: Config(
+                      columns: 7,
+                      emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+                      verticalSpacing: 0,
+                      horizontalSpacing: 0,
+                      gridPadding: EdgeInsets.zero,
+                      initCategory: Category.RECENT,
+                      bgColor: const Color(0xFFF2F2F2),
+                      indicatorColor: Colors.blue,
+                      iconColor: Colors.grey,
+                      iconColorSelected: Colors.blue,
+                      backspaceColor: Colors.blue,
+                      skinToneDialogBgColor: Colors.white,
+                      skinToneIndicatorColor: Colors.grey,
+                      enableSkinTones: true,
+                      recentTabBehavior: RecentTabBehavior.RECENT,
+                      recentsLimit: 28,
+                      noRecents: const Text(
+                        'No Recents',
+                        style: TextStyle(fontSize: 20, color: Colors.black26),
+                        textAlign: TextAlign.center,
+                      ),
+                      loadingIndicator: const SizedBox.shrink(),
+                      tabIndicatorAnimDuration: kTabScrollDuration,
+                      categoryIcons: const CategoryIcons(),
+                      buttonMode: ButtonMode.MATERIAL,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  bool isEmojiVisible = false;
+
+  void toggleEmojiPicker() {
+    setState(() {
+      FocusScope.of(context).unfocus();
+      isEmojiVisible = !isEmojiVisible;
+    });
+  }
+
+  closekeyboard() {
+    setState(() {
+      if (isEmojiVisible == true) {
+        isEmojiVisible = false;
+      }
+    });
+  }
+
+
 }
 
 Widget sendMessageTextFields({
@@ -254,6 +322,8 @@ Widget sendMessageTextFields({
   required TextEditingController controller,
   required void Function(String text) onSendMessage,
   void Function()? closekeyboard,
+  bool? isEmojiVisible,
+  void Function()? toggleEmojiPicker,
   required BuildContext context,
   ScrollController? scrollController,
 }) {
@@ -270,33 +340,46 @@ Widget sendMessageTextFields({
         ),
       ],
     ),
-    child: TextField(
-      onTap: closekeyboard,
-      textAlign: TextAlign.left,
-      controller: controller,
-      onEditingComplete: () {
-        onSendMessage(controller.text ?? "");
-        controller.clear();
-        FocusScope.of(context).unfocus();
-
-        // Scroll to the bottom
-        scrollController?.animateTo(
-          scrollController!.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      },
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.only(left: 10, bottom: 3),
-        hintText: "Type a message",
-        hintStyle: GoogleFonts.poppins(
-          color: const Color(0xFFA3A3A3),
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
+    child: Row(
+      children: [
+        GestureDetector(
+          onTap: toggleEmojiPicker,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: SvgPicture.asset(ImageAssets.emoji),
+          ),
         ),
-        border: InputBorder.none,
-      ),
-    ),
+        Expanded(
+          child: TextField(
+            onTap: closekeyboard,
+            textAlign: TextAlign.left,
+            controller: controller,
+            onEditingComplete: () {
+              onSendMessage(controller.text ?? "");
+              controller.clear();
+              FocusScope.of(context).unfocus();
+
+              // Scroll to the bottom
+              scrollController?.animateTo(
+                scrollController!.position.maxScrollExtent,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
+            },
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.only(left: 10, bottom: 3),
+              hintText: "Type a message",
+              hintStyle: GoogleFonts.poppins(
+                color: const Color(0xFFA3A3A3),
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+      ],
+    )
   );
 }
 

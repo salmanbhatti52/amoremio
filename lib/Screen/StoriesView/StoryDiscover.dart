@@ -6,14 +6,69 @@ import 'package:amoremio/Widgets/Text.dart';
 import '../../Resources/colors/colors.dart';
 
 class StoryDiscover extends StatelessWidget {
-  final Function onTap;
-  const StoryDiscover({super.key, required this.onTap});
+  final String selectedValue;
+  final void Function(String?)? onChanged;
+
+  const StoryDiscover({
+    Key? key,
+    required this.selectedValue,
+    required this.onChanged,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onTap();
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                margin: const EdgeInsets.only(right: 17, bottom: 100),
+                width: Get.width * 0.27,
+                height: Get.height * 0.08,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                clipBehavior: Clip.antiAlias,
+                decoration: const ShapeDecoration(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(13),
+                      bottomLeft: Radius.circular(13),
+                      bottomRight: Radius.circular(13),
+                    ),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButton<String>(
+                      value: selectedValue,
+                      onChanged: onChanged,
+                      items: const [
+                        DropdownMenuItem<String>(
+                          value: 'discover',
+                          child: Text('Discover'),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'matches',
+                          child: Text('Matches'),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'liked',
+                          child: Text('Liked'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       },
       child: Container(
         width: Get.width * 0.24,
@@ -22,14 +77,14 @@ class StoryDiscover extends StatelessWidget {
           color: const Color(0x14EDEDED),
           borderRadius: BorderRadius.circular(5),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             MyText(
-              text: "Discover",
+              text: selectedValue,
               fontSize: 12,
             ),
-            Icon(
+            const Icon(
               Icons.arrow_drop_down_sharp,
               color: AppColor.whiteColor,
             ),

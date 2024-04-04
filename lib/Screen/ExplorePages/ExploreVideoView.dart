@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:amoremio/Screen/ExplorePages/ExploreVideoViewDetails.dart';
 import 'package:amoremio/Screen/StoriesView/StoryBuyDialouge.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -325,6 +326,52 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     // catch (e) {
     //   print('error123456:$e');
     // }
+  }
+
+  bool isLoadings = false;
+  Map<String, dynamic> shareProfile = {};
+
+  shareUserProfile() async {
+    setState(() {
+      isLoadings = true;
+    });
+    String apiUrl = 'https://mio.eigix.net/apis/services/users_profile_shares';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": widget.userid,
+          },
+        ));
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['status'] == "success") {
+            shareProfile = jsonResponse['data'];
+            debugPrint("shareProfile: $shareProfile");
+            debugPrint("shareProfile ${jsonResponse["data"]}");
+            Clipboard.setData(ClipboardData(text: shareProfile["data"])).then((_){
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
+                text: "Linked copied successfully!",
+                color: AppColor.primaryColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ), backgroundColor: AppColor.whiteColor,),);
+            });
+            isLoadings = false;
+          } else {
+            debugPrint("parentMessage");
+            isLoadings = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoadings = false;
+        }
+      });
+    }
   }
 
   @override
@@ -723,7 +770,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                         ),
                         GestureDetector(
                           onTap: () {
-                            aboutExploreUser(context);
+                            // aboutExploreUser(context);
                           },
                           child: Padding(
                             padding: EdgeInsets.symmetric(
@@ -875,7 +922,12 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                         isButtonClicked ? Colors.red : AppColor.whiteColor,
                   ),
                 ),
-                SvgPicture.asset(ImageAssets.share),
+                GestureDetector(
+                  onTap: (){
+                    shareUserProfile();
+                  },
+                    child: SvgPicture.asset(ImageAssets.share),
+                ),
               ],
             ),
           ),

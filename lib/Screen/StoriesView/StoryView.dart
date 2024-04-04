@@ -36,7 +36,7 @@ class _StoryViewState extends State<StoryView> {
   List<dynamic> videos = [];
   bool isThumbnailClicked = false;
   String selectedImageUrl = '';
-  String selectedCategory = "discover";
+  String _selectedValue = 'discover';
 
   @override
   void initState() {
@@ -57,6 +57,7 @@ class _StoryViewState extends State<StoryView> {
           body: jsonEncode(
             {
               "users_customers_id": userId,
+              "category": _selectedValue
             },
           ));
       debugPrint(response.body);
@@ -120,7 +121,7 @@ class _StoryViewState extends State<StoryView> {
 
   likeduser(usersstories) async {
     var storyid = usersstories['users_stories_id'];
-    var Like = usersstories['liked'];
+    var Like = usersstories["stats"]['liked'];
     debugPrint('likeeee $Like');
     showDialog(context: context, builder: (context) {
           return const Center(child: CircularProgressIndicator());
@@ -270,9 +271,9 @@ class _StoryViewState extends State<StoryView> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                videos[_currentPage]["stats"]['liked'] != "Yes"
-                                    ? likeduser(videos[_currentPage])
-                                    : "";
+                                // videos[_currentPage]["stats"]['liked'] != "Yes" ?
+                                likeduser(videos[_currentPage]);
+                                    // : "";
                               },
                               child: SvgPicture.asset(
                                 width: 30,
@@ -327,53 +328,57 @@ class _StoryViewState extends State<StoryView> {
                           ],
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5.0, bottom: 0, right: 5),
-                                child: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                    videos[_currentPage]['user_data']['image'] != null
-                                        && videos[_currentPage]['user_data']['image'].isNotEmpty
-                                        ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
-                                        : videos[_currentPage]['user_data']['genders_id'] == 1
-                                            ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
-                                            : videos[_currentPage]['user_data']['genders_id'] == 2
-                                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
-                                                : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 5.0, bottom: 0, right: 5),
+                                  child: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      videos[_currentPage]['user_data']['image'] != null
+                                          && videos[_currentPage]['user_data']['image'].isNotEmpty
+                                          ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
+                                          : videos[_currentPage]['user_data']['genders_id'] == 1
+                                              ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                              : videos[_currentPage]['user_data']['genders_id'] == 2
+                                                  ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
+                                                  : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                                    ),
+                                    radius: 18.5,
                                   ),
-                                  radius: 18.5,
                                 ),
-                              ),
-                              MyText(
-                                text:
-                              videos[_currentPage]['user_data'] != null
-                                  ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
-                                  : "UserName",
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: Get.width * 0.1),
-                          StoryDiscover(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: true,
-                                barrierColor: Colors.transparent,
-                                builder: (BuildContext context) {
-                                  return buildBottomSheet();
-                                },
-                              );
-                            },
-                          ),
-                        ],
+                                MyText(
+                                  text:
+                                videos[_currentPage]['user_data'] != null
+                                    ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
+                                    : "UserName",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: Get.width * 0.1),
+                            StoryDiscover(
+                              selectedValue: _selectedValue,
+                              onChanged: (String? newValue) {
+                                if(newValue != null) {
+                                  setState(() {
+                                    _selectedValue = newValue;
+                                    loadstories();
+                                    print("_selectedValue $_selectedValue");
+                                  });
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                       Row(
                         children: [
@@ -434,6 +439,7 @@ class _StoryViewState extends State<StoryView> {
                                                           _videoControllers[_currentPage].initialize().then((_) {
                                                             print('Video controller initialized');
                                                             _videoControllers[_currentPage].play();
+                                                            setState(() {});
                                                           });
                                                           // onThumbnailClicked(index);
                                                         }

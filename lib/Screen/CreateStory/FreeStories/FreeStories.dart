@@ -92,7 +92,7 @@ class FreeStories extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  Get.back();
+                  // Get.back();
                   // controller.imagePick();
                   _showMediaSourceSelectionDialog(MediaSource.image);
                 },

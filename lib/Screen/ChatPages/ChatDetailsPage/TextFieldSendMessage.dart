@@ -5,12 +5,15 @@ import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
-Widget sendMessageTextFields(Key key, TextEditingController controller,
+Widget sendMessageTextFields(
+    Key key,
+    TextEditingController controller,
     {required void Function(String text) onSendMessage,
     void Function()? closekeyboard,
     required BuildContext context,
     ScrollController? scrollController,
     void Function()? onCameraIconClick,
+      FocusNode? focusNode,
     GlobalKey<AnimatedListState>? listKey,
     bool? isEmojiVisible,
     void Function()? toggleEmojiPicker,
@@ -34,6 +37,7 @@ Widget sendMessageTextFields(Key key, TextEditingController controller,
             ),
             Expanded(
               child: TextField(
+                focusNode: focusNode,
                 onTap: closekeyboard,
                 textAlign: TextAlign.left,
                 controller: controller,

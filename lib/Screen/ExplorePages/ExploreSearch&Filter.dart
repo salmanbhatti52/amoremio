@@ -252,8 +252,7 @@ class _ExploreSearchState extends State<ExploreSearch> {
                                       setState(() {
                                         selectedGender = value['genders_id'];
                                       });
-                                      widget
-                                          .onGenderSelect(value['genders_id']);
+                                      widget.onGenderSelect(value['genders_id']);
                                       Navigator.pop(context);
                                     },
                                   ),

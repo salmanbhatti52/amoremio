@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../Utills/AppUrls.dart';
 import 'MonitizeDialog.dart';
 import 'package:get/get.dart';
@@ -23,6 +23,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class ChatDetailsPage extends StatefulWidget {
   final String userId;
@@ -48,22 +49,177 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   String base64string = '';
   String attachmentTpye = '';
 
-  late Record audioRecord;
+  // late Record audioRecord;
   late AudioPlayer audioPlayer;
-  bool isrecoding = false;
+  // bool isrecoding = false;
 
   String audioPath = '';
   bool isShowingEmojiPicker = false;
   dynamic fileext;
+
+  late Record audioRecord;
+  Timer? timer;
+  int _seconds = 0;
+  bool _isTimerRunning = false;
+
+  final StreamController<int> recordDurationController =
+  StreamController<int>.broadcast()..add(0);
+
+  Sink<int> get recordDurationInput => recordDurationController.sink;
+
+  Stream<double> get amplitudeStream => audioRecord
+      .onAmplitudeChanged(const Duration(milliseconds: 160))
+      .map((amp) => amp.current);
+
+  Stream<RecordState> get recordStateStream => audioRecord.onStateChanged();
+
+  Stream<int> get recordDurationOutput => recordDurationController.stream;
+
+  final ScrollController scrollControllers = ScrollController();
+  List<double> amplitude = [];
+  late StreamSubscription<double> amplitudeSubscription;
+  double waveMaxHeight = 45;
+  final double minimumAmp = -67;
+  bool recording = false;
+  FocusNode _focusNode = FocusNode();
+  bool _isKeyboardOpen = false;
+
+
+  final String _recordDirectoryName = "record_audio";
+  String? _appDirPath;
+
+  Future<String> get _getAppDirPath async {
+    _appDirPath ??= (await getApplicationDocumentsDirectory()).path;
+    return _appDirPath!;
+  }
+
+  Future<Directory> get getRecordsDirectory async {
+    Directory recordDirectory =
+    Directory(path.join((await _getAppDirPath), _recordDirectoryName));
+
+    if (!(await recordDirectory.exists())) {
+      await recordDirectory.create();
+    }
+    return recordDirectory;
+  }
+
+  Future<void> initializeAudioRecord() async {
+    try {
+      audioRecord = Record();
+    } catch (e) {
+      debugPrint('Error initializing audioRecord: $e');
+    }
+  }
+
+  Future<void> stopRecording() async {
+    try {
+      String? recordPath = await audioRecord.stop();
+      if (recordPath != null && recordPath.isNotEmpty) {
+        setState(() {
+          recording = false;
+          audioPath = recordPath;
+          debugPrint("audioPath $audioPath");
+          uploadattachment(audioPath, 'voice');
+        });
+      }
+    } catch (e) {
+      debugPrint('error111111: $e');
+    } finally {
+      // Get.back();
+      if (_isTimerRunning) {
+        stopTimer();
+      }
+    }
+  }
+
+  Future<void> startRecording() async {
+    try {
+      final fileName = path.join((await getRecordsDirectory).path,
+          'audio_${DateTime.now().millisecondsSinceEpoch}.m4a');
+      if (await audioRecord.hasPermission()) {
+        await audioRecord.start(
+          path: fileName,
+        );
+        _isTimerRunning ? null : startTimer();
+        recording = true;
+      }
+    } catch (e) {
+      debugPrint('error111: $e');
+    }
+  }
+
+  void startTimer() {
+    if (_isTimerRunning) return;
+
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _seconds++;
+        recordDurationInput.add(_seconds);
+      });
+    });
+
+    setState(() {
+      _isTimerRunning = true;
+    });
+  }
+
+  void stopTimer() {
+    if (!_isTimerRunning) return;
+
+    timer?.cancel();
+    setState(() {
+      _seconds = 0;
+      _isTimerRunning = false;
+      recordDurationInput.add(0);
+    });
+  }
+
+  String getFormattedTime() {
+    int hours = _seconds ~/ 3600;
+    int minutes = (_seconds % 3600) ~/ 60;
+    int seconds = _seconds % 60;
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    initializeAudioRecord();
+    amplitudeSubscription = amplitudeStream.listen((amp) {
+      setState(() {
+        amplitude.add(amp);
+      });
+      if (scrollControllers.positions.isNotEmpty) {
+        scrollControllers.animateTo(
+          scrollControllers.position.maxScrollExtent,
+          curve: Curves.linear,
+          duration: const Duration(milliseconds: 175),
+        );
+      }
+    });
+    _focusNode.addListener(() {
+      setState(() {
+        _isKeyboardOpen = _focusNode.hasFocus;
+      });
+    });
     loaddata();
     fetchMessages();
     getGifts();
     audioPlayer = AudioPlayer();
-    audioRecord = Record();
+    // audioRecord = Record();
+  }
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    timer?.cancel();
+    audioRecord.dispose();
+    recordDurationController.close();
+    amplitudeSubscription.cancel();
+    _focusNode.dispose();
+    // audioRecord.dispose();
+    super.dispose();
   }
 
   bool isLoading = false;
@@ -542,14 +698,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   }
 
   @override
-  void dispose() {
-    audioPlayer.dispose();
-    audioRecord.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    String formattedTime = getFormattedTime();
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
@@ -1605,8 +1755,10 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                 padding: const EdgeInsets.only(left: 10, top: 20),
                 child: Row(
                   children: <Widget>[
+                  isRecording == false ?
                     sendMessageTextFields(
                       sendMessageFormKey,
+                      focusNode: _focusNode,
                       context: context,
                       sendMessageController,
                       onSendMessage: onSendMessage,
@@ -1617,62 +1769,109 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                       closekeyboard: closekeyboard,
                       pickWordOrPdfFile: pickWordOrPdfFile,
                       listKey: _listKey,
-                    ),
-                    const SizedBox(width: 05),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: AppColor.whiteColor,
-                        borderRadius: BorderRadius.circular(31),
+                    )
+                      : SizedBox(
+                height: waveMaxHeight,
+                width: Get.width * 0.8,
+                child: ListView.builder(
+                  controller: scrollControllers,
+                  itemCount: amplitude.length,
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemExtent: 6,
+                  itemBuilder: (context, index) {
+                    double amplitudes =
+                    amplitude[index].clamp(minimumAmp + 1, 0);
+                    double ampPercentage = 1 - (amplitudes / minimumAmp).abs();
+                    double waveHeight = waveMaxHeight * ampPercentage;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: Center(
+                        child: TweenAnimationBuilder(
+                          tween: Tween(begin: 0, end: waveHeight),
+                          duration: const Duration(milliseconds: 100),
+                          curve: Curves.decelerate,
+                          builder: (context, animatedWaveHeight, child) {
+                            return SizedBox(
+                              height: animatedWaveHeight.toDouble(),
+                              width: 8,
+                              child: child,
+                            );
+                          },
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
                       ),
-                      child: FloatingActionButton(
-                        onPressed: () async {
-                          onSendMessage(sendMessageController.text);
-                        },
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        child: const Icon(
-                          Icons.send,
-                          size: 25,
-                          color: AppColor.secondaryColor,
+                    );
+                  },
+                ),
+              ),
+                    const SizedBox(width: 05),
+                    if(isRecording == false)
+                    Visibility(
+                      visible: _isKeyboardOpen || isEmojiVisible,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: AppColor.whiteColor,
+                          borderRadius: BorderRadius.circular(31),
+                        ),
+                        child: FloatingActionButton(
+                          onPressed: () async {
+                            onSendMessage(sendMessageController.text);
+                          },
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          child: const Icon(
+                            Icons.send,
+                            size: 25,
+                            color: AppColor.secondaryColor,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 05),
-                    Container(
-                      width: 48,
-                      height: 48,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: AppColor.whiteColor,
-                        borderRadius: BorderRadius.circular(31),
-                      ),
-                      child: GestureDetector(
-                        onLongPressStart: (_) async {
-                        if (await audioRecord.hasPermission()) {
-                          setState(() {
-                            startrecording();
-                            isRecording = true;
-                          });
-                          }
-                        },
-                        onLongPressEnd: (_) {
-                          setState(() {
-                            stoprecording();
-                            isRecording = false;
-                          });
-                        },
-                        // onPressed: () async {
-                        //   _showRecordingModal(context);
-                        // },
-                        // backgroundColor: Colors.transparent,
-                        // elevation: 0,
-                        child: const Icon(
-                          Icons.mic,
-                          size: 30,
-                          color: AppColor.secondaryColor,
+                    // const SizedBox(width: 05),
+                    Visibility(
+                      visible: !_isKeyboardOpen && !isEmojiVisible,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: AppColor.whiteColor,
+                          borderRadius: BorderRadius.circular(31),
+                        ),
+                        child: GestureDetector(
+                          onLongPressStart: (_) async {
+                          if (await audioRecord.hasPermission()) {
+                            setState(() {
+                              startrecording();
+                              isRecording = true;
+                            });
+                            }
+                          },
+                          onLongPressEnd: (_) {
+                            setState(() {
+                              stoprecording();
+                              isRecording = false;
+                            });
+                          },
+                          // onPressed: () async {
+                          //   _showRecordingModal(context);
+                          // },
+                          // backgroundColor: Colors.transparent,
+                          // elevation: 0,
+                          child: const Icon(
+                            Icons.mic,
+                            size: 30,
+                            color: AppColor.secondaryColor,
+                          ),
                         ),
                       ),
                     ),
@@ -1680,6 +1879,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                 ),
               ),
             ),
+            if(isRecording == false)
             if (isEmojiVisible)
               SizedBox(
                 height: 200,
@@ -1766,57 +1966,58 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     }
   }
   bool isRecording = false;
-  void _showRecordingModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        bool isRecording = false; // Local variable to track recording state
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    // Start Button
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          startrecording();
-                          isRecording = true;
-                        });
-                      },
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text("Start"),
-                    ),
-                    // Stop Button
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          stoprecording();
-                          isRecording = false;
-                        });
-                      },
-                      icon: const Icon(Icons.stop),
-                      label: const Text("Stop"),
-                    ),
-                  ],
-                ),
-                // Display the message here when recording
-                if (isRecording)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: Text("Recording is in process...."),
-                  ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+  // void _showRecordingModal(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     builder: (BuildContext bc) {
+  //       bool isRecording = false; // Local variable to track recording state
+  //       return StatefulBuilder(
+  //         builder: (BuildContext context, StateSetter setState) {
+  //           return Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Row(
+  //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //                 children: <Widget>[
+  //                   // Start Button
+  //                   ElevatedButton.icon(
+  //                     onPressed: () {
+  //                       setState(() {
+  //                         startrecording();
+  //                         isRecording = true;
+  //                       });
+  //                     },
+  //                     icon: const Icon(Icons.play_arrow),
+  //                     label: const Text("Start"),
+  //                   ),
+  //                   // Stop Button
+  //                   ElevatedButton.icon(
+  //                     onPressed: () {
+  //                       setState(() {
+  //                         stoprecording();
+  //                         isRecording = false;
+  //                       });
+  //                     },
+  //                     icon: const Icon(Icons.stop),
+  //                     label: const Text("Stop"),
+  //                   ),
+  //                 ],
+  //               ),
+  //               // Display the message here when recording
+  //               if (isRecording)
+  //                 const Padding(
+  //                   padding: EdgeInsets.only(top: 20),
+  //                   child: Text("Recording is in process...."),
+  //                 ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
+  bool isrecoding = false;
   Future<void> startrecording() async {
     try {
       if (await audioRecord.hasPermission()) {
@@ -1877,6 +2078,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
       print('error: $e');
     }
   }
+
 }
 
 class VoiceNotePlayer extends StatefulWidget {
@@ -1897,6 +2099,7 @@ class _VoiceNotePlayerState extends State<VoiceNotePlayer> {
   @override
   void initState() {
     super.initState();
+    debugPrint('urllll ${widget.audioUrl}');
     audioPlayer = AudioPlayer();
 
     audioPlayer.onDurationChanged.listen((newDuration) {
