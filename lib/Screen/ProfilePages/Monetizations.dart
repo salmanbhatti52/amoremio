@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
 import 'package:amoremio/Screen/ExplorePages/ExploreBackgroundContainer.dart';
 import 'package:amoremio/Widgets/AppBar.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:amoremio/Widgets/large_Button.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Monetize extends StatefulWidget {
   const Monetize({super.key});
@@ -15,6 +20,99 @@ class Monetize extends StatefulWidget {
 }
 
 class _MonetizeState extends State<Monetize> {
+
+  bool isLoading = false;
+  List getMonetizeChat = [];
+
+  getMonetizations() async {
+    setState(() {
+      isLoading = true;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = 'https://mio.eigix.net/apis/services/get_monetizations';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": userId,
+            "monetization_type":"chat"
+          },
+        ));
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['data'] != null &&
+              jsonResponse['data'] is List<dynamic>) {
+            getMonetizeChat = jsonResponse['data'];
+            // parentMessage = jsonResponse['status'];
+            debugPrint("getMonetize: $getMonetizeChat");
+            isLoading = false;
+          } else {
+            isLoading = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoading = false;
+        }
+      });
+    }
+  }
+
+  List getMonetizeCall = [];
+
+  getMonetizationsCall() async {
+    setState(() {
+      isLoading = true;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    String apiUrl = 'https://mio.eigix.net/apis/services/get_monetizations';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": userId,
+            "monetization_type":"call"
+          },
+        ));
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['data'] != null &&
+              jsonResponse['data'] is List<dynamic>) {
+            getMonetizeCall = jsonResponse['data'];
+            debugPrint("getMonetizeCall: $getMonetizeCall");
+            isLoading = false;
+          } else {
+            isLoading = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoading = false;
+        }
+      });
+    }
+  }
+
+  callFunction() async {
+    await getMonetizations();
+    await getMonetizationsCall();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    callFunction();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,11 +196,21 @@ class _MonetizeState extends State<Monetize> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: ListView.builder(
+                  child: isLoading
+                      ? const Center(
+                    child: SpinKitPouringHourGlassRefined(
+                      color: AppColor.primaryColor,
+                      size: 80,
+                      strokeWidth: 3,
+                      duration: Duration(seconds: 1),
+                    ),
+                  )
+                  : getMonetizeChat.isNotEmpty ?
+                       ListView.builder(
                       shrinkWrap: true,
-                      // physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 5,
+                      itemCount: getMonetizeChat.length,
                       itemBuilder: (context, index) {
+                        var monetization = getMonetizeChat[index];
                         return Container(
                           width: Get.width * 0.9,
                           height: Get.height * 0.1,
@@ -120,26 +228,29 @@ class _MonetizeState extends State<Monetize> {
                             ],
                           ),
                           child:  Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Column(
+                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    MyText(text: "General Messages", color: AppColor.blackColor, fontSize: 14, fontWeight: FontWeight.w500,),
-                                    MyText(text: "(Messages)", color: AppColor.blackColor, fontSize: 12, fontWeight: FontWeight.w400,),
+                                    MyText(text: monetization["name"],  color: AppColor.blackColor, fontSize: 14, fontWeight: FontWeight.w500,),
+                                    MyText(text: "(${monetization["package_type"]})", color: AppColor.blackColor, fontSize: 12, fontWeight: FontWeight.w400,),
                                   ],
                                 ),
-                                MyText(text: "10 Coins", color: AppColor.primaryColor, fontSize: 12, fontWeight: FontWeight.w400,),
-                                LargeButton(text: "Active", onTap: (){}, width: Get.width * 0.2, height: Get.height * 0.04,)
+                                MyText(text: "${monetization["coins"]} Coins", color: AppColor.primaryColor, fontSize: 12, fontWeight: FontWeight.w400,),
+                                LargeButton(text: monetization["status"],fontSize: 15, onTap: (){}, width: Get.width * 0.2, height: Get.height * 0.04,)
                               ],
                             ),
                           ),
                         );
                       },
+                  )
+                      : const Center(
+                    child: MyText(text: "No monetization type found!", fontSize: 18, color: AppColor.primaryColor,),
                   ),
                 ),
               ),
@@ -187,11 +298,21 @@ class _MonetizeState extends State<Monetize> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: ListView.builder(
+                  child: isLoading
+                      ? const Center(
+                    child: SpinKitPouringHourGlassRefined(
+                      color: AppColor.primaryColor,
+                      size: 80,
+                      strokeWidth: 3,
+                      duration: Duration(seconds: 1),
+                    ),
+                  )
+                      : getMonetizeCall.isNotEmpty ?
+                  ListView.builder(
                     shrinkWrap: true,
-                    // physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 5,
+                    itemCount: getMonetizeCall.length,
                     itemBuilder: (context, index) {
+                      var monetizationCall = getMonetizeCall[index];
                       return Container(
                         width: Get.width * 0.9,
                         height: Get.height * 0.1,
@@ -209,7 +330,7 @@ class _MonetizeState extends State<Monetize> {
                           ],
                         ),
                         child:  Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -218,17 +339,20 @@ class _MonetizeState extends State<Monetize> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  MyText(text: "General Messages", color: AppColor.blackColor, fontSize: 14, fontWeight: FontWeight.w500,),
-                                  MyText(text: "(Messages)", color: AppColor.blackColor, fontSize: 12, fontWeight: FontWeight.w400,),
+                                  MyText(text: monetizationCall["name"],  color: AppColor.blackColor, fontSize: 14, fontWeight: FontWeight.w500,),
+                                  MyText(text: "(${monetizationCall["package_type"]})", color: AppColor.blackColor, fontSize: 12, fontWeight: FontWeight.w400,),
                                 ],
                               ),
-                              MyText(text: "10 Coins", color: AppColor.primaryColor, fontSize: 12, fontWeight: FontWeight.w400,),
-                              LargeButton(text: "Active", onTap: (){}, width: Get.width * 0.2, height: Get.height * 0.04,)
+                              MyText(text: "${monetizationCall["coins"]} Coins", color: AppColor.primaryColor, fontSize: 12, fontWeight: FontWeight.w400,),
+                              LargeButton(text: monetizationCall["status"],fontSize: 15, onTap: (){}, width: Get.width * 0.2, height: Get.height * 0.04,)
                             ],
                           ),
                         ),
                       );
                     },
+                  )
+                  : const Center(
+                    child: MyText(text: "No monetization type found!", fontSize: 18, color: AppColor.primaryColor,),
                   ),
                 ),
               ),
