@@ -29,6 +29,8 @@ class _InterestTagsState extends State<InterestTags> {
   @override
   void initState() {
     super.initState();
+    selectedList.addAll(widget.interestList);
+    widget.interestList.clear();
     getinterestTags();
   }
 

@@ -254,7 +254,7 @@ class _PaidStoryState extends State<PaidStory> {
                               print("Userstory $userStoriesId");
                             });
                             Get.to(
-                                  () =>  StoryView(userStoriesId: userStoriesId.toString(), controller: _controller, userStory: Userstory),
+                                  () =>  StoryView(totalCoins : userstories[index]["coins_per_view"], userStoriesId: userStoriesId.toString(), controller: _controller, userStory: Userstory),
                             );
                             // showModalBottomSheet(
                             //   context: context,
@@ -517,10 +517,11 @@ class _PaidStoryState extends State<PaidStory> {
 }
 
 class StoryView extends StatefulWidget {
+  final String totalCoins;
   final String userStoriesId;
   final VideoPlayerController? controller;
   final Map<String, dynamic> userStory;
-  const StoryView({super.key, required this.userStory, required this.userStoriesId, this.controller});
+  const StoryView({super.key, required this.totalCoins, required this.userStory, required this.userStoriesId, this.controller});
 
   @override
   State<StoryView> createState() => _StoryViewState();
@@ -611,6 +612,53 @@ class _StoryViewState extends State<StoryView> {
     );
   }
 
+  Widget deleteDog(String? userStoriesId) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding:
+        EdgeInsets.only(top: Get.height * 0.07, left: Get.width * 0.08),
+        child: GestureDetector(
+          onTap: (){
+            showDialog(
+              context: context,
+              barrierColor: Colors.white60,
+              barrierDismissible: true,
+              builder: (BuildContext context) =>
+                  deleteDg(widget.userStoriesId),
+            );
+          },
+          child: Container(
+            // width: Get.width * 0.27,
+            // height: Get.height * 0.17,
+            width: 112,
+            height: 30,
+            padding: const EdgeInsets.only(top: 6, left: 3, right: 6, bottom: 6),
+            color: AppColor.whiteColor,
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  ImageAssets.delete,
+                  width: 25,
+                  height: 25,
+                ),
+                const SizedBox(
+                  width: 3,
+                ),
+                const MyText(
+                  text: "Delete",
+                  color: AppColor.blackColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> deleteStory(String storyId) async {
     try {
       String deleteStoryApiUrl =
@@ -675,40 +723,23 @@ class _StoryViewState extends State<StoryView> {
                     onTap: () {
                       showDialog(
                         context: context,
-                        barrierColor: Colors.white60,
                         barrierDismissible: true,
                         builder: (BuildContext context) =>
-                            deleteDg(widget.userStoriesId),
+                            deleteDog(widget.userStoriesId),
                       );
                     },
-                    child: Container(
-                      width: 112,
-                      height: 30,
-                      padding: const EdgeInsets.only(
-                        top: 6,
-                        left: 3,
-                        right: 6,
-                        bottom: 6,
-                      ),
-                      color: AppColor.whiteColor,
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            ImageAssets.delete,
-                            width: 25,
-                            height: 25,
-                          ),
-                          const SizedBox(
-                            width: 3,
-                          ),
-                          const MyText(
-                            text: "Delete",
-                            color: AppColor.blackColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ],
-                      ),
+                    child: Row(
+                      children: [
+                        MyText(
+                          text: widget.totalCoins,
+                          fontSize: 18,
+                          color: AppColor.primaryColor,
+                        ),
+                        SvgPicture.asset(
+                          ImageAssets.dropBlack,
+                          color: AppColor.primaryColor,
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -223,8 +223,22 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
         baseUrlImage + imgListavators[index]['image'],
         width: MediaQuery.sizeOf(context).width,
         height: MediaQuery.sizeOf(context).height,
-        fit: BoxFit.fill,
-      ));
+        fit: BoxFit.cover,
+        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          } else {
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          }
+        },
+      )
+      );
     }
     return Scaffold(
       body: Stack(

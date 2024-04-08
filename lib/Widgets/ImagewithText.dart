@@ -29,7 +29,7 @@ class ImageWithText extends StatelessWidget {
       child: Column(
         children: [
           SvgPicture.asset(imagePath, width: width, height: height, color: color),
-          MyText(text: text, fontSize: 12, fontWeight: FontWeight.w500),
+          MyText(text: text, fontSize: 15, fontWeight: FontWeight.w500),
         ],
       ),
     );

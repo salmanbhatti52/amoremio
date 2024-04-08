@@ -918,8 +918,8 @@ class _UserProfileState extends State<UserProfile> {
                       height: 5,
                     ),
                     Container(
-                      width: Get.width * 0.84,
-                      height: Get.height * 0.060,
+                      width: Get.width * 0.9,
+                      height: Get.height * 0.055,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         color: AppColor.whiteColor,

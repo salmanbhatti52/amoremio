@@ -494,7 +494,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                 duration: Duration(seconds: 1),
                               ),
                             )
-                          : LiveGrid.options(
+                          : userDataList.isNotEmpty
+                ? LiveGrid.options(
                               options: options,
                               itemCount: userDataList.length,
                               gridDelegate:
@@ -697,7 +698,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                   ),
                                 );
                               },
-                            ),
+                            )
+                : Center(child: const MyText(text: "No Discover User Found")),
                     )
                   : const SizedBox(),
               /////usermatch//////
@@ -713,7 +715,8 @@ class _ExplorePageState extends State<ExplorePage> {
                           duration: Duration(seconds: 1),
                         ),
                       )
-                          : LiveGrid.options(
+                          : userDataList.isNotEmpty
+                ? LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
                         gridDelegate:
@@ -879,7 +882,8 @@ class _ExplorePageState extends State<ExplorePage> {
                             ),
                           );
                         },
-                      ),
+                      )
+                : Center(child: const MyText(text: "No Matches User Found")),
                     )
                   : const SizedBox(),
               // userliked/////
@@ -895,7 +899,8 @@ class _ExplorePageState extends State<ExplorePage> {
                           duration: Duration(seconds: 1),
                         ),
                       )
-                          : LiveGrid.options(
+                          : userDataList.isNotEmpty
+                          ? LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
                         gridDelegate:
@@ -1053,7 +1058,8 @@ class _ExplorePageState extends State<ExplorePage> {
                             ),
                           );
                         },
-                      ),
+                      )
+                : Center(child: const MyText(text: "No Liked User Found")),
                     )
                   : const SizedBox(),
 
@@ -1070,7 +1076,8 @@ class _ExplorePageState extends State<ExplorePage> {
                           duration: Duration(seconds: 1),
                         ),
                       )
-                          : LiveGrid.options(
+                          : userDataList.isNotEmpty
+                          ? LiveGrid.options(
                         options: options,
                         itemCount: userDataList.length,
                         gridDelegate:
@@ -1228,7 +1235,8 @@ class _ExplorePageState extends State<ExplorePage> {
                             ),
                           );
                         },
-                      ),
+                      )
+                      : Center(child: const MyText(text: "No Liked You User Found")),
                     )
                   : const SizedBox()
             ],

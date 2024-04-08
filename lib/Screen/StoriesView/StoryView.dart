@@ -121,8 +121,10 @@ class _StoryViewState extends State<StoryView> {
 
   likeduser(usersstories) async {
     var storyid = usersstories['users_stories_id'];
-    var Like = usersstories["stats"]['liked'];
+    var Like = usersstories['liked'];
+    var totalLike = usersstories['stats']['total_likes'];
     debugPrint('likeeee $Like');
+    debugPrint('totalLike $totalLike');
     showDialog(context: context, builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
@@ -148,6 +150,8 @@ class _StoryViewState extends State<StoryView> {
 
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
+      var totalLikes = userdetail['data'][0]['total_likes'];
+      debugPrint('Total likes: $totalLikes');
       Navigator.of(context).pop();
       var msg = userdetail['message'];
       debugPrint('userdetail $userdetail');
@@ -160,6 +164,13 @@ class _StoryViewState extends State<StoryView> {
           setState(() {
             usersstories['liked'] = 'Yes';
           });
+        }
+        if(totalLike == totalLikes){
+          setState(() {
+            usersstories = usersstories['stats']['total_likes'];
+          });
+        } else {
+          usersstories = totalLikes;
         }
       });
     } else {
@@ -258,261 +269,254 @@ class _StoryViewState extends State<StoryView> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 0.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(right: 8.0, bottom: 40.0),
-                        child: Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                // videos[_currentPage]["stats"]['liked'] != "Yes" ?
-                                likeduser(videos[_currentPage]);
-                                    // : "";
-                              },
-                              child: SvgPicture.asset(
-                                width: 30,
-                                height: 30,
-                                videos[_currentPage]["stats"]['liked'] == "Yes"
-                                    ? ImageAssets.createStory2
-                                    : ImageAssets.createStory1,
-                              ),
-                            ),
-                            Text(
-                              videos[_currentPage]['stats']['total_likes'].toString(),
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            ImageWithText(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 25.0, right: 5),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                             likeduser(videos[_currentPage]);
+                            },
+                            child: SvgPicture.asset(
                               width: 30,
                               height: 30,
-                              color: Colors.white,
-                              imagePath: ImageAssets.chat1,
-                              text: videos[_currentPage]['stats']
-                                      ['total_comments']
-                                  .toString(),
-                              onTap: (){
-                                Get.bottomSheet(
-                                   CommentSheet(storyId: videos[_currentPage]["users_stories_id"]),
-                                  barrierColor: Colors.black.withOpacity(0.5),
-                                  backgroundColor: Colors.transparent,
-                                );
-                              },
+                              videos[_currentPage]['liked'] == "Yes"
+                                  ? ImageAssets.createStory2
+                                  : ImageAssets.createStory1,
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            ImageWithText(
-                              width: 15,
-                              height: 15,
-                              color: Colors.white,
-                              imagePath: ImageAssets.share,
-                              text: "Share",
-                              onTap: () async {
-                                await shareBook(videos[_currentPage]);
-                              },
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 5.0, bottom: 0, right: 5),
-                                  child: CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      videos[_currentPage]['user_data']['image'] != null
-                                          && videos[_currentPage]['user_data']['image'].isNotEmpty
-                                          ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
-                                          : videos[_currentPage]['user_data']['genders_id'] == 1
-                                              ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
-                                              : videos[_currentPage]['user_data']['genders_id'] == 2
-                                                  ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
-                                                  : 'https://mio.eigix.net/uploads/placeholder.jpg',
-                                    ),
-                                    radius: 18.5,
-                                  ),
-                                ),
-                                MyText(
-                                  text:
-                                videos[_currentPage]['user_data'] != null
-                                    ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
-                                    : "UserName",
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: Get.width * 0.1),
-                            StoryDiscover(
-                              selectedValue: _selectedValue,
-                              onChanged: (String? newValue) {
-                                if(newValue != null) {
-                                  setState(() {
-                                    _selectedValue = newValue;
-                                    loadstories();
-                                    print("_selectedValue $_selectedValue");
-                                  });
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.10,
-                            width: MediaQuery.of(context).size.width,
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: videos[_currentPage]['user_data']['users_stories'].length,
-                              itemBuilder: (BuildContext context, int index) {
-                                var story = videos[_currentPage]['user_data']['users_stories'][index];
-                                var videoPath = story;
-                                var userStoriesId = story["users_stories_id"];
-                                var storyType = story["story_type"];
-                                var coinsView = story["coins_per_view"];
-                                if (videoPath['media_type'] == 'Video') {
-                                  return FutureBuilder<Uint8List?>(
-                                    future: generateThumbnail(baseUrlImage + story['media']),
-                                    builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
-                                      if (snapshot.connectionState == ConnectionState.done) {
-                                        if (snapshot.hasData) {
-                                          return Padding(
-                                            padding: const EdgeInsets.only(right: 0.0),
-                                            child: Column(
-                                              children: [
-                                                Container(
-                                                  margin: const EdgeInsets.only(top: 10, left: 14),
-                                                  width: 60,
-                                                  height: 60,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.transparent,
-                                                    border: Border.all(width: 2, color: AppColor.whiteColor,
-                                                    ),
-                                                    borderRadius: BorderRadius.circular(30),
-                                                  ),
-                                                  child: ClipRRect(
-                                                    borderRadius: BorderRadius.circular(30),
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        if(storyType == "Paid"){
-                                                          showDialog(
-                                                            context: context,
-                                                            barrierColor: Colors.grey.withOpacity(0.9),
-                                                            barrierDismissible: false,
-                                                            builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: userStoriesId),
-                                                          );
-                                                        } else {
-                                                          print('Thumbnail clicked');
-                                                          setState(() {
-                                                            isThumbnailClicked = true;
-                                                            selectedImageUrl = '';
-                                                            print("selectedImageUrl $selectedImageUrl");
-                                                          });
-                                                          _videoControllers[_currentPage].pause();
-                                                          print('New video controller created');
-                                                          _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
-                                                          _videoControllers[_currentPage].initialize().then((_) {
-                                                            print('Video controller initialized');
-                                                            _videoControllers[_currentPage].play();
-                                                            setState(() {});
-                                                          });
-                                                          // onThumbnailClicked(index);
-                                                        }
-                                                      },
-                                                      child: Image.memory(
-                                                        snapshot.data!,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        } else {
-                                          return const CircularProgressIndicator(); // Or some other placeholder
-                                        }
-                                      } else {
-                                        return SizedBox(
-                                          width: 65,
-                                          height: 65,
-                                          child: Center(
-                                              child: Container(
-                                                width: 60,
-                                                height: 60,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  border: Border.all(width: 2, color: Colors.white,),
-                                                ),
-                                                margin: const EdgeInsets.all(5),
-                                              ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  );
-                                } else {
-                                  return GestureDetector(
-                                    onTap: (){
-                                      setState(() {
-                                        isThumbnailClicked = true;
-                                        selectedImageUrl = 'https://mio.eigix.net/${story['media']}';
-                                        print("selectedImageUrl $selectedImageUrl");
-                                      });
-                                    },
-                                    child: Container(
-                                      width: 60,
-                                      height: 60,
-                                      margin: const EdgeInsets.all(5),
-                                      decoration: ShapeDecoration(
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                              'https://mio.eigix.net/${story['media']}'),
-                                          fit: BoxFit.fill,
-                                        ),
-                                        shape: const CircleBorder(
-                                          side: BorderSide(
-                                              width: 2, color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                          ),
+                          Text(
+                            videos[_currentPage]['stats']['total_likes'].toString(),
+                            style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          ImageWithText(
+                            width: 30,
+                            height: 30,
+                            color: Colors.white,
+                            imagePath: ImageAssets.chat1,
+                            text: videos[_currentPage]['stats']
+                                    ['total_comments']
+                                .toString(),
+                            onTap: (){
+                              Get.bottomSheet(
+                                 CommentSheet(storyId: videos[_currentPage]["users_stories_id"]),
+                                barrierColor: Colors.black.withOpacity(0.5),
+                                backgroundColor: Colors.transparent,
+                              );
+                            },
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          ImageWithText(
+                            width: 20,
+                            height: 20,
+                            color: Colors.white,
+                            imagePath: ImageAssets.share,
+                            text: "Share",
+                            onTap: () async {
+                              await shareBook(videos[_currentPage]);
+                            },
+                          ),
+                          const SizedBox(
+                            height: 10,
                           ),
                         ],
                       ),
-                      SizedBox(
-                        height: Get.height * 0.02,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 5.0, bottom: 0, right: 5),
+                                child: CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                    videos[_currentPage]['user_data']['image'] != null
+                                        && videos[_currentPage]['user_data']['image'].isNotEmpty
+                                        ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
+                                        : videos[_currentPage]['user_data']['genders_id'] == 1
+                                            ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                            : videos[_currentPage]['user_data']['genders_id'] == 2
+                                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
+                                                : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                                  ),
+                                  radius: 18.5,
+                                ),
+                              ),
+                              MyText(
+                                text: videos[_currentPage]['user_data'] != null
+                                  ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
+                                  : "UserName",
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: Get.width * 0.1),
+                          StoryDiscover(
+                            selectedValue: _selectedValue,
+                            onChanged: (String? newValue) {
+                              if(newValue != null) {
+                                setState(() {
+                                  _selectedValue = newValue;
+                                  loadstories();
+                                  print("_selectedValue $_selectedValue");
+                                });
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.10,
+                          width: MediaQuery.of(context).size.width,
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: videos[_currentPage]['user_data']['users_stories'].length,
+                            itemBuilder: (BuildContext context, int index) {
+                              var story = videos[_currentPage]['user_data']['users_stories'][index];
+                              var videoPath = story;
+                              var userStoriesId = story["users_stories_id"];
+                              var storyType = story["story_type"];
+                              var coinsView = story["coins_per_view"];
+                              if (videoPath['media_type'] == 'Video') {
+                                return FutureBuilder<Uint8List?>(
+                                  future: generateThumbnail(baseUrlImage + story['media']),
+                                  builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done) {
+                                      if (snapshot.hasData) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(right: 0.0),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                margin: const EdgeInsets.only(top: 10, left: 14),
+                                                width: 60,
+                                                height: 60,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  border: Border.all(width: 2, color: AppColor.whiteColor,
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(30),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(30),
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      if(storyType == "Paid"){
+                                                        showDialog(
+                                                          context: context,
+                                                          barrierColor: Colors.grey.withOpacity(0.9),
+                                                          barrierDismissible: false,
+                                                          builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: userStoriesId),
+                                                        );
+                                                      } else {
+                                                        print('Thumbnail clicked');
+                                                        setState(() {
+                                                          isThumbnailClicked = true;
+                                                          selectedImageUrl = '';
+                                                          print("selectedImageUrl $selectedImageUrl");
+                                                        });
+                                                        _videoControllers[_currentPage].pause();
+                                                        print('New video controller created');
+                                                        _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
+                                                        _videoControllers[_currentPage].initialize().then((_) {
+                                                          print('Video controller initialized');
+                                                          _videoControllers[_currentPage].play();
+                                                          setState(() {});
+                                                        });
+                                                        // onThumbnailClicked(index);
+                                                      }
+                                                    },
+                                                    child: Image.memory(
+                                                      snapshot.data!,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        return const CircularProgressIndicator(); // Or some other placeholder
+                                      }
+                                    } else {
+                                      return SizedBox(
+                                        width: 65,
+                                        height: 65,
+                                        child: Center(
+                                            child: Container(
+                                              width: 60,
+                                              height: 60,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(30),
+                                                border: Border.all(width: 2, color: Colors.white,),
+                                              ),
+                                              margin: const EdgeInsets.all(5),
+                                            ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              } else {
+                                return GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      isThumbnailClicked = true;
+                                      selectedImageUrl = 'https://mio.eigix.net/${story['media']}';
+                                      print("selectedImageUrl $selectedImageUrl");
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    margin: const EdgeInsets.all(5),
+                                    decoration: ShapeDecoration(
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                            'https://mio.eigix.net/${story['media']}'),
+                                        fit: BoxFit.fill,
+                                      ),
+                                      shape: const CircleBorder(
+                                        side: BorderSide(
+                                            width: 2, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: Get.height * 0.02,
+                    ),
+                  ],
                 ),
               ],
             )
