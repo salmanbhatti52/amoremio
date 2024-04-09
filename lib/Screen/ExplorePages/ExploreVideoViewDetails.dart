@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:amoremio/Resources/assets/assets.dart';
+import 'package:amoremio/Screen/CreateStory/PaidStories/PaidCommentSheet.dart';
 import 'package:amoremio/Utills/AppUrls.dart';
 import 'package:amoremio/Widgets/ImagewithText.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -209,13 +211,12 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                     ),
                   ),
                   Positioned(
-                    bottom: 50,
+                    bottom: 200,
                     right: 10,
                     child: Column(
                       children: [
                         Padding(
-                          padding:
-                              const EdgeInsets.only(right: 8.0, bottom: 40.0),
+                    padding: const EdgeInsets.only(bottom: 25.0, right: 5),
                           child: Column(
                             children: [
                               GestureDetector(
@@ -231,15 +232,14 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                                 ),
                               ),
                               Text(
-                                videos[_currentPage]['stats']['total_likes']
-                                    .toString(),
+                                videos[_currentPage]['stats']['total_likes'].toString(),
                                 style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white),
                               ),
                               const SizedBox(
-                                height: 10,
+                                height: 20,
                               ),
                               ImageWithText(
                                 width: 30,
@@ -247,79 +247,28 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                                 color: Colors.white,
                                 imagePath: ImageAssets.chat1,
                                 text: videos[_currentPage]['stats']
-                                        ['total_comments']
+                                ['total_comments']
                                     .toString(),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const ImageWithText(
-                                width: 25,
-                                height: 25,
-                                color: Colors.white,
-                                imagePath: ImageAssets.share,
-                                text: "Share",
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 50,
-                    right: 10,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(right: 8.0, bottom: 40.0),
-                          child: Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  likedUser(videos[_currentPage]);
+                                onTap: (){
+                                  Get.bottomSheet(
+                                    CommentSheet(storyId: videos[_currentPage]["users_stories_id"]),
+                                    barrierColor: Colors.black.withOpacity(0.5),
+                                    backgroundColor: Colors.transparent,
+                                  );
                                 },
-                                child: SvgPicture.asset(
-                                  width: 30,
-                                  height: 30,
-                                  videos[_currentPage]['liked'] == "Yes"
-                                      ? ImageAssets.createStory2
-                                      : ImageAssets.createStory1,
-                                ),
-                              ),
-                              Text(
-                                videos[_currentPage]['stats']['total_likes']
-                                    .toString(),
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white),
                               ),
                               const SizedBox(
-                                height: 10,
+                                height: 20,
                               ),
                               ImageWithText(
-                                width: 30,
-                                height: 30,
-                                color: Colors.white,
-                                imagePath: ImageAssets.chat1,
-                                text: videos[_currentPage]['stats']
-                                        ['total_comments']
-                                    .toString(),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const ImageWithText(
-                                width: 25,
-                                height: 25,
+                                width: 20,
+                                height: 20,
                                 color: Colors.white,
                                 imagePath: ImageAssets.share,
                                 text: "Share",
+                                onTap: () async {
+                                  await shareBook(videos[_currentPage]);
+                                },
                               ),
                               const SizedBox(
                                 height: 10,
@@ -331,7 +280,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                     ),
                   ),
                   Positioned(
-                    bottom: 50,
+                    bottom: 100,
                     left: 10,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -364,21 +313,16 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
       ),
     );
   }
-}
 
-Future<Uint8List?> generateThumbnail(String videoUrl) async {
-  try {
-    final uint8list = await VideoThumbnail.thumbnailData(
-      video: videoUrl,
-      imageFormat: ImageFormat.JPEG,
-      maxWidth: 64, // specify the width of the thumbnail
-      quality: 25,
-    );
-    return uint8list;
-  } catch (e) {
-    print(e);
-    return null;
+  Future<void> shareBook(Map<String, dynamic> videoData) async {
+    String videoUrl = 'https://mio.eigix.net/${videoData['media']}';
+    try {
+      await Share.share(videoUrl);
+    } catch (e) {
+      debugPrint('Error sharing file: $e');
+    }
   }
+
 }
 
 class Video extends StatefulWidget {

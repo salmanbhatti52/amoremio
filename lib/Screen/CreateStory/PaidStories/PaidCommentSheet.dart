@@ -101,39 +101,37 @@ class _CommentSheetState extends State<CommentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: GestureDetector(
-        onTap: (){
-          FocusScope.of(context).unfocus();
-          if (isEmojiVisible == true) {
-            isEmojiVisible = false;
-          }
-        },
-        child: Container(
-          width: double.infinity,
-          height: Get.height * 0.8,
-          decoration:  BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
+    return GestureDetector(
+      onTap: (){
+        FocusScope.of(context).unfocus();
+        if (isEmojiVisible == true) {
+          isEmojiVisible = false;
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        height: Get.height * 0.8,
+        decoration:  BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
           ),
-          child: Column(
-            children: [
-              const Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 20.0, top: 15, bottom: 12),
-                    child: MyText(
-                      text: "Comments",
-                      color: AppColor.blackColor,
-                      fontSize: 18,
-                    ),
+        ),
+        child: Column(
+          children: [
+            const Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20.0, top: 15, bottom: 12),
+                  child: MyText(
+                    text: "Comments",
+                    color: AppColor.blackColor,
+                    fontSize: 18,
                   ),
-              ),
-              SizedBox(
-              height: Get.height * 0.4,
+                ),
+            ),
+            Expanded(
               child: ListView.builder(
               itemCount: comments.length,
               physics: const BouncingScrollPhysics(),
@@ -210,88 +208,87 @@ class _CommentSheetState extends State<CommentSheet> {
                   )
                 );
               },
-            ),
           ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Container(
-                  padding: const EdgeInsets.only(left: 10, top: 20),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: sendMessageTextFields(
-                          key: sendMessageFormKey,
-                          controller: sendMessageController,
-                          onSendMessage: sendComment,
-                          isEmojiVisible: isEmojiVisible,
-                          toggleEmojiPicker: toggleEmojiPicker,
-                          closekeyboard: closekeyboard,
-                          context: context,
-                          scrollController: null,
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                padding: const EdgeInsets.only(left: 10, top: 20),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: sendMessageTextFields(
+                        key: sendMessageFormKey,
+                        controller: sendMessageController,
+                        onSendMessage: sendComment,
+                        isEmojiVisible: isEmojiVisible,
+                        toggleEmojiPicker: toggleEmojiPicker,
+                        closekeyboard: closekeyboard,
+                        context: context,
+                        scrollController: null,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: AppColor.whiteColor,
+                        borderRadius: BorderRadius.circular(31),
+                      ),
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          sendComment(sendMessageController.text);
+                        },
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        child: const Icon(
+                          Icons.send,
+                          size: 25,
+                          color: AppColor.secondaryColor,
                         ),
                       ),
-                      const SizedBox(width: 5),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
-                          color: AppColor.whiteColor,
-                          borderRadius: BorderRadius.circular(31),
-                        ),
-                        child: FloatingActionButton(
-                          onPressed: () async {
-                            sendComment(sendMessageController.text);
-                          },
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          child: const Icon(
-                            Icons.send,
-                            size: 25,
-                            color: AppColor.secondaryColor,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (isEmojiVisible)
+              SizedBox(
+                height: 200,
+                child: EmojiPicker(
+                  textEditingController: sendMessageController,
+                  config: Config(
+                    columns: 7,
+                    emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+                    verticalSpacing: 0,
+                    horizontalSpacing: 0,
+                    gridPadding: EdgeInsets.zero,
+                    initCategory: Category.RECENT,
+                    bgColor: const Color(0xFFF2F2F2),
+                    indicatorColor: Colors.blue,
+                    iconColor: Colors.grey,
+                    iconColorSelected: Colors.blue,
+                    backspaceColor: Colors.blue,
+                    skinToneDialogBgColor: Colors.white,
+                    skinToneIndicatorColor: Colors.grey,
+                    enableSkinTones: true,
+                    recentTabBehavior: RecentTabBehavior.RECENT,
+                    recentsLimit: 28,
+                    noRecents: const Text(
+                      'No Recents',
+                      style: TextStyle(fontSize: 20, color: Colors.black26),
+                      textAlign: TextAlign.center,
+                    ),
+                    loadingIndicator: const SizedBox.shrink(),
+                    tabIndicatorAnimDuration: kTabScrollDuration,
+                    categoryIcons: const CategoryIcons(),
+                    buttonMode: ButtonMode.MATERIAL,
                   ),
                 ),
               ),
-              if (isEmojiVisible)
-                SizedBox(
-                  height: 200,
-                  child: EmojiPicker(
-                    textEditingController: sendMessageController,
-                    config: Config(
-                      columns: 7,
-                      emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
-                      verticalSpacing: 0,
-                      horizontalSpacing: 0,
-                      gridPadding: EdgeInsets.zero,
-                      initCategory: Category.RECENT,
-                      bgColor: const Color(0xFFF2F2F2),
-                      indicatorColor: Colors.blue,
-                      iconColor: Colors.grey,
-                      iconColorSelected: Colors.blue,
-                      backspaceColor: Colors.blue,
-                      skinToneDialogBgColor: Colors.white,
-                      skinToneIndicatorColor: Colors.grey,
-                      enableSkinTones: true,
-                      recentTabBehavior: RecentTabBehavior.RECENT,
-                      recentsLimit: 28,
-                      noRecents: const Text(
-                        'No Recents',
-                        style: TextStyle(fontSize: 20, color: Colors.black26),
-                        textAlign: TextAlign.center,
-                      ),
-                      loadingIndicator: const SizedBox.shrink(),
-                      tabIndicatorAnimDuration: kTabScrollDuration,
-                      categoryIcons: const CategoryIcons(),
-                      buttonMode: ButtonMode.MATERIAL,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:amoremio/Screen/ExplorePages/ExploreVideoViewDetails.dart';
+import 'package:amoremio/Screen/StoriesView/StoryBuyDialouge.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -25,24 +27,39 @@ class BlockUserDetails extends StatefulWidget {
   State<BlockUserDetails> createState() => _BlockUserDetailsState();
 }
 
-class _BlockUserDetailsState extends State<BlockUserDetails> {
+class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerProviderStateMixin{
+  late final AnimationController _animateController = AnimationController(
+      duration: const Duration(milliseconds: 200), vsync: this, value: 1.0);
+  bool isButtonClicked = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animateController.dispose();
+  }
+
+  List<dynamic> imgListavators = [];
+  List<dynamic> userDataList = [];
+  List<dynamic> uservideos = [];
 
   String address = '';
   var username = '';
+  String userImage = '';
+  var summary = '';
   var dateofbirth;
   int _current = 0;
-  List<dynamic> imgListavators = [];
-  List<dynamic> uservideos = [];
   bool isLoading = false;
   bool isStoryLoading = false;
+  String userStoriesID = "";
+  String usersCustomersId = "";
   final CarouselController _controller = CarouselController();
+  double sheetTopPosition = 0;
   Map<String, Uint8List?> thumbnails = {};
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(' widget.userid ${ widget.userid}');
     loaddata();
   }
 
@@ -58,76 +75,24 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
           ));
       var userdetail = jsonDecode(response.body);
       if (userdetail['status'] == 'success') {
-        print("userdetail $userdetail");
+        print(userdetail);
         getavators();
         setState(() {
           if (userdetail['data'] != null) {
+            userImage = userdetail['data']['image'] ?? ''; // Assign default value if image is null
             username = userdetail['data']['username'] ?? ''; // Assign default value if username is null
             dateofbirth = userdetail['data']['date_of_birth'] ?? ''; // Assign default value if date_of_birth is null
             address = userdetail['data']['location'] ?? ''; // Assign default value if location is null
-           }
+            summary = userdetail['data']['summary'] ?? ''; // Assign default value if summary is null
+          }
         });
+        print("userImage ${baseUrlImage + userImage}");
       } else {
         var errormsg = userdetail['message'];
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
       }
     } catch (e) {
       print('error123456: $e');
-    }
-  }
-
-  // userstories() async {
-  //   setState(() {
-  //     isStoryLoading = true;
-  //   });
-  //   String apiUrl = getuserallstories;
-  //   try {
-  //     final response = await http.post(Uri.parse(apiUrl),
-  //         headers: <String, String>{
-  //           'Content-Type': 'application/json; charset=UTF-8',
-  //         },
-  //         body: jsonEncode(
-  //           {
-  //             "users_customers_id": widget.userid,
-  //           },
-  //         ));
-  //
-  //     var data = jsonDecode(response.body);
-  //     if (data['status'] == 'success') {
-  //       print('user stories::::: ${response.body}');
-  //       // imgurl = baseUrlImage + data['data']['image'];
-  //       uservideos = data['data'];
-  //       await generateAllThumbnails(uservideos);
-  //       setState(() {
-  //         isStoryLoading = false;
-  //       });
-  //     } else {
-  //       setState(() {
-  //         isStoryLoading = false;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       isStoryLoading = false;
-  //     });
-  //     print('errorfound $e');
-  //   }
-  // }
-
-  Future<void> generateAllThumbnails(List<dynamic> videos) async {
-    bool shouldUpdate = false;
-    for (var video in videos) {
-      if (video['media_type'] == 'Video') {
-        var thumbnail = await generateThumbnail(baseUrlImage + video['media']);
-        if (thumbnail != null) {
-          thumbnails[video['media']] = thumbnail;
-          shouldUpdate = true;
-        }
-      }
-    }
-    if (shouldUpdate) {
-      setState(
-          () {}); // Only call setState if at least one thumbnail was updated
     }
   }
 
@@ -150,12 +115,11 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         imgListavators = data['data'];
-        // userstories();
+        userstories();
         setState(() {
           isLoading = false;
         });
       } else {
-        print('errorfoundgetavatarssssss');
         setState(() {
           isLoading = false;
         });
@@ -164,7 +128,66 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
       setState(() {
         isLoading = false;
       });
-      print('errorfoundgetavatar $e');
+      print('errorfound $e');
+    }
+  }
+
+  userstories() async {
+    setState(() {
+      isStoryLoading = true;
+    });
+    String apiUrl = getuserallstories;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print("userID $userId");
+    print("otherUserID ${widget.userid}");
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+              "others_users_customers_id": widget.userid,
+            },
+          ));
+
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        print('user stories::::: ${response.body}');
+        // imgurl = baseUrlImage + data['data']['image'];
+        uservideos = data['data'];
+        await generateAllThumbnails(uservideos);
+        setState(() {
+          isStoryLoading = false;
+        });
+      } else {
+        setState(() {
+          isStoryLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isStoryLoading = false;
+      });
+      print('errorfound $e');
+    }
+  }
+
+  Future<void> generateAllThumbnails(List<dynamic> videos) async {
+    bool shouldUpdate = false;
+    for (var video in videos) {
+      if (video['media_type'] == 'Video') {
+        var thumbnail = await generateThumbnail(baseUrlImage + video['media']);
+        if (thumbnail != null) {
+          thumbnails[video['media']] = thumbnail;
+          shouldUpdate = true;
+        }
+      }
+    }
+    if (shouldUpdate) {
+      setState(() {});
     }
   }
 
@@ -215,6 +238,52 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
     // }
   }
 
+  bool isLoadings = false;
+  Map<String, dynamic> shareProfile = {};
+
+  shareUserProfile() async {
+    setState(() {
+      isLoadings = true;
+    });
+    String apiUrl = 'https://mio.eigix.net/apis/services/users_profile_shares';
+    http.Response response = await http.post(Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(
+          {
+            "users_customers_id": widget.userid,
+          },
+        ));
+    if (mounted) {
+      setState(() {
+        if (response.statusCode == 200) {
+          var jsonResponse = json.decode(response.body);
+          if (jsonResponse['status'] == "success") {
+            shareProfile = jsonResponse['data'];
+            debugPrint("shareProfile: $shareProfile");
+            debugPrint("shareProfile ${jsonResponse["data"]}");
+            Clipboard.setData(ClipboardData(text: shareProfile["data"])).then((_){
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
+                text: "Linked copied successfully!",
+                color: AppColor.primaryColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ), backgroundColor: AppColor.whiteColor,),);
+            });
+            isLoadings = false;
+          } else {
+            debugPrint("parentMessage");
+            isLoadings = false;
+          }
+        } else {
+          debugPrint("Response Bode::${response.body}");
+          isLoadings = false;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> imageSliders = [];
@@ -243,7 +312,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
     return Scaffold(
       body: Stack(
         children: [
-         isLoading ? const Center(
+          isLoading ? const Center(
             child: SpinKitPouringHourGlassRefined(
               color: AppColor.primaryColor,
               size: 80,
@@ -252,34 +321,28 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
             ),
           ) : imgListavators.isNotEmpty
               ? CarouselSlider(
-                  items: imageSliders,
-                  carouselController: _controller,
-                  options: CarouselOptions(
-                      autoPlay: false,
-                      scrollPhysics: const ScrollPhysics(),
-                      disableCenter: false,
-                      enlargeCenterPage: false,
-                      viewportFraction: 0.999,
-                      aspectRatio: 2,
-                      animateToClosest: false,
-                      enableInfiniteScroll: false,
-                      height: double.infinity,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _current = index;
-                        });
-                      }),
-                )
-              : Container(color: Colors.grey),
-          // : ImageContainer(
-          //     child: Image.network(
-          //       ImageAssets.dummyImage,
-          //       fit: BoxFit.fill,
-          //     ),
-          //   ),
+            items: imageSliders,
+            carouselController: _controller,
+            options: CarouselOptions(
+                autoPlay: false,
+                scrollPhysics: const ScrollPhysics(),
+                disableCenter: false,
+                enlargeCenterPage: false,
+                viewportFraction: 0.999,
+                aspectRatio: 2,
+                animateToClosest: false,
+                enableInfiniteScroll: false,
+                height: double.infinity,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _current = index;
+                  });
+                }),
+          )
+              : const SizedBox(),
           Positioned(
-            bottom: Get.height * 0.25,
-            // left: Get.width * 0.355,
+            bottom: Get.height * 0.325,
+            // left: Get.width * 0.405,
             child: Align(
               alignment: Alignment.center,
               child: Container(
@@ -303,6 +366,126 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
                     );
                   }).toList(),
                 ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 175,
+            left: 0,
+            right: 0,
+            child: isStoryLoading
+                ? const Center(child: Padding(
+              padding: EdgeInsets.only(bottom: 32.0),
+              child: CircularProgressIndicator(),
+            ))
+                : SizedBox(
+              height: MediaQuery.of(context).size.height * 0.10,
+              width: MediaQuery.of(context).size.width,
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: uservideos.length,
+                itemBuilder: (BuildContext context, int index) {
+                  var story = uservideos[index];
+                  var videoPath = story;
+                  var storyId = videoPath['users_stories_id'];
+                  var storyType = videoPath['story_type'];
+                  var coinsView = videoPath['coins_per_view'];
+                  var owned = videoPath['stats']["owned"];
+                  if (videoPath['media_type'] == 'Video' &&
+                      thumbnails.containsKey(story['media'])) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 0.0),
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(
+                                top: 1, left: 13, right: 1),
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              border: Border.all(
+                                width: 2,
+                                color: AppColor.whiteColor,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30),
+                              child: GestureDetector(
+                                onTap: () {
+                                  if(storyType == "Paid" && owned == "No"){
+                                    showDialog(
+                                      context: context,
+                                      barrierColor: Colors.grey.withOpacity(0.9),
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: storyId),
+                                    );
+                                  } else {
+                                    print('users_stories_id ::::: ${story["users_stories_id"]}');
+                                    print('users_customers_id ::::: ${story["users_customers_id"]}');
+                                    setState(() {
+                                      userStoriesID = story["users_stories_id"];
+                                      usersCustomersId = story["users_customers_id"];
+                                      print('userStoriesID $userStoriesID');
+                                      print('users_customers_id $usersCustomersId');
+                                    });
+                                    Get.to(
+                                          () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
+                                      duration: const Duration(seconds: 1),
+                                      transition: Transition.native,
+                                    );
+                                  }
+                                },
+                                child: Image.memory(
+                                  thumbnails[story['media']]!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return GestureDetector(
+                      onTap: (){
+                        // print('users_stories_id ::::: ${story["users_stories_id"]}');
+                        // print('users_customers_id ::::: ${story["users_customers_id"]}');
+                        // setState(() {
+                        //   userStoriesID = story["users_stories_id"];
+                        //   usersCustomersId = story["users_customers_id"];
+                        //   print('userStoriesID $userStoriesID');
+                        //   print('users_customers_id $usersCustomersId');
+                        // });
+                        // Get.to(
+                        //       () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
+                        //   duration: const Duration(seconds: 1),
+                        //   transition: Transition.native,
+                        // );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                          bottom: 12,
+                          left: 10,
+                        ),
+                        width: 60,
+                        height: 60,
+                        decoration: ShapeDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(
+                                'https://mio.eigix.net/${story['media']}'),
+                            fit: BoxFit.fill,
+                          ),
+                          shape: const CircleBorder(
+                            side: BorderSide(width: 2, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
               ),
             ),
           ),
@@ -520,52 +703,6 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
     );
   }
 
-  bool isLoadings = false;
-  Map<String, dynamic> shareProfile = {};
-
-  shareUserProfile() async {
-    setState(() {
-      isLoadings = true;
-    });
-    String apiUrl = 'https://mio.eigix.net/apis/services/users_profile_shares';
-    http.Response response = await http.post(Uri.parse(apiUrl),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(
-          {
-            "users_customers_id": widget.userid,
-          },
-        ));
-    if (mounted) {
-      setState(() {
-        if (response.statusCode == 200) {
-          var jsonResponse = json.decode(response.body);
-          if (jsonResponse['status'] == "success") {
-            shareProfile = jsonResponse['data'];
-            debugPrint("shareProfile: $shareProfile");
-            debugPrint("shareProfile ${jsonResponse["data"]}");
-            Clipboard.setData(ClipboardData(text: shareProfile["data"])).then((_){
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
-                text: "Linked copied successfully!",
-                color: AppColor.primaryColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ), backgroundColor: AppColor.whiteColor,),);
-            });
-            isLoadings = false;
-          } else {
-            debugPrint("parentMessage");
-            isLoadings = false;
-          }
-        } else {
-          debugPrint("Response Bode::${response.body}");
-          isLoadings = false;
-        }
-      });
-    }
-  }
-
   int calculateAge(String? dateOfBirth) {
     if (dateOfBirth == null) {
       // Handle the case when dateOfBirth is null
@@ -589,9 +726,10 @@ class _BlockUserDetailsState extends State<BlockUserDetails> {
     try {
       final uint8list = await VideoThumbnail.thumbnailData(
         video: videoUrl,
-        imageFormat: ImageFormat.JPEG,
+        imageFormat: ImageFormat.PNG,
         maxWidth: 64, // specify the width of the thumbnail
         quality: 25,
+        timeMs: 1
       );
       return uint8list;
     } catch (e) {
