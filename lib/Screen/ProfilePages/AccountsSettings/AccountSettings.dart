@@ -24,68 +24,6 @@ class AccountSettings extends StatefulWidget {
 }
 
 class _AccountSettingsState extends State<AccountSettings> {
-  bool isCurrentPasswordVisible = true;
-  bool isNewPasswordVisible = true;
-  bool isConfirmPasswordVisible = true;
-
-  final currentPasswordController = TextEditingController();
-  final newPasswordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-
-  currentPasswordTap() {
-    setState(() {
-      isCurrentPasswordVisible = !isCurrentPasswordVisible;
-      print("object");
-    });
-  }
-
-  newPasswordTap() {
-    setState(() {
-      isNewPasswordVisible = !isNewPasswordVisible;
-    });
-  }
-
-  confirmPasswordTap() {
-    setState(() {
-      isConfirmPasswordVisible = !isConfirmPasswordVisible;
-    });
-  }
-
-  void changepass() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? userId = prefs.getString('users_customers_id');
-    print(userId);
-    String apiUrl = changePassword;
-    try {
-      final response = await http.post(Uri.parse(apiUrl),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(
-            {
-              "users_customers_id": userId,
-              "old_password": currentPasswordController.text,
-              "password": newPasswordController.text,
-              "confirm_password": confirmPasswordController.text
-            },
-          ));
-      print(response.body);
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'success') {
-        var msg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
-        Get.back();
-      } else {
-        print(data['status']);
-        var errormsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
-      }
-    } catch (e) {
-      print('error');
-    }
-  }
 
   /// deactivate ////
   @override
@@ -108,14 +46,23 @@ class _AccountSettingsState extends State<AccountSettings> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         var msg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: MyText(
+          text: msg,
+          color: AppColor.primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ), backgroundColor: AppColor.whiteColor,),);
         Get.back();
       } else {
         print(data['status']);
         var errormsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
+        ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: MyText(
+          text: errormsg,
+          color: AppColor.primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ), backgroundColor: AppColor.whiteColor,),);
+        Get.back();
       }
     } catch (e) {
       print('error');
@@ -142,14 +89,23 @@ class _AccountSettingsState extends State<AccountSettings> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         var msg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: MyText(
+          text: msg,
+          color: AppColor.primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ), backgroundColor: AppColor.whiteColor,),);
         Get.back();
       } else {
         print(data['status']);
         var errormsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errormsg)));
+        ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: MyText(
+          text: errormsg,
+          color: AppColor.primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ), backgroundColor: AppColor.whiteColor,),);
+        Get.back();
       }
     } catch (e) {
       print('error');
@@ -185,7 +141,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                       barrierColor: Colors.grey.withOpacity(0.9),
                       barrierDismissible: true,
                       builder: (BuildContext context) =>
-                          passwordChangeDilaoge());
+                          const ChangePassword());
                 },
               ),
             ),
@@ -237,7 +193,240 @@ class _AccountSettingsState extends State<AccountSettings> {
     );
   }
 
-  Widget passwordChangeDilaoge() {
+  Widget deactivateAccountDialog() {
+    return FadeInUpBig(
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: Get.width * 0.9,
+              height: Get.height * 0.35,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const MyText(
+                          text: "djksfdgfrg",
+                          fontSize: 5,
+                          fontWeight: FontWeight.w100,
+                          color: AppColor.whiteColor,
+                        ),
+                        const MyText(
+                          text: "Deactivate Account",
+                          fontSize: 18,
+                          color: AppColor.blackColor,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: const Icon(
+                            Icons.clear,
+                            color: AppColor.blackColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: Get.height * 0.05,
+                  ),
+                  const MyText(
+                      text: 'Are you sure you want to deactivate your account?',
+                      fontSize: 18,
+                      color: AppColor.blackColor),
+                  const SizedBox(height: 20.0),
+                  LargeButton(
+                    text: "Deactivate",
+                    onTap: () {
+                      deactivate();
+                    },
+                    width: Get.width * 0.6,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget deleteAccountDialog() {
+    return FadeInUpBig(
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: Get.width * 0.9,
+              height: Get.height * 0.35,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const MyText(
+                          text: "djksfdgfrg",
+                          fontSize: 5,
+                          fontWeight: FontWeight.w100,
+                          color: AppColor.whiteColor,
+                        ),
+                        const MyText(
+                          text: "Delete Account",
+                          fontSize: 18,
+                          color: AppColor.blackColor,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: const Icon(
+                            Icons.clear,
+                            color: AppColor.blackColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: Get.height * 0.05,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: MyText(
+                        text: 'Are you sure you want to delete your account?',
+                        fontSize: 18,
+                        color: AppColor.blackColor),
+                  ),
+                  const SizedBox(height: 20.0),
+                  LargeButton(
+                    text: "Delete",
+                    onTap: () {
+                      deleteaccount();
+                    },
+                    width: Get.width * 0.6,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+}
+
+
+class ChangePassword extends StatefulWidget {
+  const ChangePassword({super.key});
+
+  @override
+  State<ChangePassword> createState() => _ChangePasswordState();
+}
+
+class _ChangePasswordState extends State<ChangePassword> {
+
+  bool isCurrentPasswordVisible = true;
+  bool isNewPasswordVisible = true;
+  bool isConfirmPasswordVisible = true;
+
+  final currentPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  currentPasswordTap() {
+    setState(() {
+      isCurrentPasswordVisible = !isCurrentPasswordVisible;
+    });
+  }
+
+  newPasswordTap() {
+    setState(() {
+      isNewPasswordVisible = !isNewPasswordVisible;
+    });
+  }
+
+  confirmPasswordTap() {
+    setState(() {
+      isConfirmPasswordVisible = !isConfirmPasswordVisible;
+    });
+  }
+
+  void changepass() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    print(userId);
+    String apiUrl = changePassword;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+              "old_password": currentPasswordController.text,
+              "password": newPasswordController.text,
+              "confirm_password": confirmPasswordController.text
+            },
+          ));
+      print(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        var msg = data['message'];
+        ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: MyText(
+          text: msg,
+          color: AppColor.primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ), backgroundColor: AppColor.whiteColor,),);
+        Get.back();
+      } else {
+        print(data['status']);
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context).showSnackBar( SnackBar(content: MyText(
+          text: errormsg,
+          color: AppColor.primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ), backgroundColor: AppColor.whiteColor,),);
+        Get.back();
+      }
+    } catch (e) {
+      print('error');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return FadeInUpBig(
       child: Dialog(
         backgroundColor: Colors.transparent,
@@ -402,152 +591,6 @@ class _AccountSettingsState extends State<AccountSettings> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget deactivateAccountDialog() {
-    return FadeInUpBig(
-      child: Dialog(
-        backgroundColor: Colors.transparent,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: Get.width * 0.9,
-              height: Get.height * 0.35,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const MyText(
-                          text: "djksfdgfrg",
-                          fontSize: 5,
-                          fontWeight: FontWeight.w100,
-                          color: AppColor.whiteColor,
-                        ),
-                        const MyText(
-                          text: "Deactivate Account",
-                          fontSize: 18,
-                          color: AppColor.blackColor,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Get.back();
-                          },
-                          child: const Icon(
-                            Icons.clear,
-                            color: AppColor.blackColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: Get.height * 0.05,
-                  ),
-                  const MyText(
-                      text: 'Are you sure you want to deactivate your account?',
-                      fontSize: 18,
-                      color: AppColor.blackColor),
-                  const SizedBox(height: 20.0),
-                  LargeButton(
-                    text: "Deactivate",
-                    onTap: () {
-                      deactivate();
-                    },
-                    width: Get.width * 0.6,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget deleteAccountDialog() {
-    return FadeInUpBig(
-      child: Dialog(
-        backgroundColor: Colors.transparent,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: Get.width * 0.9,
-              height: Get.height * 0.35,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const MyText(
-                          text: "djksfdgfrg",
-                          fontSize: 5,
-                          fontWeight: FontWeight.w100,
-                          color: AppColor.whiteColor,
-                        ),
-                        const MyText(
-                          text: "Delete Account",
-                          fontSize: 18,
-                          color: AppColor.blackColor,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Get.back();
-                          },
-                          child: const Icon(
-                            Icons.clear,
-                            color: AppColor.blackColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: Get.height * 0.05,
-                  ),
-                  const MyText(
-                      text: 'Are you sure you want to delete your account?',
-                      fontSize: 18,
-                      color: AppColor.blackColor),
-                  const SizedBox(height: 20.0),
-                  LargeButton(
-                    text: "Delete",
-                    onTap: () {
-                      deleteaccount();
-                    },
-                    width: Get.width * 0.6,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

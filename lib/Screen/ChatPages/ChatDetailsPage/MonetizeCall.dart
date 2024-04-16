@@ -11,19 +11,19 @@ import '../../../Resources/colors/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ignore: must_be_immutable
-class MonitizeDialog extends StatefulWidget {
-  const MonitizeDialog({Key? key}) : super(key: key);
+class MonetizeCall extends StatefulWidget {
+  const MonetizeCall({Key? key}) : super(key: key);
 
   @override
-  State<MonitizeDialog> createState() => _MonitizeDialogState();
+  State<MonetizeCall> createState() => _MonetizeCallState();
 }
 
-class _MonitizeDialogState extends State<MonitizeDialog> {
+class _MonetizeCallState extends State<MonetizeCall> {
 
   List<String> genderType = [
-    "2 coin per message",
-    "4 coin per message",
-    "6 coin per message"
+    "2 coin call",
+    "4 coin call",
+    "6 coin call"
   ];
 
   String? selectedGender;
@@ -52,10 +52,10 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
         body: jsonEncode(
           {
             "users_customers_id": userId,
-            "monetization_type": "chat",
+            "monetization_type": "call",
             "coins": selectedGender,
             "duration": selectedIndex == 0 ? "24h" : selectedIndex == 1 ? "48h" : selectedIndex == 2 ? "7d" : selectedIndex == 3 ? "Permanent" : "",
-            "name": "Chatting"
+            "name": "Calling"
           },
         ));
     debugPrint("users_customers_id: $userId");
@@ -136,7 +136,7 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                     height: Get.height * 0.02,
                   ),
                   const MyText(
-                    text: "Make money by chatting with this user!",
+                    text: "Make money by calling with this user!",
                     fontWeight: FontWeight.w400,
                     fontSize: 14,
                     color: Color(0xFF727171),
@@ -415,20 +415,20 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
                               items: genderType
                                   .map(
                                     (item) => DropdownMenuItem<String>(
-                                      value: item,
-                                      // onTap: selectedGender = null,
-                                      child: Text(
-                                        item,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          color: selectedGender != null
-                                              ? AppColor.hintTextColor
-                                              : AppColor.blackColor,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
+                                  value: item,
+                                  // onTap: selectedGender = null,
+                                  child: Text(
+                                    item,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: selectedGender != null
+                                          ? AppColor.hintTextColor
+                                          : AppColor.blackColor,
+                                      fontWeight: FontWeight.w400,
                                     ),
-                                  )
+                                  ),
+                                ),
+                              )
                                   .toList(),
                               value: selectedGender,
                               onChanged: (value) {

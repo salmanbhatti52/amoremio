@@ -86,6 +86,13 @@ class _CoinsShopState extends State<CoinsShop> {
       if (userdetail['status'] == 'success') {
         setState(() {
           Navigator.of(context).pop();
+          var errormsg = userdetail['message'];
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: MyText(
+            text: "$errormsg",
+            color: AppColor.primaryColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ), backgroundColor: AppColor.whiteColor,),);
         });
       } else {
         Navigator.of(context).pop();

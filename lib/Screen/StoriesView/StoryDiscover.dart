@@ -23,50 +23,7 @@ class StoryDiscover extends StatelessWidget {
           context: context,
           backgroundColor: Colors.transparent,
           builder: (BuildContext context) {
-            return Align(
-              alignment: Alignment.bottomRight,
-              child: Container(
-                margin: const EdgeInsets.only(right: 17, bottom: 100),
-                width: Get.width * 0.27,
-                height: Get.height * 0.08,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                clipBehavior: Clip.antiAlias,
-                decoration: const ShapeDecoration(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(13),
-                      bottomLeft: Radius.circular(13),
-                      bottomRight: Radius.circular(13),
-                    ),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButton<String>(
-                      value: selectedValue,
-                      onChanged: onChanged,
-                      items: const [
-                        DropdownMenuItem<String>(
-                          value: 'discover',
-                          child: Text('Discover'),
-                        ),
-                        DropdownMenuItem<String>(
-                          value: 'matches',
-                          child: Text('Matches'),
-                        ),
-                        DropdownMenuItem<String>(
-                          value: 'liked',
-                          child: Text('Liked'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return buildBottomSheet(onChanged!);
           },
         );
       },
@@ -95,7 +52,7 @@ class StoryDiscover extends StatelessWidget {
   }
 }
 
-Widget buildBottomSheet() {
+Widget buildBottomSheet(void Function(String?) onChanged) {
   return Align(
     alignment: Alignment.bottomRight,
     child: Container(
@@ -119,24 +76,29 @@ Widget buildBottomSheet() {
           const SizedBox(
             height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                ImageAssets.discover,
-                width: 25,
-                height: 25,
-              ),
-              const SizedBox(
-                width: 3,
-              ),
-              const MyText(
-                text: "Discover",
-                color: AppColor.blackColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ],
+          GestureDetector(
+            onTap: () {
+              onChanged("discover");
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  ImageAssets.discover,
+                  width: 25,
+                  height: 25,
+                ),
+                const SizedBox(
+                  width: 3,
+                ),
+                const MyText(
+                  text: "Discover",
+                  color: AppColor.blackColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ],
+            ),
           ),
           const SizedBox(
             height: 5,
@@ -150,24 +112,29 @@ Widget buildBottomSheet() {
           const SizedBox(
             height: 5,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                ImageAssets.match,
-                width: 25,
-                height: 25,
-              ),
-              const SizedBox(
-                width: 3,
-              ),
-              const MyText(
-                text: "Matches",
-                color: AppColor.blackColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ],
+          GestureDetector(
+            onTap: () {
+              onChanged("matches");
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  ImageAssets.match,
+                  width: 25,
+                  height: 25,
+                ),
+                const SizedBox(
+                  width: 3,
+                ),
+                const MyText(
+                  text: "Matches",
+                  color: AppColor.blackColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ],
+            ),
           ),
           const SizedBox(
             height: 5,
@@ -181,27 +148,32 @@ Widget buildBottomSheet() {
           const SizedBox(
             height: 5,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(
-                width: 10,
-              ),
-              SvgPicture.asset(
-                ImageAssets.liked,
-                width: 25,
-                height: 25,
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              const MyText(
-                text: "Liked",
-                color: AppColor.blackColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ],
+          GestureDetector(
+            onTap: () {
+              onChanged("liked you");
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                SvgPicture.asset(
+                  ImageAssets.liked,
+                  width: 25,
+                  height: 25,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                const MyText(
+                  text: "Liked You",
+                  color: AppColor.blackColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ],
+            ),
           ),
         ],
       ),

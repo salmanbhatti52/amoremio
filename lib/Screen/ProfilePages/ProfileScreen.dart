@@ -985,15 +985,13 @@ class _UserProfileState extends State<UserProfile> {
                               duration: const Duration(milliseconds: 300),
                             ) ??
                             [];
+                        interestList.clear();
                         setState(() {
                           if (interests.isNotEmpty) {
-                            // Assuming interests is a List, you may need to adjust accordingly
                             interestList.addAll(interests);
                           }
                         });
                         print('Selected List: $interestList');
-                        // Update your UI or perform any other actions with the selectedList
-                        // Initialize interestIds and interestIdsJson here
                         interestIds = interestList
                             .map((interest) => (interest['interests_tags_id']))
                             .toList();

@@ -46,12 +46,6 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   List<dynamic> imgListavators = [];
   List<dynamic> userDataList = [];
   List<dynamic> uservideos = [];
-
-  String address = '';
-  var username = '';
-  String userImage = '';
-  var summary = '';
-  var dateofbirth;
   int _current = 0;
   bool isLoading = false;
   bool isStoryLoading = false;
@@ -70,6 +64,8 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     fetchuserliked();
   }
 
+  Map<String, dynamic> userData = {};
+
   loaddata() async {
     String apiUrl = getusersProfile;
     try {
@@ -86,14 +82,10 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         getavators();
         setState(() {
           if (userdetail['data'] != null) {
-            userImage = userdetail['data']['image'] ?? ''; // Assign default value if image is null
-            username = userdetail['data']['username'] ?? ''; // Assign default value if username is null
-            dateofbirth = userdetail['data']['date_of_birth'] ?? ''; // Assign default value if date_of_birth is null
-            address = userdetail['data']['location'] ?? ''; // Assign default value if location is null
-            summary = userdetail['data']['summary'] ?? ''; // Assign default value if summary is null
+            userData = userdetail["data"];
+            print("userData $userData");
           }
         });
-        print("userImage ${baseUrlImage + userImage}");
       } else {
         var errormsg = userdetail['message'];
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
@@ -678,7 +670,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                             print('users_customers_id $usersCustomersId');
                                           });
                                           Get.to(
-                                                () => ExploreVideoViewDetails(userName: username, usersImage: baseUrlImage + userImage, usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
+                                                () => ExploreVideoViewDetails(userName: userData["username"], usersImage: baseUrlImage + userData["image"], usersStoriesId: userStoriesID, usersCustomersId: usersCustomersId,),
                                             duration: const Duration(seconds: 1),
                                             transition: Transition.native,
                                           );
@@ -795,24 +787,24 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               MyText(
-                                text: "$username, ${calculateAge(dateofbirth)}",
+                                text: "${userData["username"]}, ${calculateAge(userData["date_of_birth"])}",
                                 fontSize: 18,
                                 color: AppColor.blackColor,
                               ),
-                              // Row(
-                              //   children: [
-                              //     SvgPicture.asset(
-                              //       ImageAssets.createStory1,
-                              //       color: AppColor.secondaryColor,
-                              //     ),
-                              //     const MyText(
-                              //       text: "0",
-                              //       fontWeight: FontWeight.w500,
-                              //       fontSize: 14,
-                              //       color: AppColor.secondaryColor,
-                              //     ),
-                              //   ],
-                              // ),
+                              Row(
+                                children: [
+                                  SvgPicture.asset(
+                                    ImageAssets.createStory1,
+                                    color: AppColor.secondaryColor,
+                                  ),
+                                  MyText(
+                                    text: userData["total_likes"].toString(),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                    color: AppColor.secondaryColor,
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
@@ -833,7 +825,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                               ),
                               Expanded(
                                 child: MyText(
-                                    text: "$address, ${'2.5 Km'}",
+                                    text: "${userData["location"]}, ${'2.5 Km'}",
                                     fontWeight: FontWeight.w500,
                                     fontSize: 12,
                                     color: const Color(0xFF3B3B3B),
@@ -859,7 +851,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                                   color: AppColor.blackColor,
                                 ),
                                 MyText(
-                                  text: summary,
+                                  text: userData["summary"].toString(),
                                   fontWeight: FontWeight.w500,
                                   fontSize: 14,
                                   color: const Color(0xFF646464),

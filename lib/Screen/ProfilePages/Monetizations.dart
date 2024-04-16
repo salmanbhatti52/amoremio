@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:amoremio/Resources/assets/assets.dart';
 import 'package:amoremio/Resources/colors/colors.dart';
+import 'package:amoremio/Screen/ChatPages/ChatDetailsPage/MonetizeCall.dart';
+import 'package:amoremio/Screen/ChatPages/ChatDetailsPage/MonitizeDialog.dart';
 import 'package:amoremio/Screen/ExplorePages/ExploreBackgroundContainer.dart';
 import 'package:amoremio/Widgets/AppBar.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -165,18 +167,28 @@ class _MonetizeState extends State<Monetize> {
                       fontWeight: FontWeight.w500,
                       fontSize: 20,
                     ),
-                    Container(
-                      width: Get.width * 0.1,
-                      height: Get.height * 0.05,
-                      decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    GestureDetector(
+                      onTap: (){
+                        showDialog(
+                            context: context,
+                            barrierColor: Colors.grey.withOpacity(0.9),
+                            barrierDismissible: false,
+                            builder: (BuildContext context) =>
+                            const MonitizeDialog());
+                      },
+                      child: Container(
+                        width: Get.width * 0.1,
+                        height: Get.height * 0.05,
+                        decoration: ShapeDecoration(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        color: AppColor.secondaryColor,
+                        child: const Icon(
+                          Icons.add,
+                          color: AppColor.secondaryColor,
+                        ),
                       ),
                     ),
                   ],
@@ -267,18 +279,28 @@ class _MonetizeState extends State<Monetize> {
                       fontWeight: FontWeight.w500,
                       fontSize: 20,
                     ),
-                    Container(
-                      width: Get.width * 0.1,
-                      height: Get.height * 0.05,
-                      decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    GestureDetector(
+                      onTap: (){
+                        showDialog(
+                            context: context,
+                            barrierColor: Colors.grey.withOpacity(0.9),
+                            barrierDismissible: false,
+                            builder: (BuildContext context) =>
+                            const MonetizeCall());
+                      },
+                      child: Container(
+                        width: Get.width * 0.1,
+                        height: Get.height * 0.05,
+                        decoration: ShapeDecoration(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        color: AppColor.secondaryColor,
+                        child: const Icon(
+                          Icons.add,
+                          color: AppColor.secondaryColor,
+                        ),
                       ),
                     ),
                   ],

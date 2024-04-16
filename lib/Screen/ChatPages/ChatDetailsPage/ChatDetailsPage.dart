@@ -1468,35 +1468,35 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                 ],
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                                showDialog(
-                                    context: context,
-                                    barrierColor: Colors.grey.withOpacity(0.9),
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) =>
-                                        const MonitizeDialog());
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 12),
-                                child: Row(
-                                  children: [
-                                    SvgPicture.asset(ImageAssets.dollar,
-                                        width: 20),
-                                    const SizedBox(
-                                      width: 6,
-                                    ),
-                                    const MyText(
-                                      text: "Monetize",
-                                      color: AppColor.blackColor,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            // GestureDetector(
+                            //   onTap: () {
+                            //     Navigator.pop(context);
+                            //     showDialog(
+                            //         context: context,
+                            //         barrierColor: Colors.grey.withOpacity(0.9),
+                            //         barrierDismissible: false,
+                            //         builder: (BuildContext context) =>
+                            //             const MonitizeDialog());
+                            //   },
+                            //   child: Padding(
+                            //     padding: const EdgeInsets.only(top: 12),
+                            //     child: Row(
+                            //       children: [
+                            //         SvgPicture.asset(ImageAssets.dollar,
+                            //             width: 20),
+                            //         const SizedBox(
+                            //           width: 6,
+                            //         ),
+                            //         const MyText(
+                            //           text: "Monetize",
+                            //           color: AppColor.blackColor,
+                            //           fontSize: 14,
+                            //           fontWeight: FontWeight.w400,
+                            //         ),
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                             Padding(
                               padding: const EdgeInsets.only(top: 12),
                               child: Row(
@@ -1848,13 +1848,14 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                           borderRadius: BorderRadius.circular(31),
                         ),
                         child: GestureDetector(
+                          onTap: () async {
+                             await audioRecord.hasPermission();
+                          },
                           onLongPressStart: (_) async {
-                          if (await audioRecord.hasPermission()) {
                             setState(() {
                               startrecording();
                               isRecording = true;
                             });
-                            }
                           },
                           onLongPressEnd: (_) {
                             setState(() {

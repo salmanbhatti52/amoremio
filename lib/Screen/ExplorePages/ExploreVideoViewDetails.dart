@@ -99,26 +99,25 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
     super.dispose();
   }
 
-  likedUser(usersStories) async {
-    var storyId = usersStories['users_stories_id'];
-    var like = usersStories['liked'];
-    debugPrint('like $like');
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(child: CircularProgressIndicator());
-        });
+  likeduser(usersstories) async {
+    var storyid = usersstories['users_stories_id'];
+    var Like = usersstories['liked'];
+    var oldTotalLike = usersstories['stats']['total_likes'].toString();
+    debugPrint('likeeee $Like');
+    debugPrint('totalLike $oldTotalLike');
+    // showDialog(context: context, builder: (context) {
+    //   return const Center(child: CircularProgressIndicator());
+    // });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = usersstorieslikes;
-    // try {
     var showdata = {
-      "users_stories_id": storyId,
+      "users_stories_id": storyid,
       "likers_id": userId,
       "status": "Like"
     };
     var showdata2 = {
-      "users_stories_id": storyId,
+      "users_stories_id": storyid,
       "likers_id": userId,
       "status": "Unlike"
     };
@@ -127,34 +126,33 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(like == 'Yes' ? showdata2 : showdata));
+        body: jsonEncode(Like == 'Yes' ? showdata2 : showdata));
 
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
-      Navigator.of(context).pop();
+      loadStories();
+      var newTotalLikes = userdetail['data'][0]['total_likes'];
+      debugPrint('Total likes: $newTotalLikes');
+      // Navigator.of(context).pop();
       var msg = userdetail['message'];
-      print('userdetail $userdetail');
+      debugPrint('userdetail $userdetail');
       setState(() {
-        if (like == 'Yes') {
+        if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
           setState(() {
-            usersStories['liked'] = 'No';
+            usersstories['liked'] = 'No';
           });
         } else {
           setState(() {
-            usersStories['liked'] = 'Yes';
+            usersstories['liked'] = 'Yes';
+            newTotalLikes = usersstories['stats']['total_likes'].toString();
           });
         }
       });
     } else {
-      // print(userdetail['status']);
       var errormsg = userdetail['message'];
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errormsg)));
     }
-    // }
-    // catch (e) {
-    //   print('error123456:$e');
-    // }
   }
 
   @override
@@ -221,7 +219,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  likedUser(videos[_currentPage]);
+                                  likeduser(videos[_currentPage]);
                                 },
                                 child: SvgPicture.asset(
                                   width: 30,

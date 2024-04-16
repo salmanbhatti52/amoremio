@@ -20,7 +20,6 @@ class InterestTags extends StatefulWidget {
 }
 
 class _InterestTagsState extends State<InterestTags> {
-  bool isTrue = false;
   List interestsData = [];
   List selectedList = [];
   List filteredList = [];
@@ -29,23 +28,11 @@ class _InterestTagsState extends State<InterestTags> {
   @override
   void initState() {
     super.initState();
-    selectedList.addAll(widget.interestList);
-    widget.interestList.clear();
-    getinterestTags();
+    debugPrint('interestList: ${widget.interestList}');
+    getInterestTags();
   }
 
-  void selectItem(item) {
-    setState(() {
-      if (selectedList.contains(item)) {
-        selectedList.remove(item);
-      } else {
-        selectedList.add(item);
-        print('dasdasds: $selectedList');
-      }
-    });
-  }
-
-  Future<List> getinterestTags() async {
+  Future<List> getInterestTags() async {
     String apiUrl = getInterests;
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -56,12 +43,12 @@ class _InterestTagsState extends State<InterestTags> {
         setState(() {
           interestsData = data['data'];
           filteredList = List.from(interestsData);
-          print('list: $interestsData');
+          debugPrint('list: $interestsData');
         });
       }
     } catch (e) {
-      print('Error: $e');
-      print('Failed to connect to the server.');
+      debugPrint('Error: $e');
+      debugPrint('Failed to connect to the server.');
     }
     return [];
   }
@@ -165,13 +152,17 @@ class _InterestTagsState extends State<InterestTags> {
                   ),
                   itemCount: filteredList.length,
                   itemBuilder: (BuildContext context, int index) {
-                    bool isInterestSelected = widget.interestList.any(
-                            (selectedInterest) =>
-                        selectedInterest['interests_tags_id'] ==
-                            filteredList[index]['interests_tags_id']);
+                    final isSelected = selectedList.contains(filteredList[index]);
                     return GestureDetector(
                       onTap: () {
-                        selectItem(filteredList.elementAt(index));
+                        setState(() {
+                          if (isSelected) {
+                            selectedList.remove(filteredList[index]);
+                          } else {
+                            selectedList.add(filteredList[index]);
+                          }
+                        });
+                        debugPrint("selectedList $selectedList");
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -179,10 +170,8 @@ class _InterestTagsState extends State<InterestTags> {
                           width: 77,
                           height: 30,
                           decoration: BoxDecoration(
-                              color: selectedList
-                                  .contains(filteredList[index]) ||
-                                  isInterestSelected
-                                  ? Colors.white
+                              color: isSelected
+                                  ? AppColor.whiteColor
                                   : const Color(0x54E2E2E2),
                               borderRadius: BorderRadius.circular(15)),
                           child: Center(
@@ -190,12 +179,9 @@ class _InterestTagsState extends State<InterestTags> {
                               text: filteredList[index]['name'],
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
-                              color: selectedList
-                                  .contains(filteredList[index])
-                                  ? const Color(0xFFEE4433)
-                                  : (isInterestSelected
-                                  ? const Color(0xFFEE4433)
-                                  : Colors.white),
+                              color: isSelected
+                                  ? AppColor.secondaryColor
+                                  : AppColor.whiteColor,
                             ),
                           ),
                         ),

@@ -122,9 +122,9 @@ class _StoryViewState extends State<StoryView> {
   likeduser(usersstories) async {
     var storyid = usersstories['users_stories_id'];
     var Like = usersstories['liked'];
-    var totalLike = usersstories['stats']['total_likes'];
+    var oldTotalLike = usersstories['stats']['total_likes'].toString();
     debugPrint('likeeee $Like');
-    debugPrint('totalLike $totalLike');
+    debugPrint('totalLike $oldTotalLike');
     showDialog(context: context, builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
@@ -150,27 +150,21 @@ class _StoryViewState extends State<StoryView> {
 
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
-      var totalLikes = userdetail['data'][0]['total_likes'];
-      debugPrint('Total likes: $totalLikes');
+      var newTotalLikes = userdetail['data'][0]['total_likes'];
+      debugPrint('Total likes: $newTotalLikes');
       Navigator.of(context).pop();
       var msg = userdetail['message'];
       debugPrint('userdetail $userdetail');
       setState(() {
-        if (Like == 'Yes') {
+        if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
           setState(() {
             usersstories['liked'] = 'No';
           });
         } else {
           setState(() {
             usersstories['liked'] = 'Yes';
+            newTotalLikes = usersstories['stats']['total_likes'].toString();
           });
-        }
-        if(totalLike == totalLikes){
-          setState(() {
-            usersstories = usersstories['stats']['total_likes'];
-          });
-        } else {
-          usersstories = totalLikes;
         }
       });
     } else {
