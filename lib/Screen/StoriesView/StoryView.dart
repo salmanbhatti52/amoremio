@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -36,11 +37,13 @@ class _StoryViewState extends State<StoryView> {
   List<dynamic> videos = [];
   bool isThumbnailClicked = false;
   String selectedImageUrl = '';
-  String _selectedValue = 'discover';
+  String _selectedValue = 'Discover';
+  late StreamController<List<dynamic>> _videosStreamController;
 
   @override
   void initState() {
     super.initState();
+    _videosStreamController = StreamController<List<dynamic>>.broadcast();
     loadstories();
   }
 
@@ -65,6 +68,7 @@ class _StoryViewState extends State<StoryView> {
       if (data['status'] == 'success') {
         setState(() {});
         videos = data['data'];
+        _videosStreamController.add(videos);
         _pageController = PageController();
         _videoControllers = videos.map((videoData) {
           String url = 'https://mio.eigix.net/' + videoData['media'];
@@ -108,6 +112,7 @@ class _StoryViewState extends State<StoryView> {
 
   @override
   void dispose() {
+    _videosStreamController.close();
     _pageController.dispose();
     for (var controller in _videoControllers) {
       controller.pause().whenComplete(() {
@@ -156,16 +161,18 @@ class _StoryViewState extends State<StoryView> {
       var msg = userdetail['message'];
       debugPrint('userdetail $userdetail');
       setState(() {
-        if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
-          setState(() {
-            usersstories['liked'] = 'No';
-          });
-        } else {
-          setState(() {
-            usersstories['liked'] = 'Yes';
-            newTotalLikes = usersstories['stats']['total_likes'].toString();
-          });
-        }
+        usersstories['liked'] = Like == 'Yes' ? 'No' : 'Yes'; // Toggle liked status
+        usersstories['stats']['total_likes'] = newTotalLikes; // Update total likes count
+        // if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
+        //   setState(() {
+        //     usersstories['liked'] = 'No';
+        //   });
+        // } else {
+        //   setState(() {
+        //     usersstories['liked'] = 'Yes';
+        //     newTotalLikes = usersstories['stats']['total_likes'].toString();
+        //   });
+        // }
       });
     } else {
       var errormsg = userdetail['message'];
@@ -177,346 +184,369 @@ class _StoryViewState extends State<StoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: videos.isNotEmpty
-          ? Stack(
+      body: Scaffold(
+        body: StreamBuilder<List<dynamic>>(
+          stream: _videosStreamController.stream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final videos = snapshot.data!;
+              return _buildPageView(videos);
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPageView(List<dynamic> videos) {
+    return videos.isNotEmpty
+        ? Stack(
+      children: [
+        Visibility(
+          visible: isThumbnailClicked,
+          child: GestureDetector(
+            onVerticalDragEnd: (details) {
+              if (details.primaryVelocity! > 0) {
+                print('Swiped downward - Hello');
+                setState(() {
+                  isThumbnailClicked = false;
+                });
+                _videoControllers = videos.map((videoData) {
+                  String url = 'https://mio.eigix.net/' + videoData['media'];
+                  var controller = VideoPlayerController.network(url);
+                  controller.initialize().then((_) {
+                    if (_videoControllers.indexOf(controller) == 0) {
+                      controller.play();
+                    }
+                    setState(() {});
+                  });
+                  return controller;
+                }).toList();
+              } else if (details.primaryVelocity! < 0) {
+                setState(() {
+                  isThumbnailClicked = false;
+                });
+                _videoControllers = videos.map((videoData) {
+                  String url = 'https://mio.eigix.net/' + videoData['media'];
+                  var controller = VideoPlayerController.network(url);
+                  controller.initialize().then((_) {
+                    if (_videoControllers.indexOf(controller) == 0) {
+                      controller.play();
+                    }
+                    setState(() {});
+                  });
+                  return controller;
+                }).toList();
+                print('Swiped upward - Hello');
+              }
+            },
+            child: SizedBox(
+              height: Get.height,
+              child: selectedImageUrl.isNotEmpty
+                  ? Image.network(
+                selectedImageUrl,
+                fit: BoxFit.fill,
+              ) : Video2(
+                videoController: _videoControllers[_currentPage],
+                isPlaying: true,
+              ),
+            ),
+          ),
+        ),
+        Visibility(
+          visible: !isThumbnailClicked,
+          child: PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            itemCount: videos.length,
+            onPageChanged: (index) {
+              for (var controller in _videoControllers) {
+                controller.pause();
+              }
+              if (videos[index]['media_type'] == 'Video') {
+                _videoControllers[index].play();
+              }
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            itemBuilder: (BuildContext context, int index) {
+              if (videos[index]['media_type'] == 'Video') {
+                return Video(
+                  videoController: _videoControllers[index],
+                  isPlaying: index == _currentPage,
+                );
+              } else {
+                return Image.network(
+                  'https://mio.eigix.net/${videos[index]['media']}',
+                  fit: BoxFit.cover,
+                );
+              }
+            },
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 25.0, right: 5),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      likeduser(videos[_currentPage]);
+                    },
+                    child: SvgPicture.asset(
+                      width: 30,
+                      height: 30,
+                      videos[_currentPage]['liked'] == "Yes"
+                          ? ImageAssets.createStory2
+                          : ImageAssets.createStory1,
+                    ),
+                  ),
+                  Text(
+                    videos[_currentPage]['stats']['total_likes'].toString(),
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ImageWithText(
+                    width: 30,
+                    height: 30,
+                    color: Colors.white,
+                    imagePath: ImageAssets.chat1,
+                    text: videos[_currentPage]['stats']['total_comments'].toString(),
+                    onTap: (){
+                      Get.bottomSheet(
+                        CommentSheet(
+                          storyId: videos[_currentPage]["users_stories_id"],
+                          onCommentAdded: () {
+                            var currentVideo = videos[_currentPage];
+                            currentVideo['stats']['total_comments'] = ((currentVideo['stats']['total_comments']) + 1);
+                            setState(() {});
+                          },
+                        ),
+                        barrierColor: Colors.black.withOpacity(0.5),
+                        backgroundColor: Colors.transparent,
+                      );
+                    },
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ImageWithText(
+                    width: 20,
+                    height: 20,
+                    color: Colors.white,
+                    imagePath: ImageAssets.share,
+                    text: "Share",
+                    onTap: () async {
+                      await shareBook(videos[_currentPage]);
+                    },
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 5.0, bottom: 0, right: 5),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            videos[_currentPage]['user_data']['image'] != null
+                                && videos[_currentPage]['user_data']['image'].isNotEmpty
+                                ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
+                                : videos[_currentPage]['user_data']['genders_id'] == 1
+                                ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                : videos[_currentPage]['user_data']['genders_id'] == 2
+                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
+                                : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                          ),
+                          radius: 18.5,
+                        ),
+                      ),
+                      MyText(
+                        text: videos[_currentPage]['user_data'] != null
+                            ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
+                            : "UserName",
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: Get.width * 0.1),
+                  StoryDiscover(
+                    selectedValue: _selectedValue,
+                    onChanged: (String? newValue) {
+                      if(newValue != null) {
+                        setState(() {
+                          _selectedValue = newValue;
+                          loadstories();
+                          print("_selectedValue $_selectedValue");
+                        });
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Row(
               children: [
-                Visibility(
-                  visible: isThumbnailClicked,
-                  child: GestureDetector(
-                    onVerticalDragEnd: (details) {
-                      if (details.primaryVelocity! > 0) {
-                        print('Swiped downward - Hello');
-                        setState(() {
-                          isThumbnailClicked = false;
-                        });
-                        _videoControllers = videos.map((videoData) {
-                          String url = 'https://mio.eigix.net/' + videoData['media'];
-                          var controller = VideoPlayerController.network(url);
-                          controller.initialize().then((_) {
-                            if (_videoControllers.indexOf(controller) == 0) {
-                              controller.play();
-                            }
-                            setState(() {});
-                          });
-                          return controller;
-                        }).toList();
-                      } else if (details.primaryVelocity! < 0) {
-                        setState(() {
-                          isThumbnailClicked = false;
-                        });
-                        _videoControllers = videos.map((videoData) {
-                          String url = 'https://mio.eigix.net/' + videoData['media'];
-                          var controller = VideoPlayerController.network(url);
-                          controller.initialize().then((_) {
-                            if (_videoControllers.indexOf(controller) == 0) {
-                              controller.play();
-                            }
-                            setState(() {});
-                          });
-                          return controller;
-                        }).toList();
-                        print('Swiped upward - Hello');
-                      }
-                    },
-                    child: SizedBox(
-                      height: Get.height,
-                      child: selectedImageUrl.isNotEmpty
-                          ? Image.network(
-                        selectedImageUrl,
-                        fit: BoxFit.fill,
-                      ) : Video2(
-                        videoController: _videoControllers[_currentPage],
-                        isPlaying: true,
-                      ),
-                    ),
-                  ),
-                ),
-                Visibility(
-                  visible: !isThumbnailClicked,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    scrollDirection: Axis.vertical,
-                    itemCount: videos.length,
-                    onPageChanged: (index) {
-                      for (var controller in _videoControllers) {
-                        controller.pause();
-                      }
-                      if (videos[index]['media_type'] == 'Video') {
-                        _videoControllers[index].play();
-                      }
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.10,
+                  width: MediaQuery.of(context).size.width,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: videos[_currentPage]['user_data']['users_stories'].length,
                     itemBuilder: (BuildContext context, int index) {
-                      if (videos[index]['media_type'] == 'Video') {
-                        return Video(
-                          videoController: _videoControllers[index],
-                          isPlaying: index == _currentPage,
-                        );
-                      } else {
-                        return Image.network(
-                          'https://mio.eigix.net/${videos[index]['media']}',
-                          fit: BoxFit.cover,
-                        );
-                      }
-                    },
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 25.0, right: 5),
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                             likeduser(videos[_currentPage]);
-                            },
-                            child: SvgPicture.asset(
-                              width: 30,
-                              height: 30,
-                              videos[_currentPage]['liked'] == "Yes"
-                                  ? ImageAssets.createStory2
-                                  : ImageAssets.createStory1,
-                            ),
-                          ),
-                          Text(
-                            videos[_currentPage]['stats']['total_likes'].toString(),
-                            style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          ImageWithText(
-                            width: 30,
-                            height: 30,
-                            color: Colors.white,
-                            imagePath: ImageAssets.chat1,
-                            text: videos[_currentPage]['stats']
-                                    ['total_comments']
-                                .toString(),
-                            onTap: (){
-                              Get.bottomSheet(
-                                 CommentSheet(storyId: videos[_currentPage]["users_stories_id"]),
-                                barrierColor: Colors.black.withOpacity(0.5),
-                                backgroundColor: Colors.transparent,
-                              );
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          ImageWithText(
-                            width: 20,
-                            height: 20,
-                            color: Colors.white,
-                            imagePath: ImageAssets.share,
-                            text: "Share",
-                            onTap: () async {
-                              await shareBook(videos[_currentPage]);
-                            },
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5.0, bottom: 0, right: 5),
-                                child: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                    videos[_currentPage]['user_data']['image'] != null
-                                        && videos[_currentPage]['user_data']['image'].isNotEmpty
-                                        ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
-                                        : videos[_currentPage]['user_data']['genders_id'] == 1
-                                            ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
-                                            : videos[_currentPage]['user_data']['genders_id'] == 2
-                                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
-                                                : 'https://mio.eigix.net/uploads/placeholder.jpg',
-                                  ),
-                                  radius: 18.5,
-                                ),
-                              ),
-                              MyText(
-                                text: videos[_currentPage]['user_data'] != null
-                                  ? "${videos[_currentPage]['user_data']['username']}, ${calculateAge(videos[_currentPage]['user_data']['date_of_birth'])}"
-                                  : "UserName",
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: Get.width * 0.1),
-                          StoryDiscover(
-                            selectedValue: _selectedValue,
-                            onChanged: (String? newValue) {
-                              if(newValue != null) {
-                                setState(() {
-                                  _selectedValue = newValue;
-                                  loadstories();
-                                  print("_selectedValue $_selectedValue");
-                                });
-                                Navigator.pop(context);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.10,
-                          width: MediaQuery.of(context).size.width,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: videos[_currentPage]['user_data']['users_stories'].length,
-                            itemBuilder: (BuildContext context, int index) {
-                              var story = videos[_currentPage]['user_data']['users_stories'][index];
-                              var videoPath = story;
-                              var userStoriesId = story["users_stories_id"];
-                              var storyType = story["story_type"];
-                              var coinsView = story["coins_per_view"];
-                              if (videoPath['media_type'] == 'Video') {
-                                return FutureBuilder<Uint8List?>(
-                                  future: generateThumbnail(baseUrlImage + story['media']),
-                                  builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.done) {
-                                      if (snapshot.hasData) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(right: 0.0),
-                                          child: Column(
-                                            children: [
-                                              Container(
-                                                margin: const EdgeInsets.only(top: 10, left: 14),
-                                                width: 60,
-                                                height: 60,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.transparent,
-                                                  border: Border.all(width: 2, color: AppColor.whiteColor,
-                                                  ),
-                                                  borderRadius: BorderRadius.circular(30),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(30),
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      if(storyType == "Paid"){
-                                                        showDialog(
-                                                          context: context,
-                                                          barrierColor: Colors.grey.withOpacity(0.9),
-                                                          barrierDismissible: false,
-                                                          builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: userStoriesId),
-                                                        );
-                                                      } else {
-                                                        print('Thumbnail clicked');
-                                                        setState(() {
-                                                          isThumbnailClicked = true;
-                                                          selectedImageUrl = '';
-                                                          print("selectedImageUrl $selectedImageUrl");
-                                                        });
-                                                        _videoControllers[_currentPage].pause();
-                                                        print('New video controller created');
-                                                        _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
-                                                        _videoControllers[_currentPage].initialize().then((_) {
-                                                          print('Video controller initialized');
-                                                          _videoControllers[_currentPage].play();
-                                                          setState(() {});
-                                                        });
-                                                        // onThumbnailClicked(index);
-                                                      }
-                                                    },
-                                                    child: Image.memory(
-                                                      snapshot.data!,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                      var story = videos[_currentPage]['user_data']['users_stories'][index];
+                      var videoPath = story;
+                      var userStoriesId = story["users_stories_id"];
+                      var storyType = story["story_type"];
+                      var coinsView = story["coins_per_view"];
+                      if (videoPath['media_type'] == 'Video') {
+                        return FutureBuilder<Uint8List?>(
+                          future: generateThumbnail(baseUrlImage + story['media']),
+                          builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done) {
+                              if (snapshot.hasData) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 0.0),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 10, left: 14),
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          border: Border.all(width: 2, color: AppColor.whiteColor,
                                           ),
-                                        );
-                                      } else {
-                                        return const CircularProgressIndicator(); // Or some other placeholder
-                                      }
-                                    } else {
-                                      return SizedBox(
-                                        width: 65,
-                                        height: 65,
-                                        child: Center(
-                                            child: Container(
-                                              width: 60,
-                                              height: 60,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(30),
-                                                border: Border.all(width: 2, color: Colors.white,),
-                                              ),
-                                              margin: const EdgeInsets.all(5),
-                                            ),
+                                          borderRadius: BorderRadius.circular(30),
                                         ),
-                                      );
-                                    }
-                                  },
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(30),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              if(storyType == "Paid"){
+                                                showDialog(
+                                                  context: context,
+                                                  barrierColor: Colors.grey.withOpacity(0.9),
+                                                  barrierDismissible: false,
+                                                  builder: (BuildContext context) => BuyStoryDialog(coinView: coinsView, storyId: userStoriesId),
+                                                );
+                                              } else {
+                                                print('Thumbnail clicked');
+                                                setState(() {
+                                                  isThumbnailClicked = true;
+                                                  selectedImageUrl = '';
+                                                  print("selectedImageUrl $selectedImageUrl");
+                                                });
+                                                _videoControllers[_currentPage].pause();
+                                                print('New video controller created');
+                                                _videoControllers[_currentPage] = VideoPlayerController.network(baseUrlImage + story['media']);
+                                                _videoControllers[_currentPage].initialize().then((_) {
+                                                  print('Video controller initialized');
+                                                  _videoControllers[_currentPage].play();
+                                                  setState(() {});
+                                                });
+                                                // onThumbnailClicked(index);
+                                              }
+                                            },
+                                            child: Image.memory(
+                                              snapshot.data!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 );
                               } else {
-                                return GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      isThumbnailClicked = true;
-                                      selectedImageUrl = 'https://mio.eigix.net/${story['media']}';
-                                      print("selectedImageUrl $selectedImageUrl");
-                                    });
-                                  },
+                                return const CircularProgressIndicator(); // Or some other placeholder
+                              }
+                            } else {
+                              return SizedBox(
+                                width: 65,
+                                height: 65,
+                                child: Center(
                                   child: Container(
                                     width: 60,
                                     height: 60,
-                                    margin: const EdgeInsets.all(5),
-                                    decoration: ShapeDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                            'https://mio.eigix.net/${story['media']}'),
-                                        fit: BoxFit.fill,
-                                      ),
-                                      shape: const CircleBorder(
-                                        side: BorderSide(
-                                            width: 2, color: Colors.white),
-                                      ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(width: 2, color: Colors.white,),
                                     ),
+                                    margin: const EdgeInsets.all(5),
                                   ),
-                                );
-                              }
-                            },
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      } else {
+                        return GestureDetector(
+                          onTap: (){
+                            setState(() {
+                              isThumbnailClicked = true;
+                              selectedImageUrl = 'https://mio.eigix.net/${story['media']}';
+                              print("selectedImageUrl $selectedImageUrl");
+                            });
+                          },
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            margin: const EdgeInsets.all(5),
+                            decoration: ShapeDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    'https://mio.eigix.net/${story['media']}'),
+                                fit: BoxFit.fill,
+                              ),
+                              shape: const CircleBorder(
+                                side: BorderSide(
+                                    width: 2, color: Colors.white),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: Get.height * 0.02,
-                    ),
-                  ],
+                        );
+                      }
+                    },
+                  ),
                 ),
               ],
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
             ),
+            SizedBox(
+              height: Get.height * 0.02,
+            ),
+          ],
+        ),
+      ],
+    )
+        : const Center(
+      child: CircularProgressIndicator(),
     );
   }
 
@@ -605,6 +635,7 @@ class Video2 extends StatefulWidget {
 class _VideoState2 extends State<Video2> {
   @override
   Widget build(BuildContext context) {
+    if (widget.videoController.value.isInitialized) {
       return GestureDetector(
         onTap: () {
           if (widget.videoController.value.isPlaying) {
@@ -618,6 +649,14 @@ class _VideoState2 extends State<Video2> {
           child: VideoPlayer(widget.videoController),
         ),
       );
+  }  else {
+      return const Center(child: CircularProgressIndicator());
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
 

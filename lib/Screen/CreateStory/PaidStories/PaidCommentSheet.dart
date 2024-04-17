@@ -14,7 +14,8 @@ import 'dart:io';
 
 class CommentSheet extends StatefulWidget {
   final String storyId;
-  const CommentSheet({super.key, required this.storyId});
+  final VoidCallback? onCommentAdded;
+  const CommentSheet({super.key, required this.storyId, this.onCommentAdded});
 
   @override
   State<CommentSheet> createState() => _CommentSheetState();
@@ -50,6 +51,9 @@ class _CommentSheetState extends State<CommentSheet> {
       setState(() {
         if (isEmojiVisible == true) {
           isEmojiVisible = false;
+        }
+        if (widget.onCommentAdded != null) {
+          widget.onCommentAdded!();
         }
         getComments();
         sendMessageController.clear();

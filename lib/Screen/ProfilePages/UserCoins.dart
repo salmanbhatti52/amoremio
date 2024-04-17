@@ -137,25 +137,25 @@ class _UserCoinsState extends State<UserCoins> {
                   },
                 ),
               ),
-              SizedBox(
-                height: Get.height * 0.01,
-              ),
-              FadeInRight(
-                animate: true,
-                delay: const Duration(milliseconds: 500),
-                duration: const Duration(milliseconds: 600),
-                child: ProfileContainer(
-                  text: 'Upgrade Account',
-                  icon: ImageAssets.diamond,
-                  onTap: () {
-                    Get.to(
-                          () => const UpgradeAccount(),
-                      transition: Transition.rightToLeft,
-                      duration: const Duration(milliseconds: 300),
-                    );
-                  },
-                ),
-              ),
+              // SizedBox(
+              //   height: Get.height * 0.01,
+              // ),
+              // FadeInRight(
+              //   animate: true,
+              //   delay: const Duration(milliseconds: 500),
+              //   duration: const Duration(milliseconds: 600),
+              //   child: ProfileContainer(
+              //     text: 'Upgrade Account',
+              //     icon: ImageAssets.diamond,
+              //     onTap: () {
+              //       Get.to(
+              //             () => const UpgradeAccount(),
+              //         transition: Transition.rightToLeft,
+              //         duration: const Duration(milliseconds: 300),
+              //       );
+              //     },
+              //   ),
+              // ),
               SizedBox(
                 height: Get.height * 0.01,
               ),

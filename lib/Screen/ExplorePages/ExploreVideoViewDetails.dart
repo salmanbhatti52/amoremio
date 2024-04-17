@@ -5,13 +5,11 @@ import 'package:amoremio/Utills/AppUrls.dart';
 import 'package:amoremio/Widgets/ImagewithText.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:http/http.dart' as http;
 
 class ExploreVideoViewDetails extends StatefulWidget {
@@ -70,8 +68,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
       } else {
         debugPrint(data['status']);
         var errorMsg = data['message'];
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(errorMsg)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
       }
     } catch (e) {
       debugPrint('error user discover $e');
@@ -99,25 +96,22 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
     super.dispose();
   }
 
-  likeduser(usersstories) async {
-    var storyid = usersstories['users_stories_id'];
-    var Like = usersstories['liked'];
-    var oldTotalLike = usersstories['stats']['total_likes'].toString();
-    debugPrint('likeeee $Like');
+  likedUser(usersStories) async {
+    var storyId = usersStories['users_stories_id'];
+    var like = usersStories['liked'];
+    var oldTotalLike = usersStories['stats']['total_likes'].toString();
+    debugPrint('like $like');
     debugPrint('totalLike $oldTotalLike');
-    // showDialog(context: context, builder: (context) {
-    //   return const Center(child: CircularProgressIndicator());
-    // });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = usersstorieslikes;
-    var showdata = {
-      "users_stories_id": storyid,
+    var showData = {
+      "users_stories_id": storyId,
       "likers_id": userId,
       "status": "Like"
     };
-    var showdata2 = {
-      "users_stories_id": storyid,
+    var showData2 = {
+      "users_stories_id": storyId,
       "likers_id": userId,
       "status": "Unlike"
     };
@@ -126,32 +120,29 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(Like == 'Yes' ? showdata2 : showdata));
+        body: jsonEncode(like == 'Yes' ? showData2 : showData));
 
-    var userdetail = jsonDecode(response.body);
-    if (userdetail['status'] == 'success') {
-      loadStories();
-      var newTotalLikes = userdetail['data'][0]['total_likes'];
+    var userDetail = jsonDecode(response.body);
+    if (userDetail['status'] == 'success') {
+      var newTotalLikes = userDetail['data'][0]['total_likes'];
       debugPrint('Total likes: $newTotalLikes');
-      // Navigator.of(context).pop();
-      var msg = userdetail['message'];
-      debugPrint('userdetail $userdetail');
+      var msg = userDetail['message'];
+      debugPrint('userDetail $userDetail');
       setState(() {
-        if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
+        if (like == 'Yes' || oldTotalLike == newTotalLikes) {
           setState(() {
-            usersstories['liked'] = 'No';
+            usersStories['liked'] = 'No';
           });
         } else {
           setState(() {
-            usersstories['liked'] = 'Yes';
-            newTotalLikes = usersstories['stats']['total_likes'].toString();
+            usersStories['liked'] = 'Yes';
+            newTotalLikes = usersStories['stats']['total_likes'].toString();
           });
         }
       });
     } else {
-      var errormsg = userdetail['message'];
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errormsg)));
+      var errormsg = userDetail['message'];
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
     }
   }
 
@@ -202,7 +193,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                           // _pageController.dispose();
                           Get.back();
                           },
-                        child: Icon(
+                        child: const Icon(
                           Icons.close,
                           color: Colors.white,
                         ),
@@ -219,7 +210,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  likeduser(videos[_currentPage]);
+                                  likedUser(videos[_currentPage]);
                                 },
                                 child: SvgPicture.asset(
                                   width: 30,
@@ -244,12 +235,17 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                                 height: 30,
                                 color: Colors.white,
                                 imagePath: ImageAssets.chat1,
-                                text: videos[_currentPage]['stats']
-                                ['total_comments']
-                                    .toString(),
+                                text: videos[_currentPage]['stats']['total_comments'].toString(),
                                 onTap: (){
                                   Get.bottomSheet(
-                                    CommentSheet(storyId: videos[_currentPage]["users_stories_id"]),
+                                    CommentSheet(
+                                        storyId: videos[_currentPage]["users_stories_id"],
+                                      onCommentAdded: () {
+                                        var currentVideo = videos[_currentPage];
+                                        currentVideo['stats']['total_comments'] = ((currentVideo['stats']['total_comments']) + 1);
+                                        setState(() {});
+                                      },
+                                    ),
                                     barrierColor: Colors.black.withOpacity(0.5),
                                     backgroundColor: Colors.transparent,
                                   );

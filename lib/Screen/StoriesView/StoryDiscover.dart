@@ -22,8 +22,16 @@ class StoryDiscover extends StatelessWidget {
         showModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
+          isDismissible: false,
           builder: (BuildContext context) {
-            return buildBottomSheet(onChanged!);
+            return Stack(
+              children: [
+                GestureDetector(
+                  onTap: () {Get.back();},
+                ),
+                buildBottomSheet(onChanged!),
+              ],
+            );
           },
         );
       },
@@ -56,9 +64,9 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
   return Align(
     alignment: Alignment.bottomRight,
     child: Container(
-      margin: const EdgeInsets.only(right: 17, bottom: 22),
+      margin: const EdgeInsets.only(right: 17, bottom: 52),
       width: Get.width * 0.27,
-      height: Get.height * 0.17,
+      height: Get.height * 0.145,
       padding: const EdgeInsets.only(left: 3),
       clipBehavior: Clip.antiAlias,
       decoration: const ShapeDecoration(
@@ -78,7 +86,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
           ),
           GestureDetector(
             onTap: () {
-              onChanged("discover");
+              onChanged("Discover");
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -114,7 +122,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
           ),
           GestureDetector(
             onTap: () {
-              onChanged("matches");
+              onChanged("Matches");
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +158,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
           ),
           GestureDetector(
             onTap: () {
-              onChanged("liked you");
+              onChanged("Liked");
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -167,7 +175,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
                   width: 5,
                 ),
                 const MyText(
-                  text: "Liked You",
+                  text: "Liked",
                   color: AppColor.blackColor,
                   fontSize: 12,
                   fontWeight: FontWeight.w400,

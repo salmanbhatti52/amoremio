@@ -612,7 +612,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         MyText(
-                          text: "${userData["username"]}, ${calculateAge(userData["date_of_birth"])}",
+                          text: userData != null && userData.isNotEmpty ? "${userData["username"]}, ${calculateAge(userData["date_of_birth"])}" : "",
                           fontSize: 18,
                           color: AppColor.blackColor,
                         ),
@@ -623,7 +623,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
                               color: AppColor.secondaryColor,
                             ),
                             MyText(
-                              text: userData["total_likes"].toString(),
+                              text: userData != null && userData.isNotEmpty ? userData["total_likes"].toString() : "",
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
                               color: AppColor.secondaryColor,
@@ -649,7 +649,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
                         ),
                         Expanded(
                           child: MyText(
-                              text: "${userData["location"]}, ${'2.5 Km'}",
+                              text: userData != null && userData.isNotEmpty ? "${userData["location"]}, ${'2.5 Km'}" : "",
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
                               color: const Color(0xFF3B3B3B),
