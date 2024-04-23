@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:amoremio/Screen/StoriesView/StoryBuyDialouge.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';

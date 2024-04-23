@@ -96,22 +96,25 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
     super.dispose();
   }
 
-  likedUser(usersStories) async {
-    var storyId = usersStories['users_stories_id'];
-    var like = usersStories['liked'];
-    var oldTotalLike = usersStories['stats']['total_likes'].toString();
-    debugPrint('like $like');
+  likeduser(usersstories) async {
+    var storyid = usersstories['users_stories_id'];
+    var Like = usersstories["stats"]['liked'];
+    var oldTotalLike = usersstories['stats']['total_likes'].toString();
+    debugPrint('likeeee $Like');
     debugPrint('totalLike $oldTotalLike');
+    showDialog(context: context, builder: (context) {
+      return const Center(child: CircularProgressIndicator());
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = usersstorieslikes;
-    var showData = {
-      "users_stories_id": storyId,
+    var showdata = {
+      "users_stories_id": storyid,
       "likers_id": userId,
       "status": "Like"
     };
-    var showData2 = {
-      "users_stories_id": storyId,
+    var showdata2 = {
+      "users_stories_id": storyid,
       "likers_id": userId,
       "status": "Unlike"
     };
@@ -120,29 +123,33 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(like == 'Yes' ? showData2 : showData));
+        body: jsonEncode(Like == 'Yes' ? showdata2 : showdata));
 
-    var userDetail = jsonDecode(response.body);
-    if (userDetail['status'] == 'success') {
-      var newTotalLikes = userDetail['data'][0]['total_likes'];
+    var userdetail = jsonDecode(response.body);
+    if (userdetail['status'] == 'success') {
+      var newTotalLikes = userdetail['data'][0]['total_likes'];
       debugPrint('Total likes: $newTotalLikes');
-      var msg = userDetail['message'];
-      debugPrint('userDetail $userDetail');
+      Navigator.of(context).pop();
+      var msg = userdetail['message'];
+      debugPrint('userdetail $userdetail');
       setState(() {
-        if (like == 'Yes' || oldTotalLike == newTotalLikes) {
-          setState(() {
-            usersStories['liked'] = 'No';
-          });
-        } else {
-          setState(() {
-            usersStories['liked'] = 'Yes';
-            newTotalLikes = usersStories['stats']['total_likes'].toString();
-          });
-        }
+        usersstories['stats']['liked'] = Like == 'Yes' ? 'No' : 'Yes'; // Toggle liked status
+        usersstories['stats']['total_likes'] = newTotalLikes; // Update total likes count
+        // if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
+        //   setState(() {
+        //     usersstories['liked'] = 'No';
+        //   });
+        // } else {
+        //   setState(() {
+        //     usersstories['liked'] = 'Yes';
+        //     newTotalLikes = usersstories['stats']['total_likes'].toString();
+        //   });
+        // }
       });
     } else {
-      var errormsg = userDetail['message'];
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
+      var errormsg = userdetail['message'];
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errormsg)));
     }
   }
 
@@ -210,12 +217,12 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  likedUser(videos[_currentPage]);
+                                  likeduser(videos[_currentPage]);
                                 },
                                 child: SvgPicture.asset(
                                   width: 30,
                                   height: 30,
-                                  videos[_currentPage]['liked'] == "Yes"
+                                  videos[_currentPage]["stats"]['liked'] == "Yes"
                                       ? ImageAssets.createStory2
                                       : ImageAssets.createStory1,
                                 ),

@@ -60,6 +60,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
   void initState() {
     // TODO: implement initState
     super.initState();
+    getavators();
     loaddata();
     fetchuserliked();
   }
@@ -79,7 +80,6 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       var userdetail = jsonDecode(response.body);
       if (userdetail['status'] == 'success') {
         print(userdetail);
-        getavators();
         setState(() {
           if (userdetail['data'] != null) {
             userData = userdetail["data"];
@@ -194,7 +194,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
-    String apiUrl = getuserliked;
+    String apiUrl = getuserlikedme;
     try {
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
@@ -213,7 +213,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
         for (var i = 0; i < userDataList.length; i++) {
           if (userDataList[i]['users_customers_id'] == widget.userid) {
             setState(() {
-              isButtonClicked = !isButtonClicked;
+              isButtonClicked = true;
             });
           }
         }
@@ -302,6 +302,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
       Navigator.of(context).pop();
+      loaddata();
       var msg = userdetail['message'];
       print('userdetail $userdetail');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
