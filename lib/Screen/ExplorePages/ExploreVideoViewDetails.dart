@@ -36,6 +36,9 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
   late List<VideoPlayerController> _videoControllers;
 
   void loadStories() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString('users_customers_id');
+    debugPrint(userId);
     String apiUrl = userExploreStories;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -45,7 +48,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
           body: jsonEncode(
             {
               "users_customers_id": widget.usersCustomersId,
-              "users_stories_id": widget.usersStoriesId,
+              "likers_id": userId,
             },
           ));
       debugPrint(response.body);
@@ -98,9 +101,9 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
 
   likeduser(usersstories) async {
     var storyid = usersstories['users_stories_id'];
-    var Like = usersstories["stats"]['liked'];
+    var Like = usersstories['stats']['liked'];
     var oldTotalLike = usersstories['stats']['total_likes'].toString();
-    debugPrint('likeeee $Like');
+    debugPrint('like $Like');
     debugPrint('totalLike $oldTotalLike');
     showDialog(context: context, builder: (context) {
       return const Center(child: CircularProgressIndicator());
@@ -108,48 +111,38 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     String apiUrl = usersstorieslikes;
-    var showdata = {
+    var showData = {
       "users_stories_id": storyid,
       "likers_id": userId,
       "status": "Like"
     };
-    var showdata2 = {
+    var showData2 = {
       "users_stories_id": storyid,
       "likers_id": userId,
       "status": "Unlike"
     };
 
+    debugPrint("showData $showData");
+    debugPrint("showData2 $showData2");
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(Like == 'Yes' ? showdata2 : showdata));
+        body: jsonEncode(Like == 'Yes' ? showData2 : showData));
 
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
-      var newTotalLikes = userdetail['data'][0]['total_likes'];
+      var newTotalLikes = userdetail['data']['total_likes'];
       debugPrint('Total likes: $newTotalLikes');
       Navigator.of(context).pop();
-      var msg = userdetail['message'];
       debugPrint('userdetail $userdetail');
       setState(() {
-        usersstories['stats']['liked'] = Like == 'Yes' ? 'No' : 'Yes'; // Toggle liked status
-        usersstories['stats']['total_likes'] = newTotalLikes; // Update total likes count
-        // if (Like == 'Yes' || oldTotalLike == newTotalLikes) {
-        //   setState(() {
-        //     usersstories['liked'] = 'No';
-        //   });
-        // } else {
-        //   setState(() {
-        //     usersstories['liked'] = 'Yes';
-        //     newTotalLikes = usersstories['stats']['total_likes'].toString();
-        //   });
-        // }
+        usersstories['stats']['liked'] = Like == 'Yes' ? 'No' : 'Yes';
+        usersstories['stats']['total_likes'] = newTotalLikes;
       });
     } else {
       var errormsg = userdetail['message'];
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errormsg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
     }
   }
 

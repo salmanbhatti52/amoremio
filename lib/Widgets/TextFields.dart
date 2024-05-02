@@ -22,6 +22,7 @@ class CustomTextFormField extends StatelessWidget {
   final Function(String)? onFieldSubmitted;
   final dynamic Function()? suffixTap;
   final bool obscureText;
+  final bool readOnly;
   final String? Function(String?)? validator;
   const CustomTextFormField(
       {Key? key,
@@ -41,6 +42,7 @@ class CustomTextFormField extends StatelessWidget {
       this.focusNode,
       this.onFieldSubmitted,
       this.suffixTap,
+      this.readOnly = false,
       this.validator})
       : super(key: key);
 
@@ -63,6 +65,7 @@ class CustomTextFormField extends StatelessWidget {
         ],
       ),
       child: TextFormField(
+        readOnly: readOnly,
         style: GoogleFonts.poppins(
           fontSize: 14,
           color: AppColor.hintTextColor,

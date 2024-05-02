@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:amoremio/Screen/ChatPages/ChatDetailsPage/index.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Utills/AppUrls.dart';
@@ -1357,38 +1358,45 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                                     ),
                                   );
                                 },
-                                child: Container(
-                                  width: Get.width * 0.64,
-                                  height: Get.height * 0.065,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        AppColor.primaryColor,
-                                        AppColor.secondaryColor,
-                                      ],
-                                      begin: Alignment(0.20, -0.98),
-                                      end: Alignment(-0.2, 0.98),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    Get.to(
+                                          () => IndexPage(),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: Get.width * 0.64,
+                                    height: Get.height * 0.065,
+                                    clipBehavior: Clip.antiAlias,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          AppColor.primaryColor,
+                                          AppColor.secondaryColor,
+                                        ],
+                                        begin: Alignment(0.20, -0.98),
+                                        end: Alignment(-0.2, 0.98),
+                                      ),
                                     ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        ImageAssets.healthicons,
-                                        width: 30,
-                                        height: 30,
-                                        color: AppColor.whiteColor,
-                                      ),
-                                      const SizedBox(
-                                        width: 15,
-                                      ),
-                                      const MyText(
-                                        text: "Buy Coins",
-                                        fontSize: 18,
-                                      ),
-                                    ],
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                          ImageAssets.healthicons,
+                                          width: 30,
+                                          height: 30,
+                                          color: AppColor.whiteColor,
+                                        ),
+                                        const SizedBox(
+                                          width: 15,
+                                        ),
+                                        const MyText(
+                                          text: "Buy Coins",
+                                          fontSize: 18,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

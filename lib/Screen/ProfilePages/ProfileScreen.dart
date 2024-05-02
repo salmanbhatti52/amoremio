@@ -176,7 +176,7 @@ class _UserProfileState extends State<UserProfile> {
       bioController.text = userdetail['data']['summary'] ?? '';
       educationController.text = userdetail['data']['education'] ?? '';
       address = userdetail['data']['location'];
-      interestList = userdetail['data']['interests'] ?? '';
+      interestList = userdetail['data']['users_interests_tags'] ?? '';
       imgurl = baseUrlImage + userdetail['data']['image'];
 
       // List<int> decodedBytes = base64.decode(data);
@@ -247,36 +247,28 @@ class _UserProfileState extends State<UserProfile> {
     String apiUrl = editProfile;
     // print(interestIdsJson);
     // try {
-    var showdata = {
+    var showData = {
       "users_customers_id": userId,
       "summary": bioController.text.toString(),
-      "username": userNameController.text.toString(),
-      "email": emailController.text.toString(),
       "genders_id": genderval,
       "date_of_birth": birthController.text.toString(),
       "education": educationController.text.toString(),
-      "verified": "No",
+    };
+    var interests = {
+      "users_customers_id": userId,
+      "summary": bioController.text.toString(),
+      "genders_id": genderval,
+      "date_of_birth": birthController.text.toString(),
+      "education": educationController.text.toString(),
       "interests": interestIdsJson
     };
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(
-          {
-            "users_customers_id": userId,
-            "summary": bioController.text.toString(),
-            "username": userNameController.text.toString(),
-            "email": emailController.text.toString(),
-            "genders_id": genderval,
-            "date_of_birth": birthController.text.toString(),
-            "education": educationController.text.toString(),
-            "verified": "No",
-            "interests": interestIdsJson
-          },
+        body: jsonEncode( interestIdsJson != null ? interests : showData,
         ));
     // body: jsonEncode(showdata));
-    print(showdata);
     var data = jsonDecode(response.body);
     if (data['status'] == 'success') {
       Navigator.of(context).pop();
@@ -285,18 +277,12 @@ class _UserProfileState extends State<UserProfile> {
         duration: const Duration(milliseconds: 350),
         transition: Transition.rightToLeft,
       );
-      var msg = data['message'];
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } else {
       print('error');
       print(data['message']);
       var errormsg = data['message'];
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errormsg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
     }
-    // } catch (e) {
-    //   print('error123456: $e');
-    // }
   }
 
   // void removeImage(int index) {
@@ -862,6 +848,7 @@ class _UserProfileState extends State<UserProfile> {
                       height: 5,
                     ),
                     CustomTextFormField(
+                      readOnly: true,
                       controller: userNameController,
                       hintText: "Lubana Antique",
                       prefixImage: ImageAssets.user,
@@ -879,6 +866,7 @@ class _UserProfileState extends State<UserProfile> {
                       height: 5,
                     ),
                     CustomTextFormField(
+                      readOnly: true,
                       controller: emailController,
                       hintText: "lubanaantique@gmail.com",
                       prefixImage: ImageAssets.email,
@@ -978,7 +966,15 @@ class _UserProfileState extends State<UserProfile> {
                       fontSize: 18,
                     ),
                     GestureDetector(
+                      // onTap: (){
+                      //   Get.to(
+                      //               () => InterestTags(interestList: interestList),
+                      //               transition: Transition.rightToLeft,
+                      //               duration: const Duration(milliseconds: 300),
+                      //             );
+                      // },
                       onTap: () async {
+                        debugPrint("interestList $interestList");
                         interests = await Get.to(
                               () => InterestTags(interestList: interestList),
                               transition: Transition.rightToLeft,
@@ -992,6 +988,7 @@ class _UserProfileState extends State<UserProfile> {
                           }
                         });
                         print('Selected List: $interestList');
+                        print('interests $interests');
                         interestIds = interestList
                             .map((interest) => (interest['interests_tags_id']))
                             .toList();
@@ -1028,11 +1025,12 @@ class _UserProfileState extends State<UserProfile> {
                                     width: Get.width * 0.27,
                                     height: Get.height * 0.033,
                                     textColor: const Color(0xFFEE4433),
-                                    text: interestList[index]['name'],
+                                    text: interests == null || interests.isEmpty ? interestList[index]["interests_tags"]['name'] : interestList[index]['name'],
                                     onTap: () {},
                                   ),
                                 ),
-                              )),
+                              ),
+                      ),
                     ),
                     // SmallButton(
                     //   width: Get.width * 0.25,

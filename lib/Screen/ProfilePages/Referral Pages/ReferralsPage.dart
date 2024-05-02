@@ -23,6 +23,7 @@ class _ReferralsPageState extends State<ReferralsPage> {
 
   String referralLink = "";
   bool isTrue = false;
+  Map<String, dynamic> referrals = {};
 
   listShow() {
     setState(() {
@@ -45,15 +46,16 @@ class _ReferralsPageState extends State<ReferralsPage> {
       );
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body);
         String status = jsonResponse['status'];
-        String responseData = jsonResponse['data'];
+        referrals = jsonResponse['data'];
+        debugPrint("referrals: $referrals");
+        debugPrint("link ${referrals["link"]}");
 
         if (status == "success") {
           print("API call successful");
-          print("Response Data: $responseData");
          setState(() {
-           referralLink = responseData;
+           referralLink = referrals["link"];
          });
         } else {
           print("API call failed with status: $status");

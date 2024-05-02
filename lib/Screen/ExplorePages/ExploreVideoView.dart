@@ -240,8 +240,9 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     var showdata = {
       "users_customers_id": userId,
       "blocked_id": widget.userid,
-      "status": "Blocked"
+      "status": "Block"
     };
+    debugPrint("showdata $showdata");
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -251,8 +252,6 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     var userdetail = jsonDecode(response.body);
     if (userdetail['status'] == 'success') {
       Navigator.of(context).pop();
-      var msg = userdetail['message'];
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       setState(() {
         Get.to(
           () => const MyBottomNavigationBar(),
@@ -283,12 +282,12 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     String apiUrl = userliked;
     // try {
     var showdata = {
-      "liked_id": widget.userid,
+      "users_customers_id": widget.userid,
       "likers_id": userId,
       "status": "Like"
     };
     var showdata2 = {
-      "liked_id": widget.userid,
+      "users_customers_id": widget.userid,
       "likers_id": userId,
       "status": "Unlike"
     };
@@ -305,7 +304,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
       loaddata();
       var msg = userdetail['message'];
       print('userdetail $userdetail');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg.toString())));
       setState(() {
         isButtonClicked = !isButtonClicked;
       });
@@ -345,8 +344,8 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
           if (jsonResponse['status'] == "success") {
             shareProfile = jsonResponse['data'];
             debugPrint("shareProfile: $shareProfile");
-            debugPrint("shareProfile ${jsonResponse["data"]}");
-            Clipboard.setData(ClipboardData(text: shareProfile["data"])).then((_){
+            debugPrint("link ${shareProfile["link"]}");
+            Clipboard.setData(ClipboardData(text: shareProfile["link"])).then((_){
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
                 text: "Linked copied successfully!",
                 color: AppColor.primaryColor,

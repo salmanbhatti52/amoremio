@@ -197,7 +197,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
     var showdata = {
       "users_customers_id": userId,
       "blocked_id": widget.userid,
-      "status": "Unblocked"
+      "status": "Unblock"
     };
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
@@ -209,9 +209,6 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
     if (userdetail['status'] == 'success') {
       print('success');
       Navigator.of(context).pop();
-      var msg = userdetail['message'];
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-
       setState(() {
         Get.to(
           () => const MyBottomNavigationBar(),
@@ -255,8 +252,8 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
           if (jsonResponse['status'] == "success") {
             shareProfile = jsonResponse['data'];
             debugPrint("shareProfile: $shareProfile");
-            debugPrint("shareProfile ${jsonResponse["data"]}");
-            Clipboard.setData(ClipboardData(text: shareProfile["data"])).then((_){
+            debugPrint("link ${shareProfile["link"]}");
+            Clipboard.setData(ClipboardData(text: shareProfile["link"])).then((_){
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
                 text: "Linked copied successfully!",
                 color: AppColor.primaryColor,

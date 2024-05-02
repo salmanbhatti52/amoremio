@@ -1,5 +1,5 @@
-String baseUrl = 'https://mio.eigix.net/apis/services/';
-String baseUrlImage = 'https://mio.eigix.net/';
+String baseUrl = 'https://amoremio.lared.lat/apis/services/';
+String baseUrlImage = 'https://amoremio.lared.lat/';
 
 String getGender = '${baseUrl}get_genders';
 String signUp = '${baseUrl}signup';
@@ -37,3 +37,7 @@ String getPaidstories = '${baseUrl}get_paid_users_stories';
 String createStories = '${baseUrl}create_stories';
 String usersFilter = '${baseUrl}users_filter';
 String userExploreStories = '${baseUrl}get_user_all_stories';
+
+/// Define App ID and Token
+const appId = '92c5fa7f04fe4787a4706ffaa553d7a2';
+const token = '007eJxTYLh6rsIl8uWqrqg5dwM2/lfZfP6800rOtRcr94oU72h9tOWcAoOlUbJpWqJ5moFJWqqJuYV5oom5gVlaWmKiqalxinmikfgLzbSGQEYG5ZAtrIwMjAwsQAziM4FJZjDJAibZGHIz8x0LChgYABXvJX0=';
