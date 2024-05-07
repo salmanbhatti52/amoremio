@@ -48,7 +48,7 @@ class _OwnedStoryState extends State<OwnedStory> {
 
     try {
       String apiUrl =
-          "https://mio.eigix.net/apis/services/get_users_owned_stories";
+          "https://amoremio.lared.lat/apis/services/get_users_owned_stories";
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
@@ -194,7 +194,7 @@ class _OwnedStoryState extends State<OwnedStory> {
   // Future<void> deleteStory(String storyId) async {
   //   try {
   //     String deleteStoryApiUrl =
-  //         'https://mio.eigix.net/apis/services/delete_story';
+  //         'https://amoremio.lared.lat/apis/services/delete_story';
   //
   //     http.Response response = await http.post(
   //       Uri.parse(deleteStoryApiUrl),
@@ -659,7 +659,7 @@ class _StoryViewState extends State<StoryView> {
   Future<void> deleteStory(String storyId) async {
     try {
       String deleteStoryApiUrl =
-          'https://mio.eigix.net/apis/services/delete_story';
+          'https://amoremio.lared.lat/apis/services/delete_story';
 
       http.Response response = await http.post(
         Uri.parse(deleteStoryApiUrl),

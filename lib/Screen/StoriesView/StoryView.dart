@@ -70,7 +70,7 @@ class _StoryViewState extends State<StoryView> {
         _videosStreamController.add(videos);
         _pageController = PageController();
         _videoControllers = videos.map((videoData) {
-          String url = 'https://mio.eigix.net/' + videoData['media'];
+          String url = 'https://amoremio.lared.lat/' + videoData['media'];
           var controller = VideoPlayerController.network(url);
 
           controller.initialize().then((_) {
@@ -205,7 +205,7 @@ class _StoryViewState extends State<StoryView> {
                   isThumbnailClicked = false;
                 });
                 _videoControllers = videos.map((videoData) {
-                  String url = 'https://mio.eigix.net/' + videoData['media'];
+                  String url = 'https://amoremio.lared.lat/' + videoData['media'];
                   var controller = VideoPlayerController.network(url);
                   controller.initialize().then((_) {
                     if (_videoControllers.indexOf(controller) == 0) {
@@ -220,7 +220,7 @@ class _StoryViewState extends State<StoryView> {
                   isThumbnailClicked = false;
                 });
                 _videoControllers = videos.map((videoData) {
-                  String url = 'https://mio.eigix.net/' + videoData['media'];
+                  String url = 'https://amoremio.lared.lat/' + videoData['media'];
                   var controller = VideoPlayerController.network(url);
                   controller.initialize().then((_) {
                     if (_videoControllers.indexOf(controller) == 0) {
@@ -271,7 +271,7 @@ class _StoryViewState extends State<StoryView> {
                 );
               } else {
                 return Image.network(
-                  'https://mio.eigix.net/${videos[index]['media']}',
+                  'https://amoremio.lared.lat/${videos[index]['media']}',
                   fit: BoxFit.cover,
                 );
               }
@@ -363,12 +363,12 @@ class _StoryViewState extends State<StoryView> {
                           backgroundImage: NetworkImage(
                             videos[_currentPage]['user_data']['image'] != null
                                 && videos[_currentPage]['user_data']['image'].isNotEmpty
-                                ? 'https://mio.eigix.net/${videos[_currentPage]['user_data']['image']}'
+                                ? 'https://amoremio.lared.lat/${videos[_currentPage]['user_data']['image']}'
                                 : videos[_currentPage]['user_data']['genders_id'] == 1
-                                ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                ? 'https://amoremio.lared.lat/uploads/male-placeholder.jpg'
                                 : videos[_currentPage]['user_data']['genders_id'] == 2
-                                ? 'https://mio.eigix.net/uploads/female-placeholder.jpg'
-                                : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                                ? 'https://amoremio.lared.lat/uploads/female-placeholder.jpg'
+                                : 'https://amoremio.lared.lat/uploads/placeholder.jpg',
                           ),
                           radius: 18.5,
                         ),
@@ -500,7 +500,7 @@ class _StoryViewState extends State<StoryView> {
                           onTap: (){
                             setState(() {
                               isThumbnailClicked = true;
-                              selectedImageUrl = 'https://mio.eigix.net/${story['media']}';
+                              selectedImageUrl = 'https://amoremio.lared.lat/${story['media']}';
                               print("selectedImageUrl $selectedImageUrl");
                             });
                           },
@@ -511,7 +511,7 @@ class _StoryViewState extends State<StoryView> {
                             decoration: ShapeDecoration(
                               image: DecorationImage(
                                 image: NetworkImage(
-                                    'https://mio.eigix.net/${story['media']}'),
+                                    'https://amoremio.lared.lat/${story['media']}'),
                                 fit: BoxFit.fill,
                               ),
                               shape: const CircleBorder(
@@ -540,7 +540,7 @@ class _StoryViewState extends State<StoryView> {
   }
 
   Future<void> shareBook(Map<String, dynamic> videoData) async {
-    String videoUrl = 'https://mio.eigix.net/${videoData['media']}';
+    String videoUrl = 'https://amoremio.lared.lat/${videoData['media']}';
     try {
       await Share.share(videoUrl);
     } catch (e) {

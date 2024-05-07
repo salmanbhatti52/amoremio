@@ -32,7 +32,7 @@ class _ReferralsPageState extends State<ReferralsPage> {
   }
 
   Future<void> postData() async {
-    const String apiUrl = "https://mio.eigix.net/apis/services/referral_link";
+    const String apiUrl = "https://amoremio.lared.lat/apis/services/referral_link";
     final Map<String, dynamic> data = {
       "username": widget.userName,
     };

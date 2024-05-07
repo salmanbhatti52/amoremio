@@ -44,7 +44,7 @@ class _MonetizeCallState extends State<MonetizeCall> {
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
-    String apiUrl = 'https://mio.eigix.net/apis/services/add_monetizations';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/add_monetizations';
     http.Response response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',

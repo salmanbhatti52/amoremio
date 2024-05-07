@@ -187,7 +187,7 @@ class _FreeStoryState extends State<FreeStory> {
   String? userStoriesId;
   Future<void> deleteStory(String storyId) async {
     try {
-      String deleteStoryApiUrl = 'https://mio.eigix.net/apis/services/delete_story';
+      String deleteStoryApiUrl = 'https://amoremio.lared.lat/apis/services/delete_story';
 
       http.Response response = await http.post(
         Uri.parse(deleteStoryApiUrl),
@@ -622,7 +622,7 @@ class _StoryViewState extends State<StoryView> {
   Future<void> deleteStory(String storyId) async {
     try {
       String deleteStoryApiUrl =
-          'https://mio.eigix.net/apis/services/delete_story';
+          'https://amoremio.lared.lat/apis/services/delete_story';
 
       http.Response response = await http.post(
         Uri.parse(deleteStoryApiUrl),

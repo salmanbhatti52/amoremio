@@ -262,6 +262,9 @@ class _UserProfileState extends State<UserProfile> {
       "education": educationController.text.toString(),
       "interests": interestIdsJson
     };
+
+    print(showData);
+    print(interests);
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',

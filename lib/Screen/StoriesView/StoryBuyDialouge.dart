@@ -26,7 +26,7 @@ class _BuyStoryDialogState extends State<BuyStoryDialog> {
     final String? userId = prefs.getString('users_customers_id');
 
     try {
-      String apiUrl = "https://mio.eigix.net/apis/services/buy_users_stories";
+      String apiUrl = "https://amoremio.lared.lat/apis/services/buy_users_stories";
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',

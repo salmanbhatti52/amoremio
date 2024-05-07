@@ -42,7 +42,7 @@ class _AccountVerification5State extends State<AccountVerification5> {
     });
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var userId = prefs.getString('users_customers_id');
-    String apiUrl = 'https://mio.eigix.net/apis/services/verify_profile';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/verify_profile';
 
     Map<String, dynamic> requestBody = {
       "users_customers_id": userId,

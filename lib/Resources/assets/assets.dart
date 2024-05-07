@@ -3,13 +3,13 @@ class ImageAssets {
   static const String introImage = 'assets/images/introImage.png';
 
   static const String dummyImage =
-      'https://mio.eigix.net/uploads/male-placeholder.jpg';
+      'https://amoremio.lared.lat/uploads/male-placeholder.jpg';
 
   static const String dummyImage1 =
-      'https://mio.eigix.net/uploads/female-placeholder.jpg';
+      'https://amoremio.lared.lat/uploads/female-placeholder.jpg';
 
   static const String dummyImage2 =
-      'https://mio.eigix.net/uploads/placeholder.jpg';
+      'https://amoremio.lared.lat/uploads/placeholder.jpg';
 
   static const String dummyStory = 'assets/images/placeholder.jpg';
 

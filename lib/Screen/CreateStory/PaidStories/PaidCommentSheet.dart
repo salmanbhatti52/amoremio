@@ -32,7 +32,7 @@ class _CommentSheetState extends State<CommentSheet> {
     final String? userId = prefs.getString('users_customers_id');
     print("userId $userId");
 
-    String apiUrl = "https://mio.eigix.net/apis/services/users_stories_comments";
+    String apiUrl = "https://amoremio.lared.lat/apis/services/users_stories_comments";
 
     final response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
@@ -68,7 +68,7 @@ class _CommentSheetState extends State<CommentSheet> {
   }
 
   void getComments() async {
-    String apiUrl = "https://mio.eigix.net/apis/services/get_users_stories_comments";
+    String apiUrl = "https://amoremio.lared.lat/apis/services/get_users_stories_comments";
     try {
       final response = await http.post(Uri.parse(apiUrl),
           headers: <String, String>{
@@ -158,8 +158,8 @@ class _CommentSheetState extends State<CommentSheet> {
                             child: CircleAvatar(
                               backgroundImage: NetworkImage(
                                 (commenterData != null && commenterData['image'] != null && commenterData['image'].isNotEmpty)
-                                    ? 'https://mio.eigix.net/${commenterData['image']}'
-                                    : 'https://mio.eigix.net/uploads/placeholder.jpg',
+                                    ? 'https://amoremio.lared.lat/${commenterData['image']}'
+                                    : 'https://amoremio.lared.lat/uploads/placeholder.jpg',
                               ),
                               radius: 14,
                             ),

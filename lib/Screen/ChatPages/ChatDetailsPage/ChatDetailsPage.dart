@@ -232,7 +232,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
-    String apiUrl = 'https://mio.eigix.net/apis/services/chat_gifts';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/chat_gifts';
     http.Response response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -667,7 +667,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
         builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
-    String apiUrl = 'https://mio.eigix.net/apis/services/send_chat_gifts';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/send_chat_gifts';
     try {
       var data1 = {
         "users_customers_id":userId,
@@ -1937,6 +1937,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     //     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
+    debugPrint('userId other ${widget.userId}');
+    debugPrint('userId $userId');
 
     try {
       String apiUrl = getChatmessages;

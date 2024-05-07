@@ -237,6 +237,8 @@ class _ExplorePageState extends State<ExplorePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
     print(userId);
+    print(genderId);
+    print(category);
     String apiUrl = usersFilter;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -600,7 +602,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                     },
                                                   )
                                                       : Image.network(
-                                                    'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}',
+                                                    'https://amoremio.lared.lat/${currentUserData['avatars'][0]['image']}',
                                                     fit: BoxFit.cover,
                                                     loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                                       if (loadingProgress == null) {
@@ -668,7 +670,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                                       ImageAssets
                                                                           .dummyImage2)
                                                           : NetworkImage(
-                                                              'https://mio.eigix.net/${currentUserData['image']}',
+                                                              'https://amoremio.lared.lat/${currentUserData['image']}',
                                                             ),
                                                       fit: BoxFit.fill,
                                                     ),
@@ -796,7 +798,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                               ImageAssets
                                                                   .dummyImage2) // Third image for any other case
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
+                                                      'https://amoremio.lared.lat/${currentUserData['avatars'][0]['image']}'),
                                               fit: BoxFit.fill,
                                             ),
                                             shape: RoundedRectangleBorder(
@@ -854,7 +856,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                                 ImageAssets
                                                                     .dummyImage2)
                                                     : NetworkImage(
-                                                        'https://mio.eigix.net/${currentUserData['image']}',
+                                                        'https://amoremio.lared.lat/${currentUserData['image']}',
                                                       ),
                                                 fit: BoxFit.fill,
                                               ),
@@ -972,7 +974,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                               ImageAssets
                                                                   .dummyImage2) // Third image for any other case
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
+                                                      'https://amoremio.lared.lat/${currentUserData['avatars'][0]['image']}'),
                                               fit: BoxFit.fill,
                                             ),
                                             shape: RoundedRectangleBorder(
@@ -1030,7 +1032,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                                 ImageAssets
                                                                     .dummyImage2)
                                                     : NetworkImage(
-                                                        'https://mio.eigix.net/${currentUserData['image']}',
+                                                        'https://amoremio.lared.lat/${currentUserData['image']}',
                                                       ),
                                                 fit: BoxFit.fill,
                                               ),
@@ -1149,7 +1151,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                               ImageAssets
                                                                   .dummyImage2) // Third image for any other case
                                                   : NetworkImage(
-                                                      'https://mio.eigix.net/${currentUserData['avatars'][0]['image']}'),
+                                                      'https://amoremio.lared.lat/${currentUserData['avatars'][0]['image']}'),
                                               fit: BoxFit.fill,
                                             ),
                                             shape: RoundedRectangleBorder(
@@ -1207,7 +1209,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                                                 ImageAssets
                                                                     .dummyImage2)
                                                     : NetworkImage(
-                                                        'https://mio.eigix.net/${currentUserData['image']}',
+                                                        'https://amoremio.lared.lat/${currentUserData['image']}',
                                                       ),
                                                 fit: BoxFit.fill,
                                               ),

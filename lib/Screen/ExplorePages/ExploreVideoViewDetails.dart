@@ -58,7 +58,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
         videos = data['data'];
         _pageController = PageController();
         _videoControllers = videos.map((videoData) {
-          String url = 'https://mio.eigix.net/' + videoData['media'];
+          String url = 'https://amoremio.lared.lat/' + videoData['media'];
           var controller = VideoPlayerController.network(url);
           controller.initialize().then((_) {
             if (_videoControllers.indexOf(controller) == 0) {
@@ -179,7 +179,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                       } else {
                         // Show Image widget
                         return Image.network(
-                          'https://mio.eigix.net/${videos[index]['media']}', // Adjust based on your URL
+                          'https://amoremio.lared.lat/${videos[index]['media']}', // Adjust based on your URL
                           fit: BoxFit.cover,
                         );
                       }
@@ -286,7 +286,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
                             backgroundImage: NetworkImage(widget.usersImage !=
                                         null &&
                                     widget.usersImage!.isNotEmpty
-                                ? 'https://mio.eigix.net/uploads/male-placeholder.jpg'
+                                ? 'https://amoremio.lared.lat/uploads/male-placeholder.jpg'
                                 : widget.usersImage.toString()),
                             radius: 18.5,
                           ),
@@ -309,7 +309,7 @@ class _ExploreVideoViewDetailsState extends State<ExploreVideoViewDetails> {
   }
 
   Future<void> shareBook(Map<String, dynamic> videoData) async {
-    String videoUrl = 'https://mio.eigix.net/${videoData['media']}';
+    String videoUrl = 'https://amoremio.lared.lat/${videoData['media']}';
     try {
       await Share.share(videoUrl);
     } catch (e) {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:amoremio/Screen/BottomNavigationBar/BottomNavigationBar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'CardAdd.dart';
@@ -30,7 +31,7 @@ class _CoinsShopState extends State<CoinsShop> {
     setState(() {
       isLoading = true;
     });
-    const apiUrl = 'https://mio.eigix.net/apis/services/packages';
+    const apiUrl = 'https://amoremio.lared.lat/apis/services/packages';
     http.Response response = await http.post(Uri.parse(apiUrl),);
     if (mounted) {
       setState(() {
@@ -70,7 +71,7 @@ class _CoinsShopState extends State<CoinsShop> {
         builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
-    String apiUrl = "https://mio.eigix.net/apis/services/buy_packages";
+    String apiUrl = "https://amoremio.lared.lat/apis/services/buy_packages";
     try {
       var data1 = {
         "users_customers_id": userId,
@@ -85,7 +86,11 @@ class _CoinsShopState extends State<CoinsShop> {
       print(userdetail);
       if (userdetail['status'] == 'success') {
         setState(() {
-          Navigator.of(context).pop();
+          Get.to(
+                () => const MyBottomNavigationBar(initialIndex: 4),
+            duration: const Duration(milliseconds: 300),
+            transition: Transition.rightToLeft,
+          );
           var errormsg = userdetail['message'];
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: MyText(
             text: "$errormsg",

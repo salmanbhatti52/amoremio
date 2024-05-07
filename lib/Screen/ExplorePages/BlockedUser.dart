@@ -267,8 +267,8 @@ class _BlockedUserState extends State<BlockedUser> {
                         // If not empty, filter the original data based on the search text
                         List searchResults = originalUserDataList
                             .where((user) =>
-                                user['blocked_user']['username'] != null &&
-                                user['blocked_user']['username']
+                                user['user_blocked']['username'] != null &&
+                                user['user_blocked']['username']
                                     .toLowerCase()
                                     .contains(searchText.toLowerCase()))
                             .toList();
@@ -352,6 +352,7 @@ class _BlockedUserState extends State<BlockedUser> {
                     // String randomMainImage =
                     //     mainImages[Random().nextInt(mainImages.length)];
                     Map<String, dynamic> currentUserData = userDataList[index];
+                    print("avatars ${currentUserData['user_blocked']}");
                     return FadeTransition(
                       opacity: Tween<double>(
                         begin: 0,
@@ -368,7 +369,7 @@ class _BlockedUserState extends State<BlockedUser> {
                           onTap: () {
                             Get.to(
                               () => BlockUserDetails(
-                                  userid: currentUserData['blocked_user']
+                                  userid: currentUserData['user_blocked']
                                       ['users_customers_id']),
                               duration: const Duration(seconds: 1),
                               transition: Transition.native,
@@ -383,28 +384,16 @@ class _BlockedUserState extends State<BlockedUser> {
                                     height: 160,
                                     decoration: ShapeDecoration(
                                       image: DecorationImage(
-                                        image: (currentUserData['blocked_user']
-                                                        ['avatars'] ==
-                                                    null ||
-                                                currentUserData['blocked_user']
-                                                        ['avatars']
-                                                    .isEmpty)
-                                            ? currentUserData['blocked_user']
-                                                        ['genders_id'] ==
-                                                    "1"
-                                                ? const NetworkImage(ImageAssets
-                                                    .dummyImage) // First image for genderId == 1
-                                                : currentUserData[
-                                                                'blocked_user']
-                                                            ['genders_id'] ==
-                                                        "2"
-                                                    ? const NetworkImage(ImageAssets
-                                                        .dummyImage1) // Second image for genderId == 2
-                                                    : const NetworkImage(
-                                                        ImageAssets.dummyImage2)
+                                        image: (currentUserData['user_blocked']['avatars'] == null ||
+                                                currentUserData['user_blocked']['avatars'].isEmpty)
+                                            ? currentUserData['user_blocked']['genders_id'] == "1"
+                                                ? const NetworkImage(ImageAssets.dummyImage)
+                                                : currentUserData['user_blocked']['genders_id'] == "2"
+                                                    ? const NetworkImage(ImageAssets.dummyImage1)
+                                                    : const NetworkImage(ImageAssets.dummyImage2)
                                             : NetworkImage(
-                                                'https://mio.eigix.net/${currentUserData['blocked_user']['avatars'][0]['image']}',
-                                              ),
+                                          'https://amoremio.lared.lat/${currentUserData['user_blocked']['avatars'][0]['image']}',
+                                        ),
                                         fit: BoxFit.fill,
                                       ),
                                       shape: RoundedRectangleBorder(
@@ -442,16 +431,16 @@ class _BlockedUserState extends State<BlockedUser> {
                                       height: 25,
                                       decoration: ShapeDecoration(
                                         image: DecorationImage(
-                                          image: currentUserData['blocked_user']
+                                          image: currentUserData['user_blocked']
                                                       ['image'] ==
                                                   null
-                                              ? currentUserData['blocked_user']
+                                              ? currentUserData['user_blocked']
                                                           ['genders_id'] ==
                                                       "1"
                                                   ? const NetworkImage(ImageAssets
                                                       .dummyImage) // First image for genderId == 1
                                                   : currentUserData[
-                                                                  'blocked_user']
+                                                                  'user_blocked']
                                                               ['genders_id'] ==
                                                           "2"
                                                       ? const NetworkImage(
@@ -461,7 +450,7 @@ class _BlockedUserState extends State<BlockedUser> {
                                                           ImageAssets
                                                               .dummyImage2)
                                               : NetworkImage(
-                                                  'https://mio.eigix.net/${currentUserData['blocked_user']['image']}',
+                                                  'https://amoremio.lared.lat/${currentUserData['user_blocked']['image']}',
                                                 ),
                                           fit: BoxFit.fill,
                                         ),
@@ -476,7 +465,7 @@ class _BlockedUserState extends State<BlockedUser> {
                                     ),
                                     MyText(
                                       text:
-                                          "${currentUserData['blocked_user']['username']}, ${calculateAge(currentUserData['blocked_user']['date_of_birth'])}",
+                                          "${currentUserData['user_blocked']['username']}, ${calculateAge(currentUserData['user_blocked']['date_of_birth'])}",
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),

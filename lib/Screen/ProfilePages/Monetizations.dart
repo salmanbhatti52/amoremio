@@ -32,7 +32,7 @@ class _MonetizeState extends State<Monetize> {
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
-    String apiUrl = 'https://mio.eigix.net/apis/services/get_monetizations';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/get_monetizations';
     http.Response response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -72,7 +72,7 @@ class _MonetizeState extends State<Monetize> {
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userId = prefs.getString('users_customers_id');
-    String apiUrl = 'https://mio.eigix.net/apis/services/get_monetizations';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/get_monetizations';
     http.Response response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',

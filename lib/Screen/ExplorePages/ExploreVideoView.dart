@@ -327,7 +327,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
     setState(() {
       isLoadings = true;
     });
-    String apiUrl = 'https://mio.eigix.net/apis/services/users_profile_shares';
+    String apiUrl = 'https://amoremio.lared.lat/apis/services/users_profile_shares';
     http.Response response = await http.post(Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -713,7 +713,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                               decoration: ShapeDecoration(
                                 image: DecorationImage(
                                   image: NetworkImage(
-                                      'https://mio.eigix.net/${story['media']}'),
+                                      'https://amoremio.lared.lat/${story['media']}'),
                                   fit: BoxFit.fill,
                                 ),
                                 shape: const CircleBorder(

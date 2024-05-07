@@ -202,7 +202,7 @@ class _ChatPageState extends State<ChatPage> {
                                                       ImageAssets.dummyImage2,
                                                     )
                                           : NetworkImage(
-                                              'https://mio.eigix.net/${user['image']}',
+                                              'https://amoremio.lared.lat/${user['image']}',
                                             ),
                                       fit: BoxFit.fill,
                                     ),
