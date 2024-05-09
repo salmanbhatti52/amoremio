@@ -78,19 +78,19 @@ class CreateStoryAppbar extends StatelessWidget implements PreferredSizeWidget {
         // backgroundColor: globalOrangeColors,
         centerTitle: true,
         actions: [
-          Row(
-            children: [
-              MyText(
-                text: title3,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 15.0, left: 2),
-                child: SvgPicture.asset(icon),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     MyText(
+          //       text: title3,
+          //       fontSize: 14,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //     Padding(
+          //       padding: const EdgeInsets.only(right: 15.0, left: 2),
+          //       child: SvgPicture.asset(icon),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );

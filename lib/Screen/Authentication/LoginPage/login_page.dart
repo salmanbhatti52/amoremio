@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:amoremio/Utills/AppUrls.dart';
+import 'package:amoremio/Utills/global.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
@@ -31,6 +32,9 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  double latitude = 0;
+  double longitude = 0;
+
   passwordTap() {
     setState(() {
       isPasswordVisible = !isPasswordVisible;
@@ -43,6 +47,13 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
+    await GlobalService.getCurrentPosition(context);
+    double latitude1 = GlobalService.currentLocation!.latitude;
+    double longitude1 = GlobalService.currentLocation!.longitude;
+    latitude = latitude1;
+    longitude = longitude1;
+    print('current address: $latitude');
+    print('current address: $longitude');
     String apiUrl = logIn;
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -51,8 +62,11 @@ class _LoginPageState extends State<LoginPage> {
           },
           body: jsonEncode(
             {
+              "one_signal_id": "12345",
               "email": emailController.text.toString(),
-              "password": passwordController.text.toString()
+              "password": passwordController.text.toString(),
+              "latitude": latitude,
+              "longitude": longitude
             },
           ));
       print(response.body);

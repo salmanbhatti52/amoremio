@@ -40,6 +40,9 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController genderController = TextEditingController();
   TextEditingController currentAddress = TextEditingController();
 
+  double latitude = 0;
+  double longitude = 0;
+
   GlobalService location = GlobalService();
 
   passwordTap() {
@@ -120,12 +123,16 @@ class _SignUpPageState extends State<SignUpPage> {
           },
           body: jsonEncode(
             {
+              "one_signal_id": "12345",
               "username": userNameController.text.toString(),
               "email": emailController.text.toString(),
               "genders_id": genderval,
               "date_of_birth": birthController.text.toString(),
               "location": currentAddress.text.toString(),
-              "password": passwordController.text.toString()
+              "latitude": latitude,
+              "longitude": longitude,
+              "password": passwordController.text.toString(),
+              "ref": "0",
             },
           ));
       print(response.body);
@@ -326,11 +333,15 @@ class _SignUpPageState extends State<SignUpPage> {
                             suffixImage: ImageAssets.locationFill,
                             suffixTap: () async {
                               await GlobalService.getCurrentPosition(context);
-                              String? address =
-                                  await GlobalService.getAddressFromLatLng(
-                                      GlobalService.currentLocation!);
-                              print('current address: $address');
+                              double latitude1 = GlobalService.currentLocation!.latitude;
+                              double longitude1 = GlobalService.currentLocation!.longitude;
+                              String? address = await GlobalService.getAddressFromLatLng(GlobalService.currentLocation!);
                               currentAddress.text = address!;
+                              latitude = latitude1;
+                              longitude = longitude1;
+                              print('current address: $address');
+                              print('current address: $latitude');
+                              print('current address: $longitude');
                             },
                           ),
                         ),

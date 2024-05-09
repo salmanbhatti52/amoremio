@@ -24,7 +24,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController searchController = TextEditingController();
-  List<dynamic> userschat = [];
+  Map<String, dynamic> userschat = {};
   bool ishown = false;
   String errormsg = '';
 
@@ -82,6 +82,7 @@ class _ChatPageState extends State<ChatPage> {
     if (data['status'] == 'success') {
       print(data);
       userschat = data['data'];
+      print("userschat $userschat");
       if (mounted) {
         ishown = false;
         setState(() {});
@@ -239,7 +240,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
               ),
-              ishown == true
+              userschat['chat_list'] == null || userschat['chat_list'].isEmpty
                   ? Center(
                       child: Container(
                         child: MyText(
@@ -259,20 +260,23 @@ class _ChatPageState extends State<ChatPage> {
                         child: ListView.builder(
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
-                          itemCount: userschat.length,
+                          itemCount: userschat['chat_list'].length,
                           itemBuilder: (BuildContext context, int index) {
-                            Map<String, dynamic> chats = userschat[index];
+                            List<dynamic> chatList = userschat["chat_list"];
+                            var chats = chatList[index];
+                            var lastMessages = chats['user_data']['last_message'];
+                            print(userschat["message_monitized"]);
                             var image = (chats['user_data']['image'] == null ||
                                 chats['user_data']['image'].isEmpty);
                             DateTime receivedTime = DateTime.parse(
-                                chats['user_data']['last_message']
-                                    ['created_at']);
+                                lastMessages['created_at']);
                             String timeAgo = timeago.format(receivedTime,
                                 locale: 'en_short');
                             return GestureDetector(
                               onTap: () {
                                 Get.to(
                                     () => ChatDetailsPage(
+                                      monetizeCheck: userschat["message_monitized"],
                                         userId: chats['user_data']
                                             ['users_customers_id']),
                                     duration: const Duration(milliseconds: 300),
@@ -325,21 +329,21 @@ class _ChatPageState extends State<ChatPage> {
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w500,
                                                   ),
-                                                  if (chats['user_data']['last_message']['attachment_type'] == null)
+                                                  if (lastMessages['attachment_type'] == null)
                                                     MyText(
-                                                      text: chats['user_data']['last_message']['message'],
+                                                      text: lastMessages['message'],
                                                       color: const Color(0xFF727171),
                                                       fontSize: 10,
                                                       fontWeight: FontWeight.w400,
                                                     ),
-                                                  if (chats['user_data']['last_message']['attachment_type'] == 'voice')
+                                                  if (lastMessages['attachment_type'] == 'voice')
                                                     const MyText(
                                                         text: 'voice',
                                                         color: Color(0xFF727171),
                                                         fontSize: 10,
                                                         fontWeight: FontWeight.w400,
                                                     ),
-                                                  if (chats['user_data']['last_message']['attachment_type'] == 'image')
+                                                  if (lastMessages['attachment_type'] == 'image')
                                                     const MyText(
                                                         text: 'image',
                                                         color: Color(0xFF727171),

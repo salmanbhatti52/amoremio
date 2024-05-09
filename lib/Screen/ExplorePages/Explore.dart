@@ -627,8 +627,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                                   children: [
                                                     SvgPicture.asset(ImageAssets
                                                         .locationWhite),
-                                                    const MyText(
-                                                      text: "1.4 Km",
+                                                     MyText(
+                                                      text: currentUserData["distance"],
                                                       fontSize: 12,
                                                       fontWeight:
                                                           FontWeight.w500,
@@ -814,10 +814,11 @@ class _ExplorePageState extends State<ExplorePage> {
                                             children: [
                                               SvgPicture.asset(
                                                   ImageAssets.locationWhite),
-                                              const MyText(
-                                                text: "1.4 Km",
+                                              MyText(
+                                                text: currentUserData["distance"],
                                                 fontSize: 12,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight:
+                                                FontWeight.w500,
                                               ),
                                             ],
                                           ),
@@ -990,11 +991,12 @@ class _ExplorePageState extends State<ExplorePage> {
                                             children: [
                                               SvgPicture.asset(
                                                   ImageAssets.locationWhite),
-                                              const MyText(
-                                                text: "1.4 Km",
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                          MyText(
+                                            text: currentUserData["distance"],
+                                            fontSize: 12,
+                                            fontWeight:
+                                            FontWeight.w500,
+                                          ),
                                             ],
                                           ),
                                         ),
@@ -1167,10 +1169,11 @@ class _ExplorePageState extends State<ExplorePage> {
                                             children: [
                                               SvgPicture.asset(
                                                   ImageAssets.locationWhite),
-                                              const MyText(
-                                                text: "1.4 Km",
+                                              MyText(
+                                                text: currentUserData["distance"],
                                                 fontSize: 12,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight:
+                                                FontWeight.w500,
                                               ),
                                             ],
                                           ),

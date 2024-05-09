@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../Utills/AppUrls.dart';
@@ -253,14 +254,15 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
             shareProfile = jsonResponse['data'];
             debugPrint("shareProfile: $shareProfile");
             debugPrint("link ${shareProfile["link"]}");
-            Clipboard.setData(ClipboardData(text: shareProfile["link"])).then((_){
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
-                text: "Linked copied successfully!",
-                color: AppColor.primaryColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ), backgroundColor: AppColor.whiteColor,),);
-            });
+            shareBook(shareProfile["link"]);
+            // Clipboard.setData(ClipboardData(text: shareProfile["link"])).then((_){
+            //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: MyText(
+            //     text: "Linked copied successfully!",
+            //     color: AppColor.primaryColor,
+            //     fontSize: 12,
+            //     fontWeight: FontWeight.w500,
+            //   ), backgroundColor: AppColor.whiteColor,),);
+            // });
             isLoadings = false;
           } else {
             debugPrint("parentMessage");
@@ -271,6 +273,15 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
           isLoadings = false;
         }
       });
+    }
+  }
+
+  Future<void> shareBook(String link) async {
+    String url = link;
+    try {
+      await Share.share(url);
+    } catch (e) {
+      debugPrint('Error sharing file: $e');
     }
   }
 
