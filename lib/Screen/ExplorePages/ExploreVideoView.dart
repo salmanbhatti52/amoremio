@@ -25,7 +25,8 @@ import 'package:http/http.dart' as http;
 class ExploreVideoView extends StatefulWidget {
   final String userid;
   final String match;
-  const ExploreVideoView({Key? key, required this.userid, required this.match})
+  final String distance;
+  const ExploreVideoView({Key? key, required this.distance, required this.userid, required this.match})
       : super(key: key);
 
   @override
@@ -836,7 +837,7 @@ class _ExploreVideoViewState extends State<ExploreVideoView>
                               ),
                               Expanded(
                                 child: MyText(
-                                    text: userData != null && userData.isNotEmpty ? "${userData["location"]}, ${'2.5 Km'}" : "",
+                                    text: userData != null && userData.isNotEmpty ? "${userData["location"]}, ${widget.distance}" : "",
                                     fontWeight: FontWeight.w500,
                                     fontSize: 12,
                                     color: const Color(0xFF3B3B3B),

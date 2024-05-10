@@ -142,6 +142,8 @@ class _SignUpPageState extends State<SignUpPage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString(
             'users_customers_id', data['data']['users_customers_id']);
+        await prefs.setString(
+            'username', data['data']['username']);
         Get.to(
           () => const MyBottomNavigationBar(),
           duration: const Duration(milliseconds: 350),

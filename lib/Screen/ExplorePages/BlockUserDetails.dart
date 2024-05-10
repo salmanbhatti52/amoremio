@@ -657,7 +657,7 @@ class _BlockUserDetailsState extends State<BlockUserDetails> with SingleTickerPr
                         ),
                         Expanded(
                           child: MyText(
-                              text: userData != null && userData.isNotEmpty ? "${userData["location"]}, ${'2.5 Km'}" : "",
+                              text: userData != null && userData.isNotEmpty ? "${userData["location"]}" : "",
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
                               color: const Color(0xFF3B3B3B),

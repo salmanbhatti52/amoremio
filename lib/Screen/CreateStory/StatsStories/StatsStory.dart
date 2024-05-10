@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'StatsChart.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/svg.dart';
@@ -5,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:amoremio/Widgets/Text.dart';
 import '../../../Resources/assets/assets.dart';
 import '../../../Resources/colors/colors.dart';
-
-class StatsStory extends StatelessWidget {
+import 'package:http/http.dart' as http;
+class StatsStory extends StatefulWidget {
   final double height;
   final Function onTap;
   const StatsStory({
@@ -16,9 +20,60 @@ class StatsStory extends StatelessWidget {
   });
 
   @override
+  State<StatsStory> createState() => _StatsStoryState();
+}
+
+class _StatsStoryState extends State<StatsStory> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getStats();
+  }
+
+  Map<String, dynamic> stats = {};
+  var userName = "";
+  void getStats() async {
+    String apiUrl =
+        "https://amoremio.lared.lat/apis/services/get_user_stories_stats";
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var userId = prefs.getString('users_customers_id');
+    var userName1 = prefs.getString('username');
+    setState(() {
+      userName = userName1.toString();
+    });
+    debugPrint("userName $userName");
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(
+            {
+              "users_customers_id": userId,
+            },
+          ),
+      );
+      debugPrint(response.body);
+      var data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {});
+        stats = data['data'];
+      } else {
+        debugPrint("status ${data['status']}");
+        var errorMsg = data['message'];
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
+      }
+    } catch (e) {
+      debugPrint('e $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height,
+      height: widget.height,
       child: Column(
         children: [
           SizedBox(
@@ -34,8 +89,8 @@ class StatsStory extends StatelessWidget {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  const MyText(
-                    text: "Lubana Antique",
+                  MyText(
+                    text: userName,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -53,8 +108,8 @@ class StatsStory extends StatelessWidget {
                       const SizedBox(
                         width: 4,
                       ),
-                      const MyText(
-                        text: '2742',
+                      MyText(
+                        text: stats.isNotEmpty ? stats['user_likes'].toString() : "0",
                         color: AppColor.primaryColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -273,30 +328,30 @@ class StatsStory extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(
+                Padding(
+                  padding: const EdgeInsets.symmetric(
                       horizontal: 30.0, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       MyText(
-                        text: "500k",
+                        text: stats.isNotEmpty ? stats["stories_likes"].toString() : "",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF393939),
+                        color: const Color(0xFF393939),
                         align: TextAlign.center,
                       ),
                       MyText(
-                        text: "300",
+                        text: stats.isNotEmpty ? stats["user_coins"] : "",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF393939),
+                        color: const Color(0xFF393939),
                       ),
                       MyText(
-                        text: "18K",
+                        text: stats.isNotEmpty ? stats["stories_views"].toString() : "",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF393939),
+                        color: const Color(0xFF393939),
                       ),
                     ],
                   ),

@@ -526,9 +526,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                       onTap: () {
                                         Get.to(
                                           () => ExploreVideoView(
-                                              userid: currentUserData[
-                                                  'users_customers_id'],
-                                              match: 'no'),
+                                            distance: currentUserData["distance"],
+                                              userid: currentUserData['users_customers_id'], match: 'no'),
                                           duration: const Duration(seconds: 1),
                                           transition: Transition.native,
                                         );
@@ -761,9 +760,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                   // );
                                   Get.to(
                                     () => UserMatchesPage(
-                                      userid:
-                                          currentUserData['users_customers_id'],
-                                    ),
+                                      userid: currentUserData['users_customers_id'],),
                                     duration: const Duration(milliseconds: 350),
                                     transition: Transition.rightToLeft,
                                   );
@@ -938,9 +935,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                 onTap: () {
                                   Get.to(
                                     () => ExploreVideoView(
-                                        userid: currentUserData[
-                                            'users_customers_id'],
-                                        match: 'no'),
+                                        distance: currentUserData["distance"],
+                                        userid: currentUserData['users_customers_id'], match: 'no'),
                                     duration: const Duration(seconds: 1),
                                     transition: Transition.native,
                                   );
@@ -1116,9 +1112,8 @@ class _ExplorePageState extends State<ExplorePage> {
                                 onTap: () {
                                   Get.to(
                                     () => ExploreVideoView(
-                                        userid: currentUserData[
-                                            'users_customers_id'],
-                                        match: 'no'),
+                                        distance: currentUserData["distance"],
+                                        userid: currentUserData['users_customers_id'], match: 'no'),
                                     duration: const Duration(seconds: 1),
                                     transition: Transition.native,
                                   );

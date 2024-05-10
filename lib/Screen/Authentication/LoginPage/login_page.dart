@@ -78,6 +78,12 @@ class _LoginPageState extends State<LoginPage> {
         prefs.setString('user', response.body);
         await prefs.setString(
             'users_customers_id', data['data']['users_customers_id']);
+        await prefs.setString(
+            'username', data['data']['username']);
+        var userId = prefs.getString('users_customers_id');
+        var userName1 = prefs.getString('username');
+        debugPrint("userId $userId");
+        debugPrint("username $userName1");
         if (formKey.currentState!.validate()) {
           Get.offAll(
             () => const MyBottomNavigationBar(),
@@ -164,6 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                             controller: emailController,
                             hintText: "username@gmail.com",
                             keyboardType: TextInputType.emailAddress,
+                            maxLine: 1,
                             focusNode: focus1,
                             validator: null,
                             // validator: validateEmail,

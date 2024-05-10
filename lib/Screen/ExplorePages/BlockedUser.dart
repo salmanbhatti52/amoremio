@@ -401,21 +401,21 @@ class _BlockedUserState extends State<BlockedUser> {
                                       ),
                                     ),
                                   ),
-                                  Positioned(
-                                    right: 5,
-                                    top: 5,
-                                    child: Row(
-                                      children: [
-                                        SvgPicture.asset(
-                                            ImageAssets.locationWhite),
-                                        const MyText(
-                                          text: "1.4 Km",
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  // Positioned(
+                                  //   right: 5,
+                                  //   top: 5,
+                                  //   child: Row(
+                                  //     children: [
+                                  //       SvgPicture.asset(
+                                  //           ImageAssets.locationWhite),
+                                  //         MyText(
+                                  //         text: "1.4 Km",
+                                  //         fontSize: 12,
+                                  //         fontWeight: FontWeight.w500,
+                                  //       ),
+                                  //     ],
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               const SizedBox(

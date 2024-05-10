@@ -40,13 +40,19 @@ class _BuyStoryDialogState extends State<BuyStoryDialog> {
       var data = jsonDecode(response.body);
       print(data);
       if (data['status'] == 'success') {
-        Get.to(
-              () => const MyBottomNavigationBar(initialIndex: 2),
-          duration: const Duration(milliseconds: 300),
-          transition: Transition.rightToLeft,
-        );
+        var errormsg = data['message'];
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
+        Get.back();
+        // Get.to(
+        //       () => const MyBottomNavigationBar(initialIndex: 2),
+        //   duration: const Duration(milliseconds: 300),
+        //   transition: Transition.rightToLeft,
+        // );
       } else {
+        var errormsg = data['message'];
         print(data['status']);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errormsg)));
+        Get.back();
       }
     } catch (e) {
       print('error123456');
