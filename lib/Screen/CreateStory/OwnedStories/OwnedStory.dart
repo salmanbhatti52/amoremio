@@ -452,7 +452,7 @@ class _OwnedStoryState extends State<OwnedStory> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Image.network(
-                              baseUrlImage + userProfile,
+                              userProfile == null ? ImageAssets.dummyImage : baseUrlImage + userProfile,
                               width: 16,
                               height: 16,
                               loadingBuilder: (BuildContext context,

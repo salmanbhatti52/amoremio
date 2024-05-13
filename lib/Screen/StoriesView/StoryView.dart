@@ -33,10 +33,10 @@ class _StoryViewState extends State<StoryView> {
   late PageController _pageController;
   int _currentPage = 0;
   late List<VideoPlayerController> _videoControllers;
-  List<dynamic> videos = [];
+  List<dynamic> videoss = [];
   bool isThumbnailClicked = false;
   String selectedImageUrl = '';
-  String _selectedValue = 'Discover';
+  String _selectedValue = 'discover';
   late StreamController<List<dynamic>> _videosStreamController;
 
   @override
@@ -66,10 +66,10 @@ class _StoryViewState extends State<StoryView> {
       var data = jsonDecode(response.body);
       if (data['status'] == 'success') {
         setState(() {});
-        videos = data['data'];
-        _videosStreamController.add(videos);
+        videoss = data['data'];
+        _videosStreamController.add(videoss);
         _pageController = PageController();
-        _videoControllers = videos.map((videoData) {
+        _videoControllers = videoss.map((videoData) {
           String url = 'https://amoremio.lared.lat/' + videoData['media'];
           var controller = VideoPlayerController.network(url);
 
@@ -101,7 +101,7 @@ class _StoryViewState extends State<StoryView> {
     for (var controller in _videoControllers) {
       controller.pause();
     }
-    if (videos[index]['media_type'] == 'Video') {
+    if (videoss[index]['media_type'] == 'Video') {
       _videoControllers[index].play(); // Play the selected video
     }
     setState(() {
@@ -389,6 +389,10 @@ class _StoryViewState extends State<StoryView> {
                       if(newValue != null) {
                         setState(() {
                           _selectedValue = newValue;
+                          videoss = [];
+                          _videosStreamController = StreamController<List<dynamic>>.broadcast();
+                          _currentPage = 0;
+
                           loadstories();
                           print("_selectedValue $_selectedValue");
                         });

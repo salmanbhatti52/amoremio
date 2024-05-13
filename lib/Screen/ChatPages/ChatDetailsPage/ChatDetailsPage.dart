@@ -279,7 +279,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                         maxLines: 10,
                         align: TextAlign.center,
                         text:
-                        "You can pay users for every messages, this chat is monetized",
+                        "This chat is monetized, you have to pay for every messages.",
                         fontWeight: FontWeight.w400,
                         fontSize: 14,
                         color: Color(0xFF727171),

@@ -24,7 +24,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController searchController = TextEditingController();
-  Map<String, dynamic> userschat = {};
+  List<dynamic> userschat = [];
   bool ishown = false;
   String errormsg = '';
 
@@ -240,7 +240,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
               ),
-              userschat['chat_list'] == null || userschat['chat_list'].isEmpty
+              userschat == null || userschat.isEmpty
                   ? Center(
                       child: Container(
                         child: MyText(
@@ -260,14 +260,13 @@ class _ChatPageState extends State<ChatPage> {
                         child: ListView.builder(
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
-                          itemCount: userschat['chat_list'].length,
+                          itemCount: userschat.length,
                           itemBuilder: (BuildContext context, int index) {
-                            List<dynamic> chatList = userschat["chat_list"];
-                            var chats = chatList[index];
-                            var lastMessages = chats['user_data']['last_message'];
-                            print(userschat["message_monitized"]);
-                            var image = (chats['user_data']['image'] == null ||
-                                chats['user_data']['image'].isEmpty);
+                            Map<String, dynamic> chatList = userschat[index];
+                            var lastMessages = chatList['user_data']['last_message'];
+                            print(chatList['user_data']["message_monitized"]);
+                            var image = (chatList['user_data']['image'] == null ||
+                                chatList['user_data']['image'].isEmpty);
                             DateTime receivedTime = DateTime.parse(
                                 lastMessages['created_at']);
                             String timeAgo = timeago.format(receivedTime,
@@ -276,11 +275,9 @@ class _ChatPageState extends State<ChatPage> {
                               onTap: () {
                                 Get.to(
                                     () => ChatDetailsPage(
-                                      monetizeCheck: userschat["message_monitized"],
-                                        userId: chats['user_data']
-                                            ['users_customers_id']),
-                                    duration: const Duration(milliseconds: 300),
-                                    transition: Transition.rightToLeft);
+                                      monetizeCheck: chatList['user_data']["message_monitized"],
+                                        userId: chatList['user_data']
+                                            ['users_customers_id']),);
                               },
                               child: FadeInUp(
                                 child: Padding(
@@ -310,7 +307,7 @@ class _ChatPageState extends State<ChatPage> {
                                                         ? const NetworkImage(
                                                                 ImageAssets.dummyImage) as ImageProvider<Object>
                                                         : NetworkImage(
-                                                            baseUrlImage + chats['user_data']['image']),
+                                                            baseUrlImage + chatList['user_data']['image']),
                                                     fit: BoxFit.fill,
                                                   ),
                                                   shape: const OvalBorder(),
@@ -324,7 +321,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   MyText(
-                                                    text: chats['user_data']['username'],
+                                                    text: chatList['user_data']['username'],
                                                     color: AppColor.blackColor,
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w500,

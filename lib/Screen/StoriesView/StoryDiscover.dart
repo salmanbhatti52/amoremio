@@ -86,7 +86,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
           ),
           GestureDetector(
             onTap: () {
-              onChanged("Discover");
+              onChanged("discover");
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +122,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
           ),
           GestureDetector(
             onTap: () {
-              onChanged("Matches");
+              onChanged("matches");
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -158,7 +158,7 @@ Widget buildBottomSheet(void Function(String?) onChanged) {
           ),
           GestureDetector(
             onTap: () {
-              onChanged("Liked");
+              onChanged("liked");
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
