@@ -352,36 +352,40 @@ class _OwnedStoryState extends State<OwnedStory> {
                         children: [
                           userStory['media_type'] == 'Video'
                               ? FutureBuilder<Uint8List?>(
-                                  future: generateThumbnail(
-                                      baseUrlImage + userStory['media']),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<Uint8List?> snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      if (snapshot.hasData &&
-                                          snapshot.data != null) {
-                                        return ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(7.9),
-                                          child: Image.memory(
-                                            snapshot.data!,
-                                            width: 108,
-                                            height: 138,
-                                            fit: BoxFit.fill,
-                                          ),
-                                        );
-                                      } else {
-                                        return Image.asset(
-                                          'path/to/default/image',
+                            future: generateThumbnail(baseUrlImage + userStory['media']),
+                            builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+                              if (snapshot.connectionState == ConnectionState.done) {
+                                if (snapshot.hasData && snapshot.data != null) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(7.9),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Image.memory(
+                                          snapshot.data!,
                                           width: 108,
-                                          height: 136,
-                                        );
-                                      }
-                                    } else {
-                                      return const SizedBox();
-                                    }
-                                  },
-                                )
+                                          height: 138,
+                                          fit: BoxFit.fill,
+                                        ),
+                                        SvgPicture.asset(
+                                          ImageAssets.videoPlay,
+                                          width: 15,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  return Image.asset(
+                                    'path/to/default/image',
+                                    width: 108,
+                                    height: 136,
+                                  );
+                                }
+                              } else {
+                                return const SizedBox();
+                              }
+                            },
+                          )
                               : ClipRRect(
                                   borderRadius: BorderRadius.circular(7.9),
                                   child: Image.network(

@@ -71,6 +71,7 @@ class _MonitizeDialogState extends State<MonitizeDialog> {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Package activated successfully!")));
             isLoading = false;
             Get.back();
+            Get.back();
           } else {
             String message = jsonResponse['message'];
             debugPrint("message: $message");
